@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-deavvcn@$@(3dr3ww@z4=fhc)!1y^xx$91n2rwtrefm)7rd_ea'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*','167.71.49.52','foodsave.uz','www.foodsave.uz']
 
 
 # Application definition
