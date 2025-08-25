@@ -34,6 +34,15 @@
         <div class="col-lg-9">
             <div class="mb-4">
                 <h2>Каталог</h2>
+
+                <!-- Quick filter chips -->
+                <div class="quick-chips mb-3">
+                    <a class="chip {% if not current_type %}active{% endif %}" href="{% url 'catalog:catalog' %}"><i class="fas fa-th-large me-1"></i>Все</a>
+                    <a class="chip {% if current_type == 'dishes' %}active{% endif %}" href="{% url 'catalog:catalog' %}?type=dishes"><i class="fas fa-utensils me-1"></i>Блюда</a>
+                    <a class="chip {% if current_type == 'products' %}active{% endif %}" href="{% url 'catalog:catalog' %}?type=products"><i class="fas fa-shopping-basket me-1"></i>Продукты</a>
+                    <a class="chip" href="{% url 'catalog:catalog' %}?discount=30"><i class="fas fa-percent me-1"></i>Скидка 30%+</a>
+                    <a class="chip" href="{% url 'catalog:catalog' %}?price_range=0-500"><i class="fas fa-tag me-1"></i>До 500 ₸</a>
+                </div>
                 
                 <!-- Filter Buttons -->
                 <div class="mb-3">
@@ -80,7 +89,21 @@
             </div>
             
             <!-- Items Grid -->
-            <div class="row">
+            <!-- Skeletons -->
+            <div id="skeletonGrid" class="row g-4 mb-1">
+                {% for _ in "123456" %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="skeleton-card">
+                        <div class="sk-image"></div>
+                        <div class="sk-line w-75"></div>
+                        <div class="sk-line w-50"></div>
+                        <div class="sk-line w-100"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="row" id="itemsGrid">
                 {% for item in items %}
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100 shadow-sm item-card">
@@ -122,7 +145,7 @@
                     </div>
                 {% empty %}
                     <div class="col-12">
-                        <div class="text-center py-5">
+                        <div class="text-center py-5 empty-state">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h4>Товары не найдены</h4>
                             <p class="text-muted">Попробуйте изменить параметры поиска</p>
@@ -164,8 +187,35 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.quick-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.quick-chips .chip { background:#F3F4F6; color:#374151; border:1px solid #E5E7EB; border-radius:999px; padding:8px 12px; font-weight:600; text-decoration:none; }
+.quick-chips .chip.active { background:#ECFDF5; color:#065F46; border-color:#A7F3D0; }
+
+/* Skeletons */
+.skeleton-card { background:#FFFFFF; border:1px solid #E5E7EB; border-radius:12px; padding:12px; box-shadow: var(--premium-elev); }
+.sk-image { height:180px; border-radius:10px; background: linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 37%,#F3F4F6 63%); background-size:400% 100%; animation: shimmer 1.2s infinite; }
+.sk-line { height:14px; margin-top:10px; border-radius:8px; background: linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 37%,#F3F4F6 63%); background-size:400% 100%; animation: shimmer 1.2s infinite; }
+.sk-line.w-50 { width:50%; }
+.sk-line.w-75 { width:75%; }
+.sk-line.w-100 { width:100%; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Slight card polish reuse global tokens */
+.item-card { border:1px solid #E5E7EB; box-shadow: var(--premium-elev); }
+.empty-state { background:#F9FAFB; border:1px dashed #E5E7EB; border-radius:12px; }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
+// Hide skeletons when content is ready
+window.addEventListener('load', function(){
+    const sk = document.getElementById('skeletonGrid');
+    if (sk) setTimeout(() => sk.style.display = 'none', 200);
+});
+
 document.getElementById('sortSelect').addEventListener('change', function() {
     const sortValue = this.value;
     if (sortValue) {
@@ -194,8 +244,12 @@ function addToCart(itemId, itemName, itemPrice) {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // Show success message
-    alert(`${itemName} добавлен в корзину!`);
+    // Show success toast (fallback to alert)
+    if (window.showToast) {
+        window.showToast(`${itemName} добавлен в корзину!`, 'success');
+    } else {
+        alert(`${itemName} добавлен в корзину!`);
+    }
     
     // Update cart count if badge exists
     updateCartCount();

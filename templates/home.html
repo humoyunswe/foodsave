@@ -5,6 +5,19 @@
 
 {% block content %}
 <div class="container py-5">
+    <!-- Premium Hero -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10 text-center">
+            <h1 class="display-6 fw-bold mb-2 hero-title">Экономьте на еде, спасая планету</h1>
+            <p class="lead text-muted mb-3">Премиальный маркетплейс с выгодными наборами от проверенных заведений рядом с вами.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2 hero-chips">
+                <span class="chip"><i class="fas fa-percent me-2"></i>Экономия до 70%</span>
+                <span class="chip"><i class="fas fa-shield-check me-2"></i>Проверенные заведения</span>
+                <span class="chip"><i class="fas fa-leaf me-2"></i>Спасаем еду от выброса</span>
+            </div>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
             <!-- Main Buttons -->
@@ -122,6 +135,34 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Trust / Value strip -->
+            <div class="trust-strip mt-4">
+                <div class="trust-item"><i class="fas fa-lock me-2"></i>Безопасная оплата</div>
+                <div class="trust-item"><i class="fas fa-undo me-2"></i>Гарантия возврата</div>
+                <div class="trust-item"><i class="fas fa-headset me-2"></i>Поддержка 24/7</div>
+            </div>
+
+            <!-- How it works -->
+            <div class="how-works mt-3">
+                <div class="step"><i class="fas fa-list-ul me-2"></i>Выберите предложения</div>
+                <div class="step"><i class="fas fa-credit-card me-2"></i>Оплатите онлайн</div>
+                <div class="step"><i class="fas fa-bag-shopping me-2"></i>Заберите в удобное время</div>
+            </div>
+
+            <!-- Eco Impact -->
+            <div class="eco-impact mt-3">
+                <i class="fas fa-seedling me-2"></i>
+                Мы уже спасли <strong>{{ eco_kg|default:"12 540" }} кг</strong> еды и сократили <strong>{{ eco_co2|default:"33" }} тонны CO₂</strong>
+            </div>
+
+            <!-- Partners strip -->
+            <div class="partners mt-3">
+                <span class="partner">Magnum</span>
+                <span class="partner">Small&Fresh</span>
+                <span class="partner">Green Market</span>
+                <span class="partner">Urban Cafe</span>
+            </div>
         </div>
     </div>
 </div>
@@ -129,57 +170,97 @@
 
 {% block extra_css %}
 <style>
+/* Hero */
+.hero-title { letter-spacing: -0.02em; }
+.hero-chips .chip {
+    background: #EFF6FF;
+    color: #1E3A8A;
+    border: 1px solid #DBEAFE;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
 .main-category-btn {
-    border: none;
+    background: var(--premium-surface);
+    color: var(--premium-text);
+    border: 1px solid #e5e7eb;
     border-radius: 15px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all var(--premium-dur) var(--premium-ease);
+    box-shadow: var(--premium-elev);
+}
+
+/* Force white card look for both variants */
+.main-category-btn.btn-primary,
+.main-category-btn.btn-success {
+    background: var(--premium-surface) !important;
+    color: var(--premium-text) !important;
+    border: 1px solid #e5e7eb;
 }
 
 .main-category-btn:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    box-shadow: var(--premium-elev-hover);
 }
 
+/* Icon styling with contrast */
 .main-category-btn i {
-    transition: transform 0.3s ease;
+    transition: transform var(--premium-dur) var(--premium-ease);
+    font-size: 2.5rem; /* keep big but balanced */
+    padding: 10px;
+    border-radius: 12px;
 }
 
-.main-category-btn:hover i {
-    transform: scale(1.1);
+/* Dishes card (was btn-primary) → green icon on white */
+.main-category-btn.btn-primary i {
+    color: var(--premium-primary);
+    background: rgba(5,150,105,0.08);
 }
 
-.card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+/* Products card (was btn-success) → blue icon on white */
+.main-category-btn.btn-success i {
+    color: var(--premium-accent);
+    background: rgba(59,130,246,0.08);
 }
 
-.card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px 15px 0 0 !important;
-}
+.main-category-btn:hover i { transform: scale(1.08); }
 
-.form-select {
-    border-radius: 10px;
-    border: 2px solid #e9ecef;
-    transition: border-color 0.3s ease;
-}
+.card { border: 1px solid #e5e7eb; border-radius: 15px; box-shadow: var(--premium-elev); }
+.card-header { background: var(--premium-surface); color: var(--premium-text); border-radius: 15px 15px 0 0 !important; border-bottom: 1px solid #e5e7eb; }
 
-.form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
+.form-select { border-radius: 10px; border: 1px solid #e5e7eb; transition: border-color var(--premium-dur) var(--premium-ease); }
+.form-select:focus { border-color: var(--premium-primary); box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.25); }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-}
+/* CTA buttons (keep logic) */
+.btn.btn-primary { background: var(--premium-primary); border: none; }
+.btn.btn-primary:hover { background: var(--premium-primary-700); }
+.btn.btn-success { background: var(--premium-accent); border: none; }
+.btn.btn-success:hover { filter: brightness(0.95); }
 
-.btn-success {
-    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-    border: none;
+/* Trust strip */
+.trust-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
+.trust-item { background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 12px; font-weight: 600; color: #374151; }
+
+/* How it works */
+.how-works { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.how-works .step { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 12px; font-weight: 600; color: #374151; box-shadow: var(--premium-elev); }
+
+/* Eco impact */
+.eco-impact { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; border-radius: 12px; padding: 10px 12px; font-weight: 600; }
+
+/* Partners */
+.partners { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.partners .partner { background: #F9FAFB; color: #6B7280; border: 1px solid #E5E7EB; border-radius: 999px; padding: 8px 12px; font-weight: 600; }
+
+/* Small text contrast inside category cards */
+.main-category-btn small { color: var(--premium-muted) !important; }
+.main-category-btn h4 { color: var(--premium-text); }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .trust-strip { grid-template-columns: 1fr; }
+    .how-works { grid-template-columns: 1fr; }
 }
 </style>
 {% endblock %}
