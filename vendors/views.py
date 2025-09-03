@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from .models import Vendor, Branch
-from .forms import VendorForm, BranchForm, OwnerForm
+from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm
 from catalog.models import Item, Category, ItemImage, Offer
 from catalog.forms import ItemForm, ItemImageFormSet, OfferForm
 from django import forms
@@ -78,7 +78,7 @@ def add_item(request, vendor_id):
         return redirect('vendors:add_branch', vendor_id=vendor.id)
     
     if request.method == 'POST':
-        form = ItemForm(request.POST)
+        form = ItemForm(request.POST, vendor=vendor)
         image_formset = ItemImageFormSet(request.POST, request.FILES)
         
         if form.is_valid() and image_formset.is_valid():
@@ -197,3 +197,27 @@ def add_vendor(request):
         'form': form,
         'owner_form': owner_form
     })
+
+
+@login_required
+def management_hub(request):
+    """Unified management hub with shortcuts to vendor actions"""
+    user_vendors = Vendor.objects.filter(owner=request.user).prefetch_related('branches', 'items')
+    return render(request, 'vendors/management.html', {
+        'vendors': user_vendors,
+    })
+
+
+@staff_member_required
+def assign_vendor(request):
+    """Staff page to assign vendor role to an existing user"""
+    if request.method == 'POST':
+        form = AssignVendorRoleForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'Пользователь {user.username} назначен как вендор.')
+            return redirect('vendors:assign_vendor')
+    else:
+        form = AssignVendorRoleForm()
+
+    return render(request, 'vendors/assign_vendor.html', { 'form': form })

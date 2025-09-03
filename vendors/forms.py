@@ -162,3 +162,23 @@ class BranchForm(forms.ModelForm):
             'placeholder': '+7 (xxx) xxx-xx-xx',
             'required': True
         })
+
+
+class AssignVendorRoleForm(forms.Form):
+    """Staff form to assign vendor role to an existing user"""
+    user = forms.ModelChoiceField(queryset=User.objects.all(), label="Пользователь")
+    make_staff = forms.BooleanField(required=False, initial=False, label="Сделать сотрудником (staff)")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user'].widget.attrs.update({'class': 'form-select'})
+        self.fields['make_staff'].widget.attrs.update({'class': 'form-check-input'})
+
+    def save(self):
+        user = self.cleaned_data['user']
+        make_staff = self.cleaned_data.get('make_staff', False)
+        user.role = 'vendor'
+        if make_staff:
+            user.is_staff = True
+        user.save()
+        return user

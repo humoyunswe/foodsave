@@ -64,17 +64,60 @@
                 <!-- User Menu -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
+                        {% if user.role == 'vendor' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Панель управления
+                            </a>
+                        </li>
                         {% if user.owned_vendors.exists %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-info" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-store me-1"></i>Управление заведением
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'vendors:manage_items' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-list me-2"></i>Управление товарами
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_item' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-plus me-2"></i>Добавить товар
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_branch' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Добавить филиал
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:vendor_list' %}">
+                                    <i class="fas fa-store me-2"></i>Все заведения
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-eye me-2"></i>Просмотр моего заведения
+                                </a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-muted" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-handshake me-1"></i>Стать партнёром
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% elif user.owned_vendors.exists %}
                         <li class="nav-item">
                             <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
                                 <i class="fas fa-store me-1"></i>Мои заведения
                             </a>
                         </li>
                         {% endif %}
-                        {% if user.is_staff %}
+                        {% if user.is_staff and user.role != 'customer' %}
                         <li class="nav-item">
                             <a class="nav-link text-success" href="{% url 'vendors:add_vendor' %}">
                                 <i class="fas fa-plus me-1"></i>Добавить Vendor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="{% url 'vendors:assign_vendor' %}">
+                                <i class="fas fa-user-check me-1"></i>Назначить вендора
                             </a>
                         </li>
                         {% endif %}
@@ -122,7 +165,7 @@
             <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
-                <a href="{% url 'vendors:add_vendor' %}" class="btn btn-primary">
+                <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-primary">
                     <i class="fas fa-handshake-angle me-2"></i>Присоединиться как партнёр
                 </a>
                 {% else %}

@@ -9,28 +9,59 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-store me-2"></i>Панель управления</h2>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fas fa-plus me-2"></i>Добавить
-                    </button>
-                    <ul class="dropdown-menu">
-                        {% if vendors %}
-                            {% for vendor in vendors %}
-                                <li><h6 class="dropdown-header">{{ vendor.name }}</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'vendors:add_branch' vendor.id %}">
-                                    <i class="fas fa-map-marker-alt me-2"></i>Новый филиал
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'vendors:add_item' vendor.id %}">
-                                    <i class="fas fa-box me-2"></i>Новый товар
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                            {% endfor %}
-                        {% endif %}
-                        <li><a class="dropdown-item text-muted" href="#" onclick="alert('Обратитесь к администратору для создания нового заведения')">
-                            <i class="fas fa-store me-2"></i>Новое заведение
-                        </a></li>
-                    </ul>
+                {% if user.is_authenticated %}
+                <div class="d-flex gap-2">
+                    {% if vendors %}
+                        {% for vendor in vendors %}
+                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-map-marker-alt me-1"></i>Добавить филиал
+                            </a>
+                            <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-box me-1"></i>Добавить товар
+                            </a>
+                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-cog me-1"></i>Управление
+                            </a>
+                            {% if not forloop.first %}<div class="vr mx-2"></div>{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <a href="https://t.me/khumoyun_04" class="btn btn-primary">
+                            <i class="fas fa-store me-1"></i>Создать заведение
+                        </a>
+                    {% endif %}
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle btn-sm" data-bs-toggle="dropdown">
+                            <i class="fas fa-plus me-1"></i>Еще
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% if vendors %}
+                                {% for vendor in vendors %}
+                                    <li><h6 class="dropdown-header">{{ vendor.name }}</h6></li>
+                                    <li><a class="dropdown-item" href="{% url 'vendors:add_branch' vendor.id %}">
+                                        <i class="fas fa-map-marker-alt me-2"></i>Новый филиал
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vendors:add_item' vendor.id %}">
+                                        <i class="fas fa-box me-2"></i>Новый товар
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vendors:manage_items' vendor.id %}">
+                                        <i class="fas fa-cog me-2"></i>Управление товарами
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' vendor.id %}">
+                                        <i class="fas fa-eye me-2"></i>Просмотр заведения
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endfor %}
+                            {% else %}
+                                <li><h6 class="dropdown-header text-muted">Пока нет заведений</h6></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="https://t.me/khumoyun_04">
+                                <i class="fas fa-store me-2"></i>Создать заведение
+                            </a></li>
+                        </ul>
+                    </div>
                 </div>
+                {% endif %}
             </div>
             
             {% if vendors %}
@@ -58,6 +89,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 text-md-end">
+                                    {% if user.is_authenticated %}
                                     <div class="btn-group">
                                         <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-light btn-sm">
                                             <i class="fas fa-cog me-1"></i>Управление
@@ -66,6 +98,7 @@
                                             <i class="fas fa-eye me-1"></i>Просмотр
                                         </a>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -129,25 +162,29 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
+                                        {% if user.is_authenticated %}
                                         <div class="mt-2">
                                             <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-outline-primary btn-sm">
                                                 <i class="fas fa-plus me-1"></i>Добавить филиал
                                             </a>
                                         </div>
+                                        {% endif %}
                                     {% else %}
                                         <div class="text-center py-3">
                                             <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
                                             <p class="text-muted">Нет филиалов</p>
-                                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-plus me-1"></i>Добавить первый филиал
-                                            </a>
+                                            {% if user.is_authenticated %}
+                                                <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-plus me-1"></i>Добавить первый филиал
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     {% endif %}
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <h6><i class="fas fa-box me-2"></i>Последние товары</h6>
-                                    {% if vendor.items.all %}
+                                    {% if vendor.items.count %}
                                         <div class="list-group list-group-flush">
                                             {% for item in vendor.items.all|slice:":3" %}
                                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
@@ -169,14 +206,17 @@
                                                         {% if item.offers.first %}
                                                             <span class="price-tag small">{{ item.offers.first.current_price }} ₸</span>
                                                         {% else %}
+                                                            {% if user.is_authenticated and user.role == 'vendor' %}
                                                             <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-outline-success btn-xs">
                                                                 <i class="fas fa-plus"></i>
                                                             </a>
+                                                            {% endif %}
                                                         {% endif %}
                                                     </div>
                                                 </div>
                                             {% endfor %}
                                         </div>
+                                        {% if user.is_authenticated %}
                                         <div class="mt-2">
                                             <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-outline-success btn-sm me-2">
                                                 <i class="fas fa-plus me-1"></i>Добавить товар
@@ -185,14 +225,17 @@
                                                 <i class="fas fa-cog me-1"></i>Управление
                                             </a>
                                         </div>
+                                        {% endif %}
                                     {% else %}
                                         <div class="text-center py-3">
                                             <i class="fas fa-box fa-2x text-muted mb-2"></i>
                                             <p class="text-muted">Нет товаров</p>
                                             {% if vendor.branches.all %}
-                                                <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-success btn-sm">
-                                                    <i class="fas fa-plus me-1"></i>Добавить первый товар
-                                                </a>
+                                                {% if user.is_authenticated and user.role == 'vendor' %}
+                                                    <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-plus me-1"></i>Добавить первый товар
+                                                    </a>
+                                                {% endif %}
                                             {% else %}
                                                 <small class="text-muted">Сначала добавьте филиал</small>
                                             {% endif %}
@@ -204,13 +247,88 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-store fa-4x text-muted mb-4"></i>
-                    <h4>У вас пока нет заведений</h4>
-                    <p class="text-muted mb-4">Обратитесь к администратору для создания вашего первого заведения</p>
-                    <button class="btn btn-primary" onclick="alert('Обратитесь к администратору для создания заведения')">
-                        <i class="fas fa-envelope me-2"></i>Связаться с администратором
-                    </button>
+                <!-- No vendors yet - show getting started options -->
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-store fa-4x text-primary mb-4"></i>
+                                <h4 class="mb-3">Добро пожаловать в панель управления!</h4>
+                                <p class="text-muted mb-4">У вас пока нет заведений, но вы можете подготовить всё необходимое для старта</p>
+                                
+                                <!-- Getting Started Steps -->
+                                <div class="row text-start mb-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">1</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Свяжитесь с администратором</h6>
+                                                <small class="text-muted">Для создания вашего заведения</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">2</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Подготовьте информацию</h6>
+                                                <small class="text-muted">О вашем заведении и товарах</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                                    <a href="https://t.me/khumoyun_04" class="btn btn-primary">
+                                        <i class="fas fa-envelope me-2"></i>Связаться с администратором
+                                    </a>
+                                    <a href="{% url 'vendors:vendor_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-eye me-2"></i>Посмотреть примеры заведений
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Information Cards -->
+                        <div class="row mt-4">
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-3"></i>
+                                        <h6>Филиалы</h6>
+                                        <small class="text-muted">Добавляйте адреса ваших точек продаж</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-box fa-2x text-success mb-3"></i>
+                                        <h6>Товары</h6>
+                                        <small class="text-muted">Загружайте фото и описания продуктов</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-percent fa-2x text-warning mb-3"></i>
+                                        <h6>Предложения</h6>
+                                        <small class="text-muted">Создавайте выгодные наборы для клиентов</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
         </div>

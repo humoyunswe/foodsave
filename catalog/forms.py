@@ -27,6 +27,9 @@ class ItemForm(forms.ModelForm):
             self.fields['branch'].queryset = vendor.branches.filter(is_active=True)
             self.fields['branch'].empty_label = "Выберите филиал"
         
+        # Make tags optional and accept comma-separated input
+        self.fields['tags'].required = False
+        
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_enctype = 'multipart/form-data'
@@ -65,6 +68,19 @@ class ItemForm(forms.ModelForm):
         self.fields['tags'].widget.attrs.update({
             'class': 'form-control'
         })
+
+    def clean_tags(self):
+        value = self.cleaned_data.get('tags')
+        if not value:
+            return []
+        # If already a list (e.g., posted as JSON), keep it
+        if isinstance(value, list):
+            return value
+        # Accept comma-separated string
+        if isinstance(value, str):
+            tokens = [t.strip() for t in value.split(',') if t.strip()]
+            return tokens
+        return []
 
 
 class ItemImageForm(forms.ModelForm):
