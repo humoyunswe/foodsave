@@ -1,12 +1,15 @@
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
 
 app_name = 'vendors'
 
 urlpatterns = [
     # Public vendor views
-    path('', views.VendorListView.as_view(), name='vendor_list'),
-    path('<int:pk>/', views.VendorDetailView.as_view(), name='vendor_detail'),
+    path('', views.index, name='index'),
+    path('main/', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('vendors-list/', views.VendorListView.as_view(), name='vendor_list'),
+    path('vendors/<int:pk>/', views.VendorDetailView.as_view(), name='vendor_detail'),
     
     # Vendor management dashboard
     path('dashboard/', views.vendor_dashboard, name='vendor_dashboard'),

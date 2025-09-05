@@ -12,6 +12,9 @@ from catalog.models import Item, Category, ItemImage, Offer
 from catalog.forms import ItemForm, ItemImageFormSet, OfferForm
 from django import forms
 
+def index(request):
+    return render(request, 'vendors/index.html')
+
 
 class VendorListView(ListView):
     model = Vendor
@@ -78,7 +81,7 @@ def add_item(request, vendor_id):
         return redirect('vendors:add_branch', vendor_id=vendor.id)
     
     if request.method == 'POST':
-        form = ItemForm(request.POST, vendor=vendor)
+        form = ItemForm(request.POST, vendor=vendor, request=request)
         image_formset = ItemImageFormSet(request.POST, request.FILES)
         
         if form.is_valid() and image_formset.is_valid():
@@ -98,7 +101,7 @@ def add_item(request, vendor_id):
             
             return redirect('vendors:vendor_dashboard')
     else:
-        form = ItemForm(vendor=vendor)
+        form = ItemForm(vendor=vendor, request=request)
         image_formset = ItemImageFormSet()
     
     return render(request, 'vendors/add_item.html', {

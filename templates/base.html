@@ -35,7 +35,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+            <a class="navbar-brand fw-bold" href="{% url 'vendors:home' %}">
                 <i class="fas fa-utensils me-2"></i>FoodSave
             </a>
             
@@ -109,18 +109,6 @@
                             </a>
                         </li>
                         {% endif %}
-                        {% if user.is_staff and user.role != 'customer' %}
-                        <li class="nav-item">
-                            <a class="nav-link text-success" href="{% url 'vendors:add_vendor' %}">
-                                <i class="fas fa-plus me-1"></i>Добавить Vendor
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{% url 'vendors:assign_vendor' %}">
-                                <i class="fas fa-user-check me-1"></i>Назначить вендора
-                            </a>
-                        </li>
-                        {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
@@ -160,19 +148,14 @@
     </main>
 
     <!-- Partner CTA Banner -->
+    {% if user.is_authenticated and user.role == 'customer' or not user.is_authenticated %}
     <section class="partner-cta py-3">
         <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
             {% if user.is_authenticated %}
-                {% if user.is_staff %}
-                <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-primary">
-                    <i class="fas fa-handshake-angle me-2"></i>Присоединиться как партнёр
-                </a>
-                {% else %}
                 <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-primary">
                     <i class="fas fa-handshake-angle me-2"></i>Стать партнёром
                 </a>
-                {% endif %}
             {% else %}
                 <a href="{% url 'users:login' %}" class="btn btn-primary">
                     <i class="fas fa-handshake-angle me-2"></i>Присоединиться
@@ -180,6 +163,7 @@
             {% endif %}
         </div>
     </section>
+    {% endif %}
 
     <!-- Footer -->
     <footer class="bg-dark text-light mt-5 py-4">
@@ -221,6 +205,21 @@
     <style>
     .partner-cta { background:#F3F4F6; border-top:1px solid #E5E7EB; border-bottom:1px solid #E5E7EB; }
     .partner-cta .btn { border-radius:10px; }
+    
+    /* Fix z-index for vendor dropdown menu */
+    .navbar .dropdown-menu {
+        z-index: 1060;
+    }
+    
+    .navbar .nav-item.dropdown {
+        position: relative;
+        z-index: 1061;
+    }
+    
+    /* Ensure navbar itself has high z-index */
+    .navbar {
+        z-index: 1055;
+    }
     </style>
 
     <!-- Toast container -->

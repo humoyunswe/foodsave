@@ -1,0 +1,2152 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodSave - Не дай еде пропасть, сэкономь с нами</title>
+    <link rel="icon" href="{% static 'images/logo.jpeg' %}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'contact.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(46, 204, 113, 0.1);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2ECC71;
+            text-decoration: none;
+            gap: 0.7rem;
+        }
+        .logo-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(46,204,113,0.25), 0 1.5px 4px rgba(0,0,0,0.10);
+            background: white;
+            object-fit: contain;
+            transition: box-shadow 0.3s;
+        }
+        .logo:hover .logo-img {
+            box-shadow: 0 8px 24px rgba(46,204,113,0.35), 0 2px 8px rgba(0,0,0,0.13);
+        }
+        .logo-text {
+            color: #2ECC71;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px rgba(46,204,113,0.10);
+        }
+        @media (max-width: 480px) {
+            .logo-img {
+                width: 32px;
+                height: 32px;
+            }
+            .logo-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #2ECC71;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .mobile-menu span {
+            width: 25px;
+            height: 3px;
+            background: #333;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #2ECC71;
+            color: white;
+            border: 2px solid #2ECC71;
+        }
+
+        .btn-primary:hover {
+            background: #27ae60;
+            border-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #2ECC71;
+            border: 2px solid #2ECC71;
+        }
+
+        .btn-outline:hover {
+            background: #2ECC71;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .hero-image {
+            text-align: center;
+        }
+
+        .phone-mockup {
+            width: 300px;
+            height: 640px;
+            background: linear-gradient(145deg, #2ECC71, #27ae60);
+            border-radius: 40px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(46, 204, 113, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            overflow: hidden;
+            border: 8px solid #1a1a1a;
+        }
+
+      
+
+        .phone-mockup img {
+            width: 100%;
+            height: 100%;
+            {% comment %} object-fit: cover; {% endcomment %}
+            border-radius: 32px;
+        }
+
+        .phone-mockup .app-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(39, 174, 96, 0.9));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 32px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .phone-mockup:hover .app-overlay {
+            opacity: 1;
+        }
+
+        /* Phone animation */
+        @keyframes phoneFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .phone-mockup {
+            animation: phoneFloat 3s ease-in-out infinite;
+        }
+
+        .phone-mockup:hover {
+            animation-play-state: paused;
+        }
+
+        /* Sections */
+        .section {
+            /* padding: 80px 0; */
+        }
+
+        /* Individual section paddings */
+        .hero {
+            padding: 120px 0 80px;
+        }
+        #how-it-works {
+            padding: 80px 0 60px 0;
+        }
+        #for-whom {
+            padding: 80px 0 60px 0;
+        }
+        #featured-products {
+            padding: 80px 0 60px 0;
+        }
+        #our-clients {
+            padding: 60px 0 40px 0;
+        }
+        #future-partners {
+            padding: 60px 0 40px 0;
+        }
+        .team-section {
+            padding: 40px 0 40px 0;
+        }
+        .contact-section {
+            padding: 80px 0 60px 0;
+        }
+        .download-cta {
+            padding: 80px 0 60px 0;
+        }
+        #testimonials {
+            padding: 80px 0 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: #1a1a1a;
+        }
+
+        /* How it works */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background: #2ECC71;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .step h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .step p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* For whom */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .grid-item {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .grid-item h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .grid-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Logo carousel */
+        .logo-carousel {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        .logo-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+        }
+        .logo-item {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 12px rgba(46,204,113,0.10), 0 1.5px 4px rgba(0,0,0,0.07);
+            background: none;
+            padding: 0;
+        }
+        .logo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+            transition: none;
+            box-shadow: none;
+            background: none;
+            display: block;
+        }
+        .logo-title {
+            text-align: center;
+            font-size: 1rem;
+            margin-top: 0.3rem;
+            color: #666;
+            font-weight: 500;
+            width: 100%;
+            line-height: 1.2;
+        }
+        .logo-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(46,204,113,0.18), 0 2px 8px rgba(0,0,0,0.13);
+        }
+        .logo-title {
+            text-align: center;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Product Cards */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .product-discount {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #f39c12;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        .product-info p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .current-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2ECC71;
+        }
+
+        .original-price {
+            font-size: 1rem;
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        /* Testimonials */
+        .reviews {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .review {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .review::before {
+            content: '"';
+            font-size: 4rem;
+            color: #2ECC71;
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-family: serif;
+        }
+
+        .review p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+            color: #2ECC71;
+        }
+
+        /* Download CTA */
+        .download-cta {
+            background: linear-gradient(135deg, #2ECC71, #27ae60);
+            color: white;
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .download-cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 30px 0 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2ECC71;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-column ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: #2ECC71;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding: 1rem 0 0;
+            text-align: center;
+            color: #ccc;
+            margin: 0;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .social-links a {
+            color: #ccc;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #2ECC71;
+        }
+
+        /* Mobile menu */
+        .nav-links.active {
+            display: flex !important;
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(46, 204, 113, 0.1);
+        }
+
+        /* Future Partners Section */
+        .future-partners-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 3rem;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .partner-item {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .partner-item:hover {
+            color: #2ECC71;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .phone-mockup {
+                width: 280px;
+                height: 560px;
+                margin-top: 2rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-text p {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .steps, .grid, .reviews, .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo-carousel {
+                gap: 1.5rem;
+            }
+
+            .hero-buttons, .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .future-partners-grid {
+                gap: 1.5rem;
+            }
+            
+            .partner-item {
+                padding: 1rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .future-partners-grid {
+                gap: 1rem;
+            }
+            
+            .partner-item {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Team Section */
+        .team-section {
+            padding: 20px 0;
+            background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 50%, #f0f8ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="%23ffffff" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .team-section .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .team-section .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .team-section .section-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .team-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 2rem 0;
+        }
+
+        .team-track {
+            display: flex;
+            animation: scrollTeam 50s linear infinite;
+            width: max-content;
+        }
+
+        .team-track.paused {
+            animation-play-state: paused;
+        }
+
+        .team-card {
+            flex-shrink: 0;
+            width: 320px;
+            margin: 0 1.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(46, 204, 113, 0.1);
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(46, 204, 113, 0.15);
+            border-color: rgba(46, 204, 113, 0.3);
+        }
+
+        .profile-image {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #f8fffe, #e8f5e8);
+        }
+
+        .profile-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(39, 174, 96, 0.1));
+            z-index: 1;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .team-card:hover .profile-image img {
+            transform: scale(1.08);
+        }
+
+        .profile-info {
+            padding: 2rem 1.5rem 1.5rem;
+            background: white;
+        }
+
+        .profile-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .profile-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .profile-title span {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .linkedin-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #0077b5, #005885);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+        }
+
+        .linkedin-icon:hover {
+            background: linear-gradient(135deg, #005885, #004066);
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.4);
+        }
+
+        .linkedin-icon i {
+            font-size: 0.9rem;
+        }
+
+        .company-logos {
+            padding: 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+
+        .company-logo {
+            width: 100px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .company-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Business Solutions */
+        .business-solutions {
+            background: #f9f9f9;
+            padding: 80px 0 60px 0;
+        }
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        .solution-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(46,204,113,0.07);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .solution-card:hover {
+            transform: translateY(-6px) scale(1.03);
+        }
+        .solution-icon {
+            font-size: 2.5rem;
+            color: #2ECC71;
+            margin-bottom: 1rem;
+        }
+        .solution-for {
+            margin-top: 1.2rem;
+            color: #888;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        .solutions-flex {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+        }
+
+        .solutions-visual {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .solution-photo {
+            width: 100%;
+            height: 300px; /* Adjust as needed */
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .solutions-info {
+            flex: 1;
+        }
+
+        .solutions-desc {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        /* Business Solutions (двухколоночный формат) */
+        .solutions-flex {
+          display: flex;
+          gap: 3rem;
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+        .solutions-visual {
+          flex: 1 1 340px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          align-items: center;
+          min-width: 260px;
+        }
+        .solution-photo.main {
+          width: 320px;
+          height: 220px;
+          object-fit: cover;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(46,204,113,0.10);
+        }
+        .solution-photo.small {
+          width: 180px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 14px;
+          margin-left: 60px;
+          box-shadow: 0 4px 16px rgba(46,204,113,0.08);
+        }
+        .solutions-info {
+          flex: 2 1 420px;
+          min-width: 300px;
+        }
+        @media (max-width: 900px) {
+          .solutions-flex { flex-direction: column; align-items: stretch; }
+          .solutions-visual { flex-direction: row; justify-content: center; gap: 1rem; }
+          .solution-photo.main, .solution-photo.small { width: 48vw; max-width: 320px; height: 120px; margin-left: 0; }
+        }
+
+        @keyframes scrollTeam {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Team section responsive */
+        @media (max-width: 768px) {
+            .team-section {
+                padding: 60px 0;
+            }
+            
+            .team-section .section-title {
+                font-size: 2rem;
+            }
+            
+            .team-section .section-subtitle {
+                font-size: 1rem;
+            }
+            
+            .team-card {
+                width: 280px;
+                margin: 0 1rem;
+            }
+            
+            .profile-image {
+                height: 180px;
+            }
+            
+            .company-logos {
+                gap: 1rem;
+            }
+            
+            .company-logo {
+                width: 60px;
+                height: 25px;
+            }
+
+            .solutions-flex {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .solution-photo {
+                height: 250px;
+            }
+        }
+
+        .business-grid {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 2.5rem;
+          align-items: start;
+          position: relative;
+        }
+        .business-photos {
+          position: relative;
+          min-height: 380px;
+        }
+        .photo-main {
+          width: 340px;
+          height: 240px;
+          object-fit: cover;
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(46,204,113,0.10);
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 2;
+        }
+        .photo-side {
+          width: 200px;
+          height: 160px;
+          object-fit: cover;
+          border-radius: 16px;
+          box-shadow: 0 4px 16px rgba(46,204,113,0.08);
+          position: absolute;
+          top: 140px;
+          left: 120px;
+          z-index: 1;
+        }
+        .business-cards {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-top: 0.5rem;
+        }
+        .solution-card {
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 10px 30px rgba(46,204,113,0.07);
+          padding: 2rem 1.5rem;
+          text-align: left;
+          position: relative;
+          z-index: 3;
+        }
+        .card-bottom {
+          margin-top: 2.5rem;
+        }
+        @media (max-width: 900px) {
+          .business-grid { grid-template-columns: 1fr; }
+          .business-photos { min-height: 200px; }
+          .photo-main, .photo-side { position: static; width: 90vw; max-width: 340px; height: 120px; margin: 0 0 1rem 0; }
+          .business-cards { margin-top: 0; }
+          .card-bottom { margin-top: 0; }
+        }
+
+        .solution-row {
+          display: flex;
+          align-items: center;
+          gap: 2.5rem;
+          margin-bottom: 2.5rem;
+          flex-wrap: wrap;
+        }
+        .solution-row.center {
+          flex-direction: column;
+          text-align: center;
+          margin-bottom: 0.5rem;
+        }
+        .solution-row.last {
+          margin-bottom: 0;
+        }
+        .solution-img {
+          flex: 1 1 220px;
+          min-width: 220px;
+          text-align: center;
+        }
+        .solution-img img {
+          width: 320px;
+          max-width: 100%;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(46,204,113,0.10);
+        }
+        .solution-text {
+          flex: 2 170px;
+          min-width: 220px;
+        }
+        .solution-row.reverse {
+          flex-direction: row-reverse;
+        }
+        .solution-row.center .solution-img,
+        .solution-row.center .solution-text {
+          width: 100%;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+          .solution-row, .solution-row.reverse {
+            flex-direction: column;
+            text-align: center;
+          }
+          .solution-img, .solution-text {
+            width: 100%;
+            min-width: 0;
+          }
+        }
+
+        .feature-single-row {
+          display: flex;
+          align-items: center;
+          gap: 3rem;
+          flex-wrap: wrap;
+          margin-bottom: 2rem;
+        }
+        .feature-img {
+          flex: 1 1 320px;
+          min-width: 220px;
+          text-align: center;
+        }
+        .feature-img img {
+          width: 340px;
+          max-width: 100%;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(46,204,113,0.10);
+        }
+        .feature-text {
+          flex: 2 1 340px;
+          min-width: 220px;
+        }
+        @media (max-width: 900px) {
+          .feature-single-row { flex-direction: column; text-align: center; }
+          .feature-img, .feature-text { width: 100%; min-width: 0; }
+        }
+
+        .feature-ui {
+          background: linear-gradient(135deg, #f9f9f9 60%, #e8f5e8 100%);
+          padding: 80px 0 60px 0;
+        }
+        .mockup-frame {
+          background: #fff;
+          border-radius: 28px;
+          box-shadow: 0 8px 32px rgba(46,204,113,0.13), 0 1.5px 4px rgba(0,0,0,0.07);
+          padding: 18px 12px;
+          display: inline-block;
+        }
+        .mockup-frame img {
+          width: 420px;
+          max-width: 100%;
+          border-radius: 20px;
+          display: block;
+        }
+        .mockup-caption {
+          margin-top: 1rem;
+          color: #888;
+          font-size: 1rem;
+          text-align: center;
+        }
+        .feature-text {
+          flex: 2 1 340px;
+          min-width: 220px;
+          text-align: left;
+        }
+        .feature-subtitle {
+          font-size: 1.15rem;
+          color: #444;
+          margin-bottom: 1.2rem;
+        }
+        .feature-list {
+          list-style: disc inside;
+          color: #2ECC71;
+          margin-bottom: 1.5rem;
+          padding-left: 1.2rem;
+        }
+        .feature-list li {
+          color: #333;
+          font-size: 1.05rem;
+          margin-bottom: 0.5rem;
+        }
+        @media (max-width: 900px) {
+          .feature-single-row { flex-direction: column; text-align: center; }
+          .feature-text { text-align: center; }
+        }
+
+        .big-footer {
+          position: relative;
+          background: #00795a;
+          color: #fff;
+          overflow: hidden;
+          padding: 0;
+        }
+        .footer-bg-text {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 15vw;
+          font-weight: 900;
+          color: #fff;
+          opacity: 0.13;
+          letter-spacing: 0.1em;
+          z-index: 1;
+          pointer-events: none;
+          user-select: none;
+          text-align: center;
+          line-height: 1;
+        }
+        .footer-content {
+          position: relative;
+          z-index: 2;
+          padding: 80px 0 40px 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .footer-logo img {
+          width: 100px;
+          margin-bottom: 2rem;
+        }
+        .footer-links {
+          display: flex;
+          gap: 2rem;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .footer-links a {
+          color: #fff;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 1.1rem;
+          opacity: 0.9;
+          transition: opacity 0.2s;
+        }
+        .footer-links a:hover {
+          opacity: 1;
+          text-decoration: underline;
+        }
+        .footer-social {
+          display: flex;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        .footer-social a {
+          color: #fff;
+          font-size: 2rem;
+          opacity: 0.8;
+          transition: opacity 0.2s;
+        }
+        .footer-social a:hover {
+          opacity: 1;
+        }
+        .footer-copy {
+          color: #fff;
+          opacity: 0.7;
+          font-size: 1rem;
+          margin-top: 1rem;
+          text-align: center;
+        }
+        @media (max-width: 700px) {
+          .footer-bg-text { font-size: 16vw; }
+          .footer-content { padding: 50px 0 30px 0; }
+          .footer-logo img { width: 44px; }
+          .footer-links { gap: 1rem; font-size: 1rem; }
+          .footer-social { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">
+                    <img src="{% static 'images/logo.jpeg' %}" alt="FoodSave Logo" class="logo-img">
+                    <span class="logo-text">FoodSave</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="{% url 'users:register' %}" class="business-reg-link">Регистрация для бизнеса</a></li>
+                    <li><a href="#how-it-works">Как работает</a></li>
+                    <li><a href="#featured-products">Товары</a></li>
+                    <li><a href="#for-whom">Для кого</a></li>
+                    <li><a href="#our-clients">Партнёры</a></li>
+                    <li><a href="#testimonials">Отзывы</a></li>
+                </ul>
+                <div class="mobile-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Не дай еде пропасть — сэкономь с FoodSave</h1>
+                    <p>Находи скидки на еду, срок которой скоро истечёт, от любимых кафе, магазинов и пекарен рядом с тобой.</p>
+                    <div class="hero-buttons">
+                        <a href="#download-app" class="btn btn-primary">
+                            <i class="fas fa-download"></i>
+                            Скачать приложение
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline">
+                            <i class="fas fa-play"></i>
+                            Как это работает
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="phone-mockup">
+                        <img src="/static/project_photos/image.png" alt="FoodSave App">
+                        <div class="app-overlay">
+                            <i class="fas fa-mobile-alt"></i>
+                            <br>
+                            FoodSave App
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Как работает FoodSave?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Ищи рядом</h3>
+                    <p>Открой карту и найди ближайшие кафе и магазины с уценёнными товарами.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-percent"></i>
+                    </div>
+                    <h3>Смотри скидки</h3>
+                    <p>Просматривай актуальные предложения и сроки годности.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>Забронируй</h3>
+                    <p>Забронируй товар и забери его до конца дня.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For whom -->
+    <section class="section" id="for-whom" style="background: #f8fffe;">
+        <div class="container">
+            <h2 class="section-title">Кому это нужно?</h2>
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="step-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Покупателям</h3>
+                    <p>Экономия до 70% на продуктах каждый день</p>
+                </div>
+                <div class="grid-item">
+                    <div class="step-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3>Магазинам и кафе</h3>
+                    <p>Избавление от остатков, снижение убытков</p>
+                </div>
+                <div class="grid-item">
+                    <div class="step-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Планете</h3>
+                    <p>Меньше выброшенной еды — меньше углеродного следа</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Business Solutions -->
+    <section class="section business-solutions" id="business-solutions">
+      <div class="container">
+        <h2 class="section-title">Наш бизнес решение</h2>
+        <!-- 1. Фото слева, текст справа -->
+        <div class="solution-row">
+          <div class="solution-img left">
+            <img src="{% static 'project_photos/image3.png' %}" alt="Сюрприз-боксы">
+          </div>
+          <div class="solution-text">
+            <h3>Сюрприз-боксы</h3>
+            <p>Продавайте непроданные продукты в специальных наборах через FoodSave. Пользователи забирают их в удобное время.</p>
+            <div class="solution-for">Для: ритейл, кафе, пекарни</div>
+          </div>
+        </div>
+        <!-- 2. Фото по центру, текст под фото -->
+        <div class="solution-row center">
+          <div class="solution-img center">
+            <img src="{% static 'project_photos/image4.png' %}" alt="Платформа FoodSave">
+          </div>
+          <div class="solution-text center">
+            <h3>Платформа FoodSave</h3>
+            <p>Модульная система для управления излишками, отслеживания и автоматизации скидок.</p>
+            <div class="solution-for">Для: супермаркеты, сети, дистрибьюторы</div>
+          </div>
+        </div>
+        <!-- 3. Фото справа, текст слева -->
+        <div class="solution-row reverse last">
+          <div class="solution-text">
+            <h3>Инициатива по маркировке</h3>
+            <p>Внедряем маркировку «Смотри-нюхай-пробуй» для снижения пищевых отходов у покупателей.</p>
+            <div class="solution-for">Для: производители, оптовики, ритейл</div>
+          </div>
+          <div class="solution-img right">
+            <img src="{% static 'project_photos/image5.png' %}" alt="Инициатива по маркировке">
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Featured Products -->
+    <section class="section feature-ui" id="featured-products">
+      <div class="container feature-single-row">
+        <div class="feature-img">
+          <div class="mockup-frame">
+            <img src="{% static 'project_photos/image2.png' %}" alt="Интерфейс FoodSave">
+          </div>
+          <div class="mockup-caption">Главный экран вебсайта</div>
+        </div>
+        <div class="feature-text">
+          <h2 class="section-title">Современный и удобный интерфейс</h2>
+          <p class="feature-subtitle">
+            FoodSave — это не только выгода, но и удовольствие от использования:
+          </p>
+          <ul class="feature-list">
+            <li>Быстрый поиск скидок и товаров рядом</li>
+            <li>Интуитивная навигация и фильтры</li>
+            <li>Детальная информация о каждом предложении</li>
+            <li>Мгновенное бронирование и карта заведений</li>
+          </ul>
+          <a href="/vendors/main/" class="btn btn-primary" style="margin-top:2rem;">Попробовать FoodSave</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our clients -->
+    <section class="section" id="our-clients">
+        <div class="container">
+            <h2 class="section-title">С нами уже сотрудничают</h2>
+            <div class="logo-carousel">
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/havas.png' %}" alt="Havas"></div>
+                    <div class="logo-title">Havas</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/universal.png' %}" alt="Eram"></div>
+                    <div class="logo-title">Eram</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/universal.png' %}" alt="Chayka"></div>
+                    <div class="logo-title">Chayka</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/olma.png' %}" alt="Olma"></div>
+                    <div class="logo-title">Olma</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/sunduk.png' %}" alt="Sunduk"></div>
+                    <div class="logo-title">Sunduk</div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Future Partners -->
+    <section class="section" id="future-partners" style="background: #f8fffe;">
+        <div class="container">
+            <h2 class="section-title">Наши будущие партнеры (2025-2027)</h2>
+            <div class="logo-carousel">
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/korzinka.png' %}" alt="Korzinka" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Korzinka</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/makro.png' %}" alt="Makro" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Makro</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/magnum.png' %}" alt="Magnum" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Magnum</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/baraka.png' %}" alt="Baraka Market" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Baraka</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/andalus.png' %}" alt="Andalus Supermarket" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Andalus</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/evos.png' %}" alt="EVOS" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">EVOS</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/kfc.jpeg' %}" alt="KFC" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">KFC</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/bbq.png' %}" alt="BBQ BARBEQUE" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">BBQ</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/black.png' %}" alt="BLACK STAR BURGER" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">BLACK STAR </div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/oqtepa.webp' %}" alt="OQTEPA LAVASH" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">OQTEPA</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/shef.jpeg' %}" alt="ШЕФ BURGER" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">ШЕФ</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/feedup.png' %}" alt="Feed Up" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Feed Up</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/street.png' %}" alt="STREET 77" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">STREET 77</div>
+                </div>
+                <div class="logo-col">
+                    <div class="logo-item"><img src="{% static 'photos/brands/rayhon.png' %}" alt="Rayhon" onerror="this.onerror=null;this.src='{% static 'photos/brands/placeholder.png' %}';"></div>
+                    <div class="logo-title">Rayhon</div>
+                </div>
+            </div>
+        </div>
+    </section>
+        
+     <!-- Team Section -->
+     <section class="team-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Наша команда</h2>
+                <p class="section-subtitle">Профессионалы с опытом работы в ведущих компаниях</p>
+            </div>
+            
+            <div class="team-container">
+                <div class="team-track">
+                    <!-- First set of team members -->
+                    <div class="team-card">
+                        <div class="profile-image">
+                            <img src="{% static 'photos/companies/member1.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Humoyun Akbaraliev</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Intelligent Solutions</span>
+                                <a href="https://www.linkedin.com/in/humoyun-akbaraliev/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/texnousta.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/intelligent_solutions.png' %}" alt="U-EDU Team">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image">
+                            <img src="{% static 'photos/companies/member2.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Mirafzal Bahodirov</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Ucell</span>
+                                <a href="https://www.linkedin.com/in/mirafzal-bakhodirov-54399b286/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uzcard3.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/ucell.png' %}" alt="U-EDU Team">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image ">
+                            <img src="{% static 'photos/companies/member4.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Xolmirza Abubakirov</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Nnt-Express</span>
+                                <a href="https://www.linkedin.com/in/abubakirov-xolmirza/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/nnt-exress.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/abuali.png' %}" alt="mobal.io">
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image ">
+                            <img src="{% static 'photos/companies/member3.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Bobur Sulaymonov</h3>
+                            <div class="profile-title">
+                                <span>Co-founder & CTO @ FoodSave</span>
+                                <a href="https://www.instagram.com/suleimanv_/?igsh=MXE1bGRncWdpYmdzaA%3D%3D#" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/befit.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/abuali.png' %}" alt="mobal.io">
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="team-card">
+                        <div class="profile-image">
+                            <img src="{% static 'photos/companies/member1.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Humoyun Akbaraliev</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Intelligent Solutions</span>
+                                <a href="https://www.linkedin.com/in/humoyun-akbaraliev/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/texnousta.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/intelligent_solutions.png' %}" alt="U-EDU Team">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image">
+                            <img src="{% static 'photos/companies/member2.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Mirafzal Bahodirov</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Ucell</span>
+                                <a href="https://www.linkedin.com/in/mirafzal-bakhodirov-54399b286/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uzcard3.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/ucell.png' %}" alt="U-EDU Team">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image ">
+                            <img src="{% static 'photos/companies/member4.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Xolmirza Abubakirov</h3>
+                            <div class="profile-title">
+                                <span>Software Engineer @ Nnt-Express</span>
+                                <a href="https://www.linkedin.com/in/abubakirov-xolmirza/" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/uedu.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/nnt-exress.png' %}" alt="mobal.io">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/abuali.png' %}" alt="mobal.io">
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="profile-image ">
+                            <img src="{% static 'photos/companies/member3.png' %}" alt="Otabek Nurmuhammad">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Bobur Sulaymonov</h3>
+                            <div class="profile-title">
+                                <span>Independent UI/UX Designer</span>
+                                <a href="https://www.instagram.com/suleimanv_/?igsh=MXE1bGRncWdpYmdzaA%3D%3D#" class="linkedin-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="company-logos">
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/befit.png' %}" alt="Dropbox">
+                            </div>
+                            <div class="company-logo">
+                                <img src="{% static 'photos/companies/abuali.png' %}" alt="mobal.io">
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section last-section" id="contact">
+        <div class="container">
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-header">
+                        <h2>Свяжитесь с нами</h2>
+                        <p>Есть вопросы или предложения? Мы всегда рады общению! Свяжитесь с нами любым удобным способом.</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <a href="mailto:info@foodsave.uz">info@foodsave.uz</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Телефон</h3>
+                            <a href="tel:+998901234567">+998 94 218-26-09</a>
+                            <a href="tel:+998901234567">+998 94 215-95-55</a>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Время работы</h3>
+                            <p>Пн-Пт: 9:00 - 18:00<br>Сб-Вс: 10:00 - 16:00</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <h3 style="margin-bottom: 2rem; color: #2ECC71; font-size: 1.5rem;">Отправить сообщение</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Имя *</label>
+                            <input type="text" id="name" name="name" placeholder="Ваше имя" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Тема</label>
+                            <input type="text" id="subject" name="subject" placeholder="Тема сообщения">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Сообщение *</label>
+                            <textarea id="message" name="message" placeholder="Ваше сообщение..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Отправить сообщение
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id="testimonials" style="background: #f8fffe;">
+        <div class="container">
+            <h2 class="section-title">Отзывы наших пользователей</h2>
+            <div class="reviews">
+                <div class="review">
+                    <p>Теперь покупаю любимую еду со скидкой каждый день. Круто, что можно помочь и планете, и кошельку.</p>
+                    <div class="review-author">— Алина, Ташкент</div>
+                </div>
+                <div class="review">
+                    <p>Нашёл классную пекарню по пути домой, которая каждый вечер выкладывает дешёвые пирожки!</p>
+                    <div class="review-author">— Мирза, Ташкент</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download CTA -->
+    <section class="download-cta" id="download-app">
+        <div class="container">
+            <h2>Скачай FoodSave и начни экономить уже сегодня!</h2>
+            <div class="download-buttons">
+                <a href="vendors/main/" class="download-btn">
+                    <i class="fab fa-apple"></i>
+                    App Store
+                </a>
+                <a href="/vendors/main/" class="download-btn">
+                    <i class="fab fa-google-play"></i>
+                    Google Play
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer big-footer">
+      <div class="footer-bg-text">FOOD SAVE</div>
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="{% static 'images/logo.jpeg' %}" alt="FoodSave" />
+        </div>
+        <div class="footer-links">
+          <a href="#">О нас</a>
+          <a href="#">Контакты</a>
+          <a href="#">Партнёрам</a>
+          <a href="#">Политика</a>
+        </div>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-telegram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+        </div>
+        <div class="footer-copy">
+          © 2025 FoodSave. Все права защищены.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Header background on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+            }
+        });
+
+        // Team section hover pause
+        const teamTrack = document.querySelector('.team-track');
+        const teamCards = document.querySelectorAll('.team-card');
+        
+        teamCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                teamTrack.classList.add('paused');
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                teamTrack.classList.remove('paused');
+            });
+        });
+
+        // Contact form handling
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const formData = new FormData(this);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const subject = formData.get('subject');
+                const message = formData.get('message');
+                
+                // Simple validation
+                if (!name || !email || !message) {
+                    alert('Пожалуйста, заполните все обязательные поля');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Пожалуйста, введите корректный email адрес');
+                    return;
+                }
+                
+                // Show success message
+                alert('Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.');
+                
+                // Reset form
+                this.reset();
+            });
+        }
+    </script>
+</body>
+</html>

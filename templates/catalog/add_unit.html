@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>{{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Добавьте новую единицу измерения для товаров. Она будет доступна в списке единиц при добавлении товара.
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Примеры:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Сокращение:</strong> упак → <strong>Отображение:</strong> Упаковки</li>
+                            <li><strong>Сокращение:</strong> коробка → <strong>Отображение:</strong> Коробки</li>
+                            <li><strong>Сокращение:</strong> бутылка → <strong>Отображение:</strong> Бутылки</li>
+                        </ul>
+                    </div>
+                    
+                    {% crispy form %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

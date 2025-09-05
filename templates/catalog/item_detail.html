@@ -9,7 +9,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
             <li class="breadcrumb-item"><a href="{% url 'catalog:catalog' %}">Каталог</a></li>
-            {% if item.category %}
+            {% if item.category and item.category.slug %}
                 <li class="breadcrumb-item"><a href="{% url 'catalog:category' item.category.slug %}">{{ item.category.name }}</a></li>
             {% endif %}
             <li class="breadcrumb-item active">{{ item.title }}</li>

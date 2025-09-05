@@ -2,10 +2,17 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import redirect
+from django.contrib import messages
 import math
 from .models import Item, Category, Offer
+from .forms import CategoryForm, UnitForm
 from vendors.models import Vendor, Branch
 from django.utils import timezone
+from django.utils.text import slugify
 import json
 
 
@@ -417,3 +424,103 @@ def get_custom_sets(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+@require_http_methods(["POST"])
+def create_category_ajax(request):
+    """AJAX view for creating new categories"""
+    try:
+        category_name = request.POST.get('name', '').strip()
+        
+        if not category_name:
+            return JsonResponse({
+                'success': False,
+                'error': 'Название категории не может быть пустым'
+            })
+        
+        # Check if category already exists
+        if Category.objects.filter(name__iexact=category_name).exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'Категория с таким названием уже существует'
+            })
+        
+        # Create new category
+        category = Category.objects.create(
+            name=category_name,
+            slug=slugify(category_name)
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'category': {
+                'id': category.id,
+                'name': category.name
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка при создании категории: {str(e)}'
+        })
+
+@require_http_methods(["GET"])
+def get_categories_ajax(request):
+    """AJAX view for getting all categories"""
+    try:
+        categories = Category.objects.filter(is_active=True).values('id', 'name')
+        return JsonResponse({
+            'success': True,
+            'categories': list(categories)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+def add_category(request):
+    """View for adding new categories"""
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f'Категория "{category.name}" успешно создана!')
+            # Redirect back to the referring page or to catalog if no referrer
+            return redirect(request.META.get('HTTP_REFERER', 'catalog:catalog'))
+    else:
+        form = CategoryForm()
+    
+    return render(request, 'catalog/add_category.html', {
+        'form': form,
+        'title': 'Добавить категорию'
+    })
+
+def add_unit(request):
+    """View for adding new units"""
+    if request.method == 'POST':
+        form = UnitForm(request.POST)
+        if form.is_valid():
+            unit_key = form.cleaned_data['unit_key']
+            unit_display = form.cleaned_data['unit_display']
+            
+            # Store in session to be used in ItemForm
+            if 'custom_units' not in request.session:
+                request.session['custom_units'] = []
+            
+            request.session['custom_units'].append({
+                'key': unit_key,
+                'display': unit_display
+            })
+            request.session.modified = True
+            
+            messages.success(request, f'Единица измерения "{unit_display}" успешно добавлена!')
+            return redirect(request.META.get('HTTP_REFERER', 'catalog:catalog'))
+    else:
+        form = UnitForm()
+    
+    return render(request, 'catalog/add_unit.html', {
+        'form': form,
+        'title': 'Добавить единицу измерения'
+    })

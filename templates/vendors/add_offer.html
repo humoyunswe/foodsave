@@ -66,7 +66,7 @@
                                 </label>
                                 <div class="input-group">
                                     {{ form.original_price }}
-                                    <span class="input-group-text">₸</span>
+                                    <span class="input-group-text">сум</span>
                                 </div>
                                 <div class="form-text">Базовая цена товара</div>
                             </div>
@@ -86,27 +86,27 @@
                                 </label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="final-price" readonly>
-                                    <span class="input-group-text">₸</span>
+                                    <span class="input-group-text">сум</span>
                                 </div>
                                 <div class="form-text">Автоматический расчёт</div>
                             </div>
                         </div>
                         
-                        <!-- Branch Selection -->
+                        <!-- Quantity Section -->
                         <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.branch.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>Филиал *
-                                </label>
-                                {{ form.branch }}
-                                <div class="form-text">В каком филиале доступен товар</div>
-                            </div>
                             <div class="col-md-6">
                                 <label for="{{ form.quantity.id_for_label }}" class="form-label fw-bold">
                                     <i class="fas fa-boxes me-2 text-info"></i>Количество
                                 </label>
                                 {{ form.quantity }}
                                 <div class="form-text">Доступное количество (0 = неограниченно)</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.branch.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Филиал *
+                                </label>
+                                {{ form.branch }}
+                                <div class="form-text">Выберите филиал для этого предложения</div>
                             </div>
                         </div>
                         
@@ -158,7 +158,7 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <h6 class="text-muted">Обычная цена</h6>
-                                        <h4 class="text-muted"><s><span id="preview-original">0</span> ₸</s></h4>
+                                        <h4 class="text-muted"><s><span id="preview-original">0</span> сум</s></h4>
                                     </div>
                                     <div class="col-4">
                                         <h6 class="text-warning">Скидка</h6>
@@ -166,12 +166,12 @@
                                     </div>
                                     <div class="col-4">
                                         <h6 class="text-success">Итоговая цена</h6>
-                                        <h4 class="text-success"><span id="preview-final">0</span> ₸</h4>
+                                        <h4 class="text-success"><span id="preview-final">0</span> сум</h4>
                                     </div>
                                 </div>
                                 <div class="mt-3">
                                     <span class="badge bg-success fs-6">
-                                        Экономия: <span id="preview-savings">0</span> ₸
+                                        Экономия: <span id="preview-savings">0</span> сум
                                     </span>
                                 </div>
                             </div>

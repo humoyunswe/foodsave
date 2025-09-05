@@ -23,10 +23,13 @@ class Category(models.Model):
 
 class Item(models.Model):
     UNIT_CHOICES = [
-        ('pcs', 'Pieces'),
-        ('kg', 'Kilograms'),
-        ('portion', 'Portion'),
-        ('liter', 'Liter'),
+        ('шт', 'Штуки'),
+        ('кг', 'Килограммы'),
+        ('порция', 'Порция'),
+        ('литр', 'Литр'),
+        ('г', 'Граммы'),
+        ('мл', 'Миллилитры'),
+        ('другое', 'Другое'),
     ]
     
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='items')
@@ -34,14 +37,20 @@ class Item(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='pcs')
-    tags = models.JSONField(default=list)  # ["halal", "vegetarian", ...]
+    unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='шт')
+    custom_unit = models.CharField(max_length=50, blank=True, help_text="Укажите единицу измерения, если выбрали 'Другое'")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
+    
+    def get_unit_display_custom(self):
+        """Return custom unit if 'другое' is selected, otherwise return standard unit display"""
+        if self.unit == 'другое' and self.custom_unit:
+            return self.custom_unit
+        return self.get_unit_display()
 
 class ItemImage(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='images')
@@ -87,6 +96,3 @@ class Offer(models.Model):
         if self.end_date:
             return timezone.now().date() > self.end_date
         return False
-
-
-

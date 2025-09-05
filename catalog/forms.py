@@ -13,22 +13,35 @@ class ItemForm(forms.ModelForm):
     
     class Meta:
         model = Item
-        fields = ['branch', 'category', 'title', 'description', 'unit', 'tags', 'is_active']
+        fields = ['branch', 'category', 'title', 'description', 'unit', 'custom_unit', 'is_active']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-            'tags': forms.TextInput(attrs={'placeholder': 'Введите теги через запятую (например: халяль, вегетарианское, острое)'}),
+            'custom_unit': forms.TextInput(attrs={'placeholder': 'Укажите единицу измерения'}),
         }
     
     def __init__(self, *args, **kwargs):
         vendor = kwargs.pop('vendor', None)
+        request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         
         if vendor:
             self.fields['branch'].queryset = vendor.branches.filter(is_active=True)
             self.fields['branch'].empty_label = "Выберите филиал"
         
-        # Make tags optional and accept comma-separated input
-        self.fields['tags'].required = False
+        # Add custom units from session
+        if request and hasattr(request, 'session') and 'custom_units' in request.session:
+            custom_units = request.session['custom_units']
+            current_choices = list(self.fields['unit'].choices)
+            
+            for unit in custom_units:
+                unit_choice = (unit['key'], unit['display'])
+                if unit_choice not in current_choices:
+                    current_choices.append(unit_choice)
+            
+            self.fields['unit'].choices = current_choices
+        
+        # Make custom_unit initially hidden
+        self.fields['custom_unit'].required = False
         
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -36,17 +49,57 @@ class ItemForm(forms.ModelForm):
         self.helper.layout = Layout(
             Row(
                 Column('branch', css_class='form-group col-md-6 mb-3'),
-                Column('category', css_class='form-group col-md-6 mb-3'),
+                Column(
+                    Div(
+                        'category',
+                        HTML('''
+                            <a href="{% url 'catalog:add_category' %}" class="btn btn-outline-success btn-sm mt-2" target="_blank">
+                                <i class="fas fa-plus me-1"></i>Добавить категорию
+                            </a>
+                        '''),
+                        css_class='position-relative'
+                    ),
+                    css_class='form-group col-md-6 mb-3'
+                ),
                 css_class='form-row'
             ),
             Row(
                 Column('title', css_class='form-group col-md-8 mb-3'),
-                Column('unit', css_class='form-group col-md-4 mb-3'),
+                Column(
+                    Div(
+                        'unit',
+                        HTML('''
+                            <a href="{% url 'catalog:add_unit' %}" class="btn btn-outline-info btn-sm mt-2" target="_blank">
+                                <i class="fas fa-plus me-1"></i>Добавить единицу
+                            </a>
+                        '''),
+                        css_class='position-relative'
+                    ),
+                    css_class='form-group col-md-4 mb-3'
+                ),
                 css_class='form-row'
             ),
+            Div(
+                'custom_unit',
+                css_class='mb-3',
+                style='display: none;',
+                id='customUnitDiv'
+            ),
             'description',
-            'tags',
             'is_active',
+            HTML('''
+                <script>
+                // Custom unit toggle
+                function toggleCustomUnit(value) {
+                    const customUnitDiv = document.getElementById('customUnitDiv');
+                    if (value === 'другое') {
+                        customUnitDiv.style.display = 'block';
+                    } else {
+                        customUnitDiv.style.display = 'none';
+                    }
+                }
+                </script>
+            '''),
             FormActions(
                 Submit('submit', 'Сохранить товар', css_class='btn btn-primary btn-lg'),
                 css_class='mt-3'
@@ -56,7 +109,10 @@ class ItemForm(forms.ModelForm):
         # Add custom styling
         self.fields['branch'].widget.attrs.update({'class': 'form-select'})
         self.fields['category'].widget.attrs.update({'class': 'form-select'})
-        self.fields['unit'].widget.attrs.update({'class': 'form-select'})
+        self.fields['unit'].widget.attrs.update({
+            'class': 'form-select',
+            'onchange': 'toggleCustomUnit(this.value)'
+        })
         self.fields['title'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Название товара...'
@@ -65,22 +121,20 @@ class ItemForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': 'Описание товара...'
         })
-        self.fields['tags'].widget.attrs.update({
+        self.fields['custom_unit'].widget.attrs.update({
             'class': 'form-control'
         })
 
-    def clean_tags(self):
-        value = self.cleaned_data.get('tags')
-        if not value:
-            return []
-        # If already a list (e.g., posted as JSON), keep it
-        if isinstance(value, list):
-            return value
-        # Accept comma-separated string
-        if isinstance(value, str):
-            tokens = [t.strip() for t in value.split(',') if t.strip()]
-            return tokens
-        return []
+    def clean(self):
+        cleaned_data = super().clean()
+        unit = cleaned_data.get('unit')
+        custom_unit = cleaned_data.get('custom_unit')
+        
+        # Validate custom unit
+        if unit == 'другое' and not custom_unit:
+            raise forms.ValidationError('Укажите единицу измерения для "Другое"')
+        
+        return cleaned_data
 
 
 class ItemImageForm(forms.ModelForm):
@@ -103,6 +157,95 @@ class ItemImageForm(forms.ModelForm):
 ItemImageFormSet = forms.inlineformset_factory(
     Item, ItemImage, form=ItemImageForm, extra=3, can_delete=True
 )
+
+
+class CategoryForm(forms.ModelForm):
+    """Form for creating new categories"""
+    
+    class Meta:
+        model = Category
+        fields = ['name', 'icon']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Название категории...'}),
+            'icon': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_enctype = 'multipart/form-data'
+        self.helper.layout = Layout(
+            'name',
+            'icon',
+            FormActions(
+                Submit('submit', 'Создать категорию', css_class='btn btn-success btn-lg'),
+                HTML('<a href="javascript:history.back()" class="btn btn-secondary btn-lg ms-2">Отмена</a>'),
+                css_class='mt-3'
+            )
+        )
+        
+        # Add custom styling
+        self.fields['name'].widget.attrs.update({'class': 'form-control'})
+    
+    def save(self, commit=True):
+        category = super().save(commit=False)
+        if not category.slug:
+            from django.utils.text import slugify
+            base_slug = slugify(category.name)
+            slug = base_slug
+            counter = 1
+            
+            # Check for existing slugs and add counter if needed
+            while Category.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            
+            category.slug = slug
+        if commit:
+            category.save()
+        return category
+
+
+class UnitForm(forms.Form):
+    """Form for creating new units (adds to UNIT_CHOICES)"""
+    unit_key = forms.CharField(
+        max_length=20,
+        label="Сокращение единицы",
+        help_text="Например: упак, коробка, бутылка"
+    )
+    unit_display = forms.CharField(
+        max_length=50,
+        label="Отображаемое название",
+        help_text="Например: Упаковки, Коробки, Бутылки"
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            'unit_key',
+            'unit_display',
+            FormActions(
+                Submit('submit', 'Добавить единицу', css_class='btn btn-info btn-lg'),
+                HTML('<a href="javascript:history.back()" class="btn btn-secondary btn-lg ms-2">Отмена</a>'),
+                css_class='mt-3'
+            )
+        )
+        
+        # Add custom styling
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+        
+        self.fields['unit_key'].widget.attrs.update({
+            'placeholder': 'упак, коробка, бутылка...'
+        })
+        self.fields['unit_display'].widget.attrs.update({
+            'placeholder': 'Упаковки, Коробки, Бутылки...'
+        })
 
 
 class OfferForm(forms.ModelForm):
@@ -159,7 +302,7 @@ class OfferForm(forms.ModelForm):
                 field.widget.attrs.update({'class': 'form-control'})
         
         # Add placeholders
-        self.fields['original_price'].widget.attrs['placeholder'] = 'Оригинальная цена'
+        self.fields['original_price'].widget.attrs['placeholder'] = 'Оригинальная цена в сумах'
         self.fields['discount_percent'].widget.attrs['placeholder'] = 'Процент скидки'
         self.fields['quantity'].widget.attrs['placeholder'] = 'Количество (0 = неограниченно)'
     
