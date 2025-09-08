@@ -148,19 +148,23 @@
     </main>
 
     <!-- Partner CTA Banner -->
-    {% if user.is_authenticated and user.role == 'customer' or not user.is_authenticated %}
+    {# Show only for anonymous users or authenticated customers, never for vendors #}
+    {% if not user.is_authenticated %}
     <section class="partner-cta py-3">
         <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
-            {% if user.is_authenticated %}
-                <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-primary">
-                    <i class="fas fa-handshake-angle me-2"></i>Стать партнёром
-                </a>
-            {% else %}
-                <a href="{% url 'users:login' %}" class="btn btn-primary">
-                    <i class="fas fa-handshake-angle me-2"></i>Присоединиться
-                </a>
-            {% endif %}
+            <a href="{% url 'users:login' %}" class="btn btn-primary">
+                <i class="fas fa-handshake-angle me-2"></i>Присоединиться
+            </a>
+        </div>
+    </section>
+    {% elif user.role == 'customer' %}
+    <section class="partner-cta py-3">
+        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+            <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
+            <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-handshake-angle me-2"></i>Стать партнёром
+            </a>
         </div>
     </section>
     {% endif %}
