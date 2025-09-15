@@ -91,6 +91,7 @@
 
             <div class="row" id="itemsGrid">
                 {% for item in items %}
+                    {% with active_offer=item.offers.first %}
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100 shadow-sm item-card modern-card">
                             <div class="position-relative card-image-container">
@@ -101,8 +102,8 @@
                                         <i class="fas fa-utensils"></i>
                                     </div>
                                 {% endif %}
-                                {% if item.offers.first and item.offers.first.discount_percent %}
-                                    <span class="discount-badge-modern">-{{ item.offers.first.discount_percent|floatformat:0 }}%</span>
+                                {% if active_offer and active_offer.discount_percent > 0 %}
+                                    <span class="discount-badge-modern">-{{ active_offer.discount_percent|floatformat:0 }}%</span>
                                 {% endif %}
                                 <button class="fav-btn-modern" aria-label="В избранное" data-id="{{ item.id }}">
                                     <i class="fa-heart"></i>
@@ -115,44 +116,70 @@
                                     <span class="modern-vendor-name">{{ item.vendor.name }}</span>
                                     <div class="modern-rating">
                                         <i class="fas fa-star"></i>
-                                        <span>4.8</span>
+                                        <span>{{ item.vendor.rating|floatformat:1|default:"4.8" }}</span>
                                     </div>
                                 </div>
                                 
                                 <div class="modern-location-info">
-                                    <i class="fas fa-location-dot"></i>
-                                    <span>1.2 км</span>
+                                    {% if item.branch %}
+                                        <i class="fas fa-location-dot"></i>
+                                        <span class="distance-info" 
+                                              data-lat="{{ item.branch.latitude }}" 
+                                              data-lng="{{ item.branch.longitude }}">
+                                            Определяем расстояние...
+                                        </span>
+                                    {% endif %}
                                     <i class="fas fa-clock ms-3"></i>
                                     <span>До 20:00</span>
+                                    {% if active_offer %}
+                                        <i class="fas fa-box ms-3"></i>
+                                        <span>
+                                            {% if active_offer.quantity == 0 %}
+                                                Неограниченно
+                                            {% else %}
+                                                {{ active_offer.quantity }} шт.
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
                                 </div>
                                 
                                 <div class="modern-price-section">
-                                    {% if item.offers.first %}
-                                        <div class="modern-price">{{ item.offers.first.current_price|floatformat:0 }} ₽</div>
-                                        {% if item.offers.first.original_price != item.offers.first.current_price %}
-                                            <div class="modern-old-price">{{ item.offers.first.original_price|floatformat:0 }} ₽</div>
-                                        {% endif %}
+                                    {% if active_offer %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="modern-price">{{ active_offer.current_price|floatformat:0 }} сум</div>
+                                            {% if active_offer.original_price != active_offer.current_price %}
+                                                <div class="modern-old-price">{{ active_offer.original_price|floatformat:0 }} сум</div>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
                                         <div class="modern-price">По запросу</div>
                                     {% endif %}
                                     
-                                    <button class="modern-add-to-cart-btn" 
-                                            data-id="{{ item.id }}" 
-                                            data-name="{{ item.title|escapejs }}" 
-                                            data-price="{% if item.offers.first %}{{ item.offers.first.current_price|floatformat:0 }}{% else %}0{% endif %}" 
-                                            onclick="addToCart(this.dataset.id, this.dataset.name, this.dataset.price)">
-                                        В корзину
-                                    </button>
+                                    {% if active_offer %}
+                                        <button class="modern-add-to-cart-btn" 
+                                                data-id="{{ item.id }}" 
+                                                data-offer-id="{{ active_offer.id }}"
+                                                data-name="{{ item.title|escapejs }}" 
+                                                data-price="{{ active_offer.current_price|floatformat:0 }}" 
+                                                onclick="addToCart(this.dataset.offerId, this.dataset.name, this.dataset.price)">
+                                            В корзину
+                                        </button>
+                                    {% else %}
+                                        <button class="modern-add-to-cart-btn" disabled>
+                                            Недоступно
+                                        </button>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endwith %}
                 {% empty %}
                     <div class="col-12">
                         <div class="text-center py-5 empty-state">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h4>Товары не найдены</h4>
-                            <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                            <p class="text-muted">Попробуйте изменить параметры поиска или добавить товары с предложениями</p>
                             <div class="d-flex justify-content-center gap-2 mt-2">
                                 <a class="chip" href="{% url 'catalog:catalog' %}">Сбросить фильтры</a>
                                 <a class="chip" href="{% url 'catalog:catalog' %}?price_range=0-500">До 30 тыс. сум</a>
@@ -511,11 +538,19 @@ document.getElementById('sortSelect').addEventListener('change', function() {
 })();
 
 // Add to cart functionality
-function addToCart(itemId, itemName, itemPrice) {
+function addToCart(offerId, itemName, itemPrice) {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    let existingItem = cart.find(item => item.id === itemId);
-    if (existingItem) { existingItem.quantity += 1; }
-    else { cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: 1 }); }
+    let existingItem = cart.find(item => item.offerId === offerId);
+    if (existingItem) { 
+        existingItem.quantity += 1; 
+    } else { 
+        cart.push({ 
+            offerId: offerId, 
+            name: itemName, 
+            price: parseFloat(itemPrice), 
+            quantity: 1 
+        }); 
+    }
     localStorage.setItem('cart', JSON.stringify(cart));
     if (window.showToast) window.showToast(`${itemName} добавлен в корзину!`, 'success');
     else alert(`${itemName} добавлен в корзину!`);
@@ -541,6 +576,42 @@ function showNearbyItems() {
         });
     } else { alert('Ваш браузер не поддерживает геолокацию.'); }
 }
+
+// Distance calculation
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const lat1Rad = lat1 * Math.PI / 180;
+    const lat2Rad = lat2 * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1Rad) * Math.cos(lat2Rad);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance.toFixed(2);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const distanceInfos = document.querySelectorAll('.distance-info');
+    distanceInfos.forEach(info => {
+        const lat = info.dataset.lat;
+        const lng = info.dataset.lng;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = calculateDistance(userLat, userLng, lat, lng);
+                info.textContent = `${distance} км`;
+            }, function(error) {
+                console.error('Geolocation error:', error);
+            });
+        } else {
+            info.textContent = 'Недоступно';
+        }
+    });
+});
 
 document.addEventListener('DOMContentLoaded', updateCartCount);
 </script>

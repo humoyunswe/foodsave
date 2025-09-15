@@ -17,10 +17,14 @@ from django.utils.text import slugify
 import json
 
 
+from vendors.models import Branch, Vendor
 
 def catalog_view(request):
-    # Get queryset with active items
-    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category')
+    # Get queryset with active items and their active offers
+    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch').prefetch_related(
+        'images',
+        'offers__branch'
+    )
     
     # Filter by vendor type (products vs dishes)
     vendor_type = request.GET.get('type')
@@ -30,6 +34,42 @@ def catalog_view(request):
     elif vendor_type == 'dishes':
         # Dishes from restaurants and cafes
         queryset = queryset.filter(vendor__type__in=['restaurant', 'cafe'])
+    
+    # Filter by discount percentage
+    discount_filter = request.GET.get('discount')
+    if discount_filter:
+        try:
+            min_discount = int(discount_filter)
+            queryset = queryset.filter(offers__discount_percent__gte=min_discount, offers__is_active=True, offers__status='available')
+        except ValueError:
+            pass
+    
+    # Filter by price range
+    price_range = request.GET.get('price_range')
+    if price_range:
+        try:
+            if price_range == '2000+':
+                queryset = queryset.filter(offers__current_price__gte=2000, offers__is_active=True, offers__status='available')
+            else:
+                min_price, max_price = map(int, price_range.split('-'))
+                queryset = queryset.filter(offers__current_price__gte=min_price, offers__current_price__lte=max_price, offers__is_active=True, offers__status='available')
+        except (ValueError, AttributeError):
+            pass
+    
+    # Sorting
+    sort_by = request.GET.get('sort')
+    if sort_by == 'price':
+        queryset = queryset.order_by('offers__current_price')
+    elif sort_by == 'discount':
+        queryset = queryset.order_by('-offers__discount_percent')
+    elif sort_by == 'name':
+        queryset = queryset.order_by('title')
+    else:
+        # Default sorting: items with active offers first, then by creation date
+        queryset = queryset.order_by('-offers__is_active', '-created_at')
+    
+    # Remove duplicates that might occur due to multiple offers per item
+    queryset = queryset.distinct()
     
     # Pagination
     paginator = Paginator(queryset, 12)
@@ -41,6 +81,8 @@ def catalog_view(request):
         'items': items,
         'categories': Category.objects.filter(is_active=True),
         'current_type': request.GET.get('type', ''),
+        'is_paginated': items.has_other_pages(),
+        'page_obj': items,
     }
     
     return render(request, 'catalog/catalog.html', context)
