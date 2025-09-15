@@ -47,9 +47,7 @@ class ItemAdmin(admin.ModelAdmin):
         ('Basic Information', {
             'fields': ('vendor', 'branch', 'category', 'title', 'description')
         }),
-        ('Details', {
-            'fields': ('unit', 'tags')
-        }),
+
         ('Status', {
             'fields': ('is_active',)
         }),

@@ -92,49 +92,56 @@
             <div class="row" id="itemsGrid">
                 {% for item in items %}
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow-sm item-card">
-                            <div class="position-relative">
+                        <div class="card h-100 shadow-sm item-card modern-card">
+                            <div class="position-relative card-image-container">
                                 {% if item.images.first %}
-                                    <img src="{{ item.images.first.image.url }}" class="card-img-top" alt="" loading="lazy" data-fallback="{% static 'images/placeholder.jpg' %}" onerror="this.onerror=null;this.src=this.dataset.fallback">
+                                    <img src="{{ item.images.first.image.url }}" class="card-img-top modern-card-img" alt="{{ item.title }}" loading="lazy" data-fallback="{% static 'images/placeholder.jpg' %}" onerror="this.onerror=null;this.src=this.dataset.fallback">
                                 {% else %}
-                                    <div class="image-placeholder">
+                                    <div class="image-placeholder modern-placeholder">
                                         <i class="fas fa-utensils"></i>
                                     </div>
                                 {% endif %}
                                 {% if item.offers.first and item.offers.first.discount_percent %}
-                                    <span class="discount-badge-overlay">-{{ item.offers.first.discount_percent|floatformat:0 }}%</span>
+                                    <span class="discount-badge-modern">-{{ item.offers.first.discount_percent|floatformat:0 }}%</span>
                                 {% endif %}
-                                <button class="fav-btn" aria-label="В избранное" data-id="{{ item.id }}"><i class="fa-heart"></i></button>
+                                <button class="fav-btn-modern" aria-label="В избранное" data-id="{{ item.id }}">
+                                    <i class="fa-heart"></i>
+                                </button>
                             </div>
                             
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <h5 class="card-title mb-0 text-truncate">{{ item.title }}</h5>
+                            <div class="card-body modern-card-body">
+                                <h5 class="modern-card-title">{{ item.title }}</h5>
+                                <div class="modern-vendor-info">
+                                    <span class="modern-vendor-name">{{ item.vendor.name }}</span>
+                                    <div class="modern-rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.8</span>
+                                    </div>
                                 </div>
-                                <p class="card-text text-muted small mb-1">{{ item.vendor.name }}</p>
-                                <p class="card-text flex-grow-1 clamp-2">{{ item.description }}</p>
                                 
-                                <!-- Offers -->
-                                {% if item.offers.all %}
-                                    {% for offer in item.offers.all|slice:":1" %}
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div>
-                                                <span class="price-tag">{{ offer.current_price|floatformat:0 }} сум</span>
-                                                {% if offer.original_price != offer.current_price %}
-                                                    <small class="original-price">{{ offer.original_price|floatformat:0 }} сум</small>
-                                                {% endif %}
-                                            </div>
-                                            <span class="chip-time">Сегодня</span>
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
+                                <div class="modern-location-info">
+                                    <i class="fas fa-location-dot"></i>
+                                    <span>1.2 км</span>
+                                    <i class="fas fa-clock ms-3"></i>
+                                    <span>До 20:00</span>
+                                </div>
                                 
-                                <div class="mt-auto d-grid gap-2">
-                                    <a href="{% url 'catalog:item_detail' item.pk %}" class="btn btn-primary w-100" aria-label="Подробнее о {{ item.title }}">
-                                        <i class="fas fa-eye me-2"></i>Подробнее
-                                    </a>
-                                    <button class="btn btn-outline-secondary w-100" data-id="{{ item.id }}" data-name="{{ item.title|escapejs }}" data-price="{% if item.offers.first %}{{ item.offers.first.current_price|floatformat:0 }}{% else %}0{% endif %}" onclick="addToCart(this.dataset.id, this.dataset.name, this.dataset.price)" aria-label="Добавить {{ item.title }} в корзину">
-                                        <i class="fas fa-cart-plus me-2"></i>В корзину
+                                <div class="modern-price-section">
+                                    {% if item.offers.first %}
+                                        <div class="modern-price">{{ item.offers.first.current_price|floatformat:0 }} ₽</div>
+                                        {% if item.offers.first.original_price != item.offers.first.current_price %}
+                                            <div class="modern-old-price">{{ item.offers.first.original_price|floatformat:0 }} ₽</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="modern-price">По запросу</div>
+                                    {% endif %}
+                                    
+                                    <button class="modern-add-to-cart-btn" 
+                                            data-id="{{ item.id }}" 
+                                            data-name="{{ item.title|escapejs }}" 
+                                            data-price="{% if item.offers.first %}{{ item.offers.first.current_price|floatformat:0 }}{% else %}0{% endif %}" 
+                                            onclick="addToCart(this.dataset.id, this.dataset.name, this.dataset.price)">
+                                        В корзину
                                     </button>
                                 </div>
                             </div>
@@ -253,18 +260,193 @@
 .sk-line.w-100 { width:100%; }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-.item-card { border:1px solid #E5E7EB; box-shadow: var(--premium-elev); }
-.discount-badge-overlay { position:absolute; top:10px; left:10px; background: linear-gradient(135deg, #ef4444, #f97316); color:#fff; font-weight:700; border-radius:10px; padding:6px 10px; font-size:0.9rem; }
-.chip-time { background:#EFF6FF; color:#1E3A8A; border:1px solid #DBEAFE; border-radius:999px; padding:4px 8px; font-weight:600; font-size:0.8rem; }
+/* Modern card styles */
+.modern-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
 
-/* Favorite button refined */
-.fav-btn { position:absolute; top:12px; right:12px; width:36px; height:36px; border-radius:10px; border:1px solid #E5E7EB; background:#FFFFFFE6; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.fav-btn .fa-heart::before { content:'\f08a'; font-family: 'Font Awesome 6 Free'; font-weight: 400; color:#6B7280; }
-.fav-btn.active { border-color:#EF4444; background:#FFFFFF; }
-.fav-btn.active .fa-heart::before { content:'\f004'; font-weight: 900; color:#EF4444; }
+.modern-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.modern-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.modern-card:hover .modern-card-img {
+    transform: scale(1.05);
+}
+
+.modern-placeholder {
+    height: 100%;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 2rem;
+}
+
+.discount-badge-modern {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ff6b35;
+    color: white;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    z-index: 2;
+}
+
+.fav-btn-modern {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.fav-btn-modern:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.fav-btn-modern .fa-heart::before {
+    content: '\f08a';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+    color: #6b7280;
+}
+
+.fav-btn-modern.active {
+    background: #fee2e2;
+}
+
+.fav-btn-modern.active .fa-heart::before {
+    content: '\f004';
+    font-weight: 900;
+    color: #ef4444;
+}
+
+.modern-card-body {
+    padding: 16px;
+}
+
+.modern-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.modern-vendor-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.modern-vendor-name {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.modern-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #f59e0b;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.modern-rating .fas {
+    font-size: 0.8rem;
+}
+
+.modern-location-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+}
+
+.modern-location-info .fas {
+    font-size: 0.75rem;
+}
+
+.modern-price-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modern-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.modern-old-price {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    text-decoration: line-through;
+    margin-left: 8px;
+}
+
+.modern-add-to-cart-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.modern-add-to-cart-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
 
 /* Slim text */
-.clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.clamp-2 { display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 
 .empty-state { background:#F9FAFB; border:1px dashed #E5E7EB; border-radius:12px; }
 
@@ -307,11 +489,11 @@ document.getElementById('sortSelect').addEventListener('change', function() {
   const parse = () => JSON.parse(localStorage.getItem(key) || '[]');
   const save = (arr) => localStorage.setItem(key, JSON.stringify(arr));
   const setActive = (id, active) => {
-    document.querySelectorAll(`.fav-btn[data-id="${id}"]`).forEach(b=>b.classList.toggle('active', active));
+    document.querySelectorAll(`.fav-btn-modern[data-id="${id}"], .fav-btn[data-id="${id}"]`).forEach(b=>b.classList.toggle('active', active));
   };
   const init = () => {
     const favs = parse();
-    document.querySelectorAll('.fav-btn').forEach(btn => {
+    document.querySelectorAll('.fav-btn-modern, .fav-btn').forEach(btn => {
       const id = btn.dataset.id;
       btn.addEventListener('click', (e)=>{
         e.preventDefault();

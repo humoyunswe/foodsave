@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.core.paginator import Paginator
 import math
 from .models import Item, Category, Offer
 from .forms import CategoryForm, UnitForm
@@ -16,31 +17,33 @@ from django.utils.text import slugify
 import json
 
 
-class CatalogView(ListView):
-    model = Item
-    template_name = 'catalog/catalog.html'
-    context_object_name = 'items'
-    paginate_by = 12
+
+def catalog_view(request):
+    # Get queryset with active items
+    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category')
     
-    def get_queryset(self):
-        queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category')
-        
-        # Filter by vendor type (products vs dishes)
-        vendor_type = self.request.GET.get('type')
-        if vendor_type == 'products':
-            # Products from stores
-            queryset = queryset.filter(vendor__type='store')
-        elif vendor_type == 'dishes':
-            # Dishes from restaurants and cafes
-            queryset = queryset.filter(vendor__type__in=['restaurant', 'cafe'])
-        
-        return queryset
+    # Filter by vendor type (products vs dishes)
+    vendor_type = request.GET.get('type')
+    if vendor_type == 'products':
+        # Products from stores
+        queryset = queryset.filter(vendor__type='store')
+    elif vendor_type == 'dishes':
+        # Dishes from restaurants and cafes
+        queryset = queryset.filter(vendor__type__in=['restaurant', 'cafe'])
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.filter(is_active=True)
-        context['current_type'] = self.request.GET.get('type', '')
-        return context
+    # Pagination
+    paginator = Paginator(queryset, 12)
+    page_number = request.GET.get('page')
+    items = paginator.get_page(page_number)
+    
+    # Context data
+    context = {
+        'items': items,
+        'categories': Category.objects.filter(is_active=True),
+        'current_type': request.GET.get('type', ''),
+    }
+    
+    return render(request, 'catalog/catalog.html', context)
 
 
 class CategoryView(ListView):
