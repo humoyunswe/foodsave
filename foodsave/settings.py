@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*','167.71.49.52','foodsave.uz','www.foodsave.uz']
 
-
+# hello
 # Application definition
 
 INSTALLED_APPS = [
