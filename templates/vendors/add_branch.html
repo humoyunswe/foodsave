@@ -46,20 +46,35 @@
                             <div class="form-text">Полный адрес филиала</div>
                         </div>
                         
+                        <!-- Yandex Map Section -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-map me-2 text-primary"></i>Выберите местоположение на карте
+                            </label>
+                            <div class="card">
+                                <div class="card-body p-0">
+                                    <div id="map" style="width: 100%; height: 400px; border-radius: 10px;"></div>
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">
+                                Кликните на карте, чтобы выбрать точное местоположение филиала. Координаты будут автоматически заполнены.
+                            </div>
+                        </div>
+                        
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label for="{{ form.latitude.id_for_label }}" class="form-label fw-bold">
                                     <i class="fas fa-globe me-2 text-info"></i>Широта
                                 </label>
                                 {{ form.latitude }}
-                                <div class="form-text">GPS координата (например: 43.2220)</div>
+                                <div class="form-text">GPS координата (например: 41.2995)</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="{{ form.longitude.id_for_label }}" class="form-label fw-bold">
                                     <i class="fas fa-globe me-2 text-info"></i>Долгота
                                 </label>
                                 {{ form.longitude }}
-                                <div class="form-text">GPS координата (например: 76.8512)</div>
+                                <div class="form-text">GPS координата (например: 69.2401)</div>
                             </div>
                         </div>
                         
@@ -67,17 +82,19 @@
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <h6 class="card-title">
-                                        <i class="fas fa-map me-2"></i>Получить координаты
+                                        <i class="fas fa-map me-2"></i>Дополнительные опции
                                     </h6>
-                                    <p class="card-text small text-muted">
-                                        Нажмите кнопку ниже, чтобы автоматически определить координаты по адресу
-                                    </p>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="getCoordinates()">
-                                        <i class="fas fa-crosshairs me-2"></i>Определить координаты
-                                    </button>
-                                    <button type="button" class="btn btn-outline-info btn-sm ms-2" onclick="getCurrentLocation()">
-                                        <i class="fas fa-location-arrow me-2"></i>Моё местоположение
-                                    </button>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="getCurrentLocation()">
+                                            <i class="fas fa-location-arrow me-2"></i>Моё местоположение
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm" onclick="searchByAddress()">
+                                            <i class="fas fa-search me-2"></i>Найти по адресу
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm" onclick="centerMap()">
+                                            <i class="fas fa-crosshairs me-2"></i>Центрировать карту
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -165,18 +182,112 @@
     font-size: 0.8rem;
     color: #6c757d;
 }
+
+#map {
+    border: 2px solid #e9ecef;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.map-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Yandex Maps API -->
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+
 <script>
+let myMap, placemark;
+
+// Initialize Yandex Map
+ymaps.ready(init);
+
+function init() {
+    // Default coordinates for Tashkent, Uzbekistan
+    const defaultCoords = [41.2995, 69.2401];
+    
+    // Get existing coordinates from form if available
+    const latInput = document.getElementById('id_latitude');
+    const lngInput = document.getElementById('id_longitude');
+    const existingLat = parseFloat(latInput.value);
+    const existingLng = parseFloat(lngInput.value);
+    
+    let initialCoords = defaultCoords;
+    if (!isNaN(existingLat) && !isNaN(existingLng)) {
+        initialCoords = [existingLat, existingLng];
+    }
+    
+    myMap = new ymaps.Map("map", {
+        center: initialCoords,
+        zoom: 12,
+        controls: ['zoomControl', 'searchControl', 'typeSelector', 'fullscreenControl']
+    });
+    
+    // Add placemark if coordinates exist
+    if (!isNaN(existingLat) && !isNaN(existingLng)) {
+        addPlacemark(initialCoords);
+    }
+    
+    // Click event to add/move placemark
+    myMap.events.add('click', function (e) {
+        const coords = e.get('coords');
+        addPlacemark(coords);
+        updateCoordinateInputs(coords);
+    });
+}
+
+function addPlacemark(coords) {
+    // Remove existing placemark
+    if (placemark) {
+        myMap.geoObjects.remove(placemark);
+    }
+    
+    // Create new placemark
+    placemark = new ymaps.Placemark(coords, {
+        hintContent: 'Местоположение филиала',
+        balloonContent: 'Координаты: ' + coords[0].toFixed(6) + ', ' + coords[1].toFixed(6)
+    }, {
+        preset: 'islands#redDotIcon',
+        draggable: true
+    });
+    
+    // Add drag event
+    placemark.events.add('dragend', function (e) {
+        const coords = e.get('target').geometry.getCoordinates();
+        updateCoordinateInputs(coords);
+    });
+    
+    myMap.geoObjects.add(placemark);
+}
+
+function updateCoordinateInputs(coords) {
+    document.getElementById('id_latitude').value = coords[0].toFixed(6);
+    document.getElementById('id_longitude').value = coords[1].toFixed(6);
+}
+
 function getCurrentLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
-            document.getElementById('id_latitude').value = position.coords.latitude.toFixed(6);
-            document.getElementById('id_longitude').value = position.coords.longitude.toFixed(6);
-            
-            // Show success message
+            const coords = [position.coords.latitude, position.coords.longitude];
+            myMap.setCenter(coords, 15);
+            addPlacemark(coords);
+            updateCoordinateInputs(coords);
             showAlert('Координаты успешно определены!', 'success');
         }, function(error) {
             showAlert('Не удалось определить местоположение. Проверьте разрешения браузера.', 'warning');
@@ -186,16 +297,47 @@ function getCurrentLocation() {
     }
 }
 
-function getCoordinates() {
+function searchByAddress() {
     const address = document.getElementById('id_address').value;
     if (!address.trim()) {
         showAlert('Сначала введите адрес', 'warning');
         return;
     }
     
-    // Here you would typically use a geocoding service like Google Maps API
-    // For now, we'll show a placeholder message
-    showAlert('Функция геокодирования будет добавлена в следующем обновлении', 'info');
+    // Use Yandex Geocoder
+    ymaps.geocode(address, {
+        results: 1
+    }).then(function (res) {
+        const firstGeoObject = res.geoObjects.get(0);
+        if (firstGeoObject) {
+            const coords = firstGeoObject.geometry.getCoordinates();
+            myMap.setCenter(coords, 15);
+            addPlacemark(coords);
+            updateCoordinateInputs(coords);
+            showAlert('Адрес найден на карте!', 'success');
+        } else {
+            showAlert('Адрес не найден. Попробуйте изменить запрос.', 'warning');
+        }
+    }).catch(function (error) {
+        showAlert('Ошибка при поиске адреса.', 'error');
+    });
+}
+
+function centerMap() {
+    const latInput = document.getElementById('id_latitude');
+    const lngInput = document.getElementById('id_longitude');
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
+    
+    if (!isNaN(lat) && !isNaN(lng)) {
+        myMap.setCenter([lat, lng], 15);
+        if (!placemark) {
+            addPlacemark([lat, lng]);
+        }
+    } else {
+        // Center on Tashkent by default
+        myMap.setCenter([41.2995, 69.2401], 12);
+    }
 }
 
 function showAlert(message, type) {

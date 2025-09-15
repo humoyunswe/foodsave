@@ -218,3 +218,6 @@ ENV/
 .venv/
 
 .DS_Store
+
+
+foodsave/
