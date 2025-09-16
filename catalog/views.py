@@ -20,19 +20,56 @@ import json
 from vendors.models import Branch, Vendor
 
 def catalog_view(request):
-    # Get queryset with active items and their active offers
     queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch').prefetch_related(
         'images',
         'offers__branch'
     )
     
+    # Filter by categories (checkbox filter)
+    categories = request.GET.getlist('categories')
+    if categories:
+        queryset = queryset.filter(category__id__in=categories)
+    
+    # Filter by vendors (checkbox filter)
+    vendors_filter = request.GET.getlist('vendors')
+    if vendors_filter:
+        queryset = queryset.filter(vendor__id__in=vendors_filter)
+    
+    # Filter by price range
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price and max_price:
+        try:
+            min_price = float(min_price)
+            max_price = float(max_price)
+            queryset = queryset.filter(
+                offers__discounted_price__gte=min_price, 
+                offers__discounted_price__lte=max_price,
+                offers__is_active=True, 
+                offers__status='available'
+            )
+        except ValueError:
+            pass
+    
+    # Filter by distance (if user location is provided)
+    distance_filter = request.GET.get('distance')
+    user_lat = request.GET.get('lat')
+    user_lng = request.GET.get('lng')
+    if distance_filter and user_lat and user_lng:
+        try:
+            max_distance = float(distance_filter)
+            user_lat = float(user_lat)
+            user_lng = float(user_lng)
+            # This would need a more complex implementation with spatial queries
+            # For now, we'll just pass the parameters to the template
+        except ValueError:
+            pass
+    
     # Filter by vendor type (products vs dishes)
     vendor_type = request.GET.get('type')
     if vendor_type == 'products':
-        # Products from stores
         queryset = queryset.filter(vendor__type='store')
     elif vendor_type == 'dishes':
-        # Dishes from restaurants and cafes
         queryset = queryset.filter(vendor__type__in=['restaurant', 'cafe'])
     
     # Filter by discount percentage
@@ -44,26 +81,19 @@ def catalog_view(request):
         except ValueError:
             pass
     
-    # Filter by price range
-    price_range = request.GET.get('price_range')
-    if price_range:
-        try:
-            if price_range == '2000+':
-                queryset = queryset.filter(offers__current_price__gte=2000, offers__is_active=True, offers__status='available')
-            else:
-                min_price, max_price = map(int, price_range.split('-'))
-                queryset = queryset.filter(offers__current_price__gte=min_price, offers__current_price__lte=max_price, offers__is_active=True, offers__status='available')
-        except (ValueError, AttributeError):
-            pass
-    
     # Sorting
     sort_by = request.GET.get('sort')
-    if sort_by == 'price':
-        queryset = queryset.order_by('offers__current_price')
+    if sort_by == 'price_asc':
+        queryset = queryset.order_by('offers__discounted_price')
+    elif sort_by == 'price_desc':
+        queryset = queryset.order_by('-offers__discounted_price')
     elif sort_by == 'discount':
         queryset = queryset.order_by('-offers__discount_percent')
-    elif sort_by == 'name':
-        queryset = queryset.order_by('title')
+    elif sort_by == 'rating':
+        queryset = queryset.order_by('-vendor__rating')
+    elif sort_by == 'distance':
+        # Distance sorting would need spatial queries implementation
+        queryset = queryset.order_by('-created_at')
     else:
         # Default sorting: items with active offers first, then by creation date
         queryset = queryset.order_by('-offers__is_active', '-created_at')
@@ -76,13 +106,24 @@ def catalog_view(request):
     page_number = request.GET.get('page')
     items = paginator.get_page(page_number)
     
+    # Get all vendors for the filter
+    vendors = Vendor.objects.filter(is_active=True).order_by('name')
+    
     # Context data
     context = {
         'items': items,
         'categories': Category.objects.filter(is_active=True),
+        'vendors': vendors,
         'current_type': request.GET.get('type', ''),
         'is_paginated': items.has_other_pages(),
         'page_obj': items,
+        'selected_categories': categories,
+        'selected_vendors': vendors_filter,
+        'min_price': min_price,
+        'max_price': max_price,
+        'selected_distance': distance_filter,
+        'user_lat': user_lat,
+        'user_lng': user_lng,
     }
     
     return render(request, 'catalog/catalog.html', context)
