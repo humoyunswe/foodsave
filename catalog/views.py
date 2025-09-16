@@ -146,19 +146,42 @@ class CategoryView(ListView):
         return context
 
 
-class ItemDetailView(DetailView):
-    model = Item
-    template_name = 'catalog/item_detail.html'
-    context_object_name = 'item'
+def item_detail_view(request, pk):
+    """Function-based view for item detail page"""
+    # Get the item with related data
+    item = get_object_or_404(
+        Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch'),
+        pk=pk
+    )
     
-    def get_queryset(self):
-        return Item.objects.filter(is_active=True).select_related('vendor', 'category')
+    # Get available offers for this item with quantity available
+    offers = item.offers.filter(
+        status='available', 
+        is_active=True
+    ).select_related('branch').order_by('-discount_percent')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['offers'] = self.object.offers.filter(status='available')
-        context['images'] = self.object.images.all().order_by('order')
-        return context
+    # Add quantity_available property to each offer
+    for offer in offers:
+        offer.quantity_available = offer.quantity if offer.quantity > 0 else "Неограничено"
+    
+    # Get item images ordered by their order field
+    images = item.images.all().order_by('order')
+    
+    # Get branch information
+    branch = item.branch
+    
+    context = {
+        'item': item,
+        'offers': offers,
+        'images': images,
+        'branch': branch,
+        'phone': branch.phone if branch else None,
+        'address': branch.address if branch else None,
+        'opening_hours': branch.get_today_hours() if branch else None,
+        'is_open': branch.is_open_now() if branch else False,
+    }
+    
+    return render(request, 'catalog/item_detail.html', context)
 
 
 class SearchView(ListView):

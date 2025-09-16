@@ -4,7 +4,7 @@ from django.db import models
 from vendors.models import Vendor, Branch
 from users.models import User
 from django.contrib.auth import get_user_model
-
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -65,6 +65,9 @@ class Item(models.Model):
     def name(self):
         """Alias for title to match template expectations"""
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('catalog:item_detail', args=[str(self.id)])
 
 class ItemImage(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='images')
