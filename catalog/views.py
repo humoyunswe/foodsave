@@ -17,30 +17,113 @@ from django.utils.text import slugify
 import json
 
 
+from vendors.models import Branch, Vendor
 
 def catalog_view(request):
-    # Get queryset with active items
-    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category')
+    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch').prefetch_related(
+        'images',
+        'offers__branch'
+    )
+    
+    # Filter by categories (checkbox filter)
+    categories = request.GET.getlist('categories')
+    if categories:
+        queryset = queryset.filter(category__id__in=categories)
+    
+    # Filter by vendors (checkbox filter)
+    vendors_filter = request.GET.getlist('vendors')
+    if vendors_filter:
+        queryset = queryset.filter(vendor__id__in=vendors_filter)
+    
+    # Filter by price range
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price and max_price:
+        try:
+            min_price = float(min_price)
+            max_price = float(max_price)
+            queryset = queryset.filter(
+                offers__discounted_price__gte=min_price, 
+                offers__discounted_price__lte=max_price,
+                offers__is_active=True, 
+                offers__status='available'
+            )
+        except ValueError:
+            pass
+    
+    # Filter by distance (if user location is provided)
+    distance_filter = request.GET.get('distance')
+    user_lat = request.GET.get('lat')
+    user_lng = request.GET.get('lng')
+    if distance_filter and user_lat and user_lng:
+        try:
+            max_distance = float(distance_filter)
+            user_lat = float(user_lat)
+            user_lng = float(user_lng)
+            # This would need a more complex implementation with spatial queries
+            # For now, we'll just pass the parameters to the template
+        except ValueError:
+            pass
     
     # Filter by vendor type (products vs dishes)
     vendor_type = request.GET.get('type')
     if vendor_type == 'products':
-        # Products from stores
         queryset = queryset.filter(vendor__type='store')
     elif vendor_type == 'dishes':
-        # Dishes from restaurants and cafes
         queryset = queryset.filter(vendor__type__in=['restaurant', 'cafe'])
+    
+    # Filter by discount percentage
+    discount_filter = request.GET.get('discount')
+    if discount_filter:
+        try:
+            min_discount = int(discount_filter)
+            queryset = queryset.filter(offers__discount_percent__gte=min_discount, offers__is_active=True, offers__status='available')
+        except ValueError:
+            pass
+    
+    # Sorting
+    sort_by = request.GET.get('sort')
+    if sort_by == 'price_asc':
+        queryset = queryset.order_by('offers__discounted_price')
+    elif sort_by == 'price_desc':
+        queryset = queryset.order_by('-offers__discounted_price')
+    elif sort_by == 'discount':
+        queryset = queryset.order_by('-offers__discount_percent')
+    elif sort_by == 'rating':
+        queryset = queryset.order_by('-vendor__rating')
+    elif sort_by == 'distance':
+        # Distance sorting would need spatial queries implementation
+        queryset = queryset.order_by('-created_at')
+    else:
+        # Default sorting: items with active offers first, then by creation date
+        queryset = queryset.order_by('-offers__is_active', '-created_at')
+    
+    # Remove duplicates that might occur due to multiple offers per item
+    queryset = queryset.distinct()
     
     # Pagination
     paginator = Paginator(queryset, 12)
     page_number = request.GET.get('page')
     items = paginator.get_page(page_number)
     
+    # Get all vendors for the filter
+    vendors = Vendor.objects.filter(is_active=True).order_by('name')
+    
     # Context data
     context = {
         'items': items,
         'categories': Category.objects.filter(is_active=True),
+        'vendors': vendors,
         'current_type': request.GET.get('type', ''),
+        'is_paginated': items.has_other_pages(),
+        'page_obj': items,
+        'selected_categories': categories,
+        'selected_vendors': vendors_filter,
+        'min_price': min_price,
+        'max_price': max_price,
+        'selected_distance': distance_filter,
+        'user_lat': user_lat,
+        'user_lng': user_lng,
     }
     
     return render(request, 'catalog/catalog.html', context)
@@ -63,19 +146,42 @@ class CategoryView(ListView):
         return context
 
 
-class ItemDetailView(DetailView):
-    model = Item
-    template_name = 'catalog/item_detail.html'
-    context_object_name = 'item'
+def item_detail_view(request, pk):
+    """Function-based view for item detail page"""
+    # Get the item with related data
+    item = get_object_or_404(
+        Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch'),
+        pk=pk
+    )
     
-    def get_queryset(self):
-        return Item.objects.filter(is_active=True).select_related('vendor', 'category')
+    # Get available offers for this item with quantity available
+    offers = item.offers.filter(
+        status='available', 
+        is_active=True
+    ).select_related('branch').order_by('-discount_percent')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['offers'] = self.object.offers.filter(status='available')
-        context['images'] = self.object.images.all().order_by('order')
-        return context
+    # Add quantity_available property to each offer
+    for offer in offers:
+        offer.quantity_available = offer.quantity if offer.quantity > 0 else "Неограничено"
+    
+    # Get item images ordered by their order field
+    images = item.images.all().order_by('order')
+    
+    # Get branch information
+    branch = item.branch
+    
+    context = {
+        'item': item,
+        'offers': offers,
+        'images': images,
+        'branch': branch,
+        'phone': branch.phone if branch else None,
+        'address': branch.address if branch else None,
+        'opening_hours': branch.get_today_hours() if branch else None,
+        'is_open': branch.is_open_now() if branch else False,
+    }
+    
+    return render(request, 'catalog/item_detail.html', context)
 
 
 class SearchView(ListView):

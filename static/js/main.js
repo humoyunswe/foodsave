@@ -114,90 +114,461 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
 });
 
-// Shopping cart functionality
-let cart = JSON.parse(localStorage.getItem('foodsave_cart')) || [];
+// Compact Catalog Filter and Search Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCompactFilters();
+    initializeQuickFilters();
+    initializeSorting();
+    initializeViewToggle();
+    updateCartCount();
+    calculateDistances();
+});
 
-function addToCart(offerId, buttonElement) {
-    // Show loading state
-    const originalText = buttonElement.innerHTML;
-    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Добавляем...';
-    buttonElement.disabled = true;
+// Compact Filter System
+function initializeCompactFilters() {
+    const priceRange = document.getElementById('priceRange');
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const resetFiltersBtn = document.getElementById('resetFilters');
 
-    // Simulate API call (replace with actual AJAX when backend is ready)
-    setTimeout(() => {
-        // Add to local cart
-        const existingItem = cart.find(item => item.offerId === offerId);
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({
-                offerId: offerId,
-                quantity: 1,
-                addedAt: new Date().toISOString()
-            });
-        }
+    // Price range slider
+    if (priceRange) {
+        priceRange.addEventListener('input', function() {
+            maxPriceInput.value = this.value;
+        });
+    }
 
-        // Save to localStorage
-        localStorage.setItem('foodsave_cart', JSON.stringify(cart));
+    // Apply filters button
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyAllFilters);
+    }
 
-        // Update cart counter
-        updateCartCounter();
+    // Clear filters button
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+    }
 
-        // Show success message
-        showNotification('Товар добавлен в корзину!', 'success');
+    // Reset filters button
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', clearAllFilters);
+    }
 
-        // Reset button
-        buttonElement.innerHTML = originalText;
-        buttonElement.disabled = false;
+    // Auto-apply filters on change (with debounce)
+    const filterInputs = document.querySelectorAll('.category-filter, .vendor-filter, input[name="distance"]');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', debounce(applyAllFilters, 300));
+    });
 
-        // Show cart modal if exists
-        const cartModal = document.getElementById('cartModal');
-        if (cartModal) {
-            const modal = new bootstrap.Modal(cartModal);
-            modal.show();
-        }
-    }, 1000);
-}
-
-function updateCartCounter() {
-    const cartCounter = document.querySelector('.cart-counter');
-    if (cartCounter) {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartCounter.textContent = totalItems;
-        cartCounter.style.display = totalItems > 0 ? 'inline' : 'none';
+    // Price inputs with debounce
+    if (minPriceInput && maxPriceInput) {
+        minPriceInput.addEventListener('input', debounce(applyAllFilters, 500));
+        maxPriceInput.addEventListener('input', debounce(applyAllFilters, 500));
     }
 }
 
-function removeFromCart(offerId) {
-    cart = cart.filter(item => item.offerId !== offerId);
-    localStorage.setItem('foodsave_cart', JSON.stringify(cart));
-    updateCartCounter();
-    showNotification('Товар удален из корзины', 'info');
+// Quick Filter Chips
+function initializeQuickFilters() {
+    const quickFilters = document.querySelectorAll('input[name="quick-filter"]');
+    
+    quickFilters.forEach(filter => {
+        filter.addEventListener('change', function() {
+            if (this.checked) {
+                applyQuickFilter(this.id);
+            }
+        });
+    });
 }
 
-function clearCart() {
-    cart = [];
-    localStorage.removeItem('foodsave_cart');
-    updateCartCounter();
-    showNotification('Корзина очищена', 'info');
+function applyQuickFilter(filterId) {
+    const url = new URL(window.location);
+    
+    // Clear existing quick filters
+    url.searchParams.delete('type');
+    url.searchParams.delete('discount');
+    
+    switch(filterId) {
+        case 'filter-dishes':
+            url.searchParams.set('type', 'dishes');
+            break;
+        case 'filter-products':
+            url.searchParams.set('type', 'products');
+            break;
+        case 'filter-discount':
+            url.searchParams.set('discount', '20');
+            break;
+        case 'filter-all':
+        default:
+            // No additional parameters needed
+            break;
+    }
+    
+    window.location.href = url.toString();
 }
 
-// Notification system
+// Apply all filters function
+function applyAllFilters() {
+    const url = new URL(window.location);
+    
+    // Clear existing filter parameters
+    url.searchParams.delete('categories');
+    url.searchParams.delete('vendors');
+    url.searchParams.delete('min_price');
+    url.searchParams.delete('max_price');
+    url.searchParams.delete('distance');
+
+    // Get selected categories
+    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked'))
+        .map(cb => cb.value);
+    selectedCategories.forEach(cat => url.searchParams.append('categories', cat));
+
+    // Get selected vendors
+    const selectedVendors = Array.from(document.querySelectorAll('.vendor-filter:checked'))
+        .map(cb => cb.value);
+    selectedVendors.forEach(vendor => url.searchParams.append('vendors', vendor));
+
+    // Get price range
+    const minPrice = document.getElementById('minPrice')?.value;
+    const maxPrice = document.getElementById('maxPrice')?.value;
+    if (minPrice && minPrice > 0) url.searchParams.set('min_price', minPrice);
+    if (maxPrice && maxPrice > 0) url.searchParams.set('max_price', maxPrice);
+
+    // Get selected distance
+    const selectedDistance = document.querySelector('input[name="distance"]:checked')?.value;
+    if (selectedDistance) url.searchParams.set('distance', selectedDistance);
+
+    // Apply filters with smooth transition
+    showLoadingState();
+    window.location.href = url.toString();
+}
+
+// Clear all filters
+function clearAllFilters() {
+    // Clear checkboxes
+    document.querySelectorAll('.category-filter, .vendor-filter').forEach(cb => cb.checked = false);
+    
+    // Clear radio buttons
+    document.querySelectorAll('input[name="distance"]').forEach(radio => radio.checked = false);
+    
+    // Clear price inputs
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+    const priceRange = document.getElementById('priceRange');
+    
+    if (minPrice) minPrice.value = '';
+    if (maxPrice) maxPrice.value = '';
+    if (priceRange) priceRange.value = priceRange.max;
+    
+    // Reset quick filters
+    document.getElementById('filter-all').checked = true;
+    
+    // Redirect to clean catalog
+    window.location.href = window.location.pathname;
+}
+
+// Sorting functionality
+function initializeSorting() {
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location);
+            if (this.value) {
+                url.searchParams.set('sort', this.value);
+            } else {
+                url.searchParams.delete('sort');
+            }
+            showLoadingState();
+            window.location.href = url.toString();
+        });
+
+        // Set current sort value
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSort = urlParams.get('sort');
+        if (currentSort) {
+            sortSelect.value = currentSort;
+        }
+    }
+}
+
+// View toggle functionality
+function initializeViewToggle() {
+    const gridViewBtn = document.getElementById('gridView');
+    const listViewBtn = document.getElementById('listView');
+
+    if (gridViewBtn && listViewBtn) {
+        gridViewBtn.addEventListener('click', function() {
+            setViewMode('grid');
+        });
+
+        listViewBtn.addEventListener('click', function() {
+            setViewMode('list');
+        });
+    }
+}
+
+function setViewMode(mode) {
+    const gridViewBtn = document.getElementById('gridView');
+    const listViewBtn = document.getElementById('listView');
+    const itemsGrid = document.getElementById('itemsGrid');
+
+    if (mode === 'grid') {
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        itemsGrid.className = 'row g-3';
+        document.querySelectorAll('.item-card').forEach(card => {
+            card.className = 'col-xl-3 col-lg-4 col-md-6 item-card';
+        });
+    } else {
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        itemsGrid.className = 'row g-2';
+        document.querySelectorAll('.item-card').forEach(card => {
+            card.className = 'col-12 item-card';
+            // Add list view specific styling
+            const cardElement = card.querySelector('.card');
+            if (cardElement) {
+                cardElement.classList.add('d-md-flex', 'flex-md-row');
+            }
+        });
+    }
+
+    // Save preference
+    localStorage.setItem('viewMode', mode);
+}
+
+// Loading state
+function showLoadingState() {
+    const itemsGrid = document.getElementById('itemsGrid');
+    if (itemsGrid) {
+        itemsGrid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Применяем фильтры...</p>
+            </div>
+        `;
+    }
+}
+
+// Enhanced cart functionality
+function updateCartCount() {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    let cartBadge = document.querySelector('.cart-count');
+    
+    if (cartBadge) { 
+        cartBadge.textContent = totalItems; 
+        cartBadge.style.display = totalItems > 0 ? 'inline' : 'none'; 
+    }
+}
+
+// Add to cart with animation
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.add-to-cart-btn');
+        const itemId = btn.dataset.itemId;
+        const offerId = btn.dataset.offerId;
+        const card = btn.closest('.card');
+        const itemName = card.querySelector('h6').textContent;
+        const itemPrice = card.querySelector('.fw-bold').textContent.replace(/[^\d.]/g, '');
+        
+        // Add loading state to button
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            addToCart(offerId, itemName, itemPrice);
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 1000);
+        }, 300);
+    }
+});
+
+function addToCart(offerId, itemName, itemPrice) {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let existingItem = cart.find(item => item.offerId === offerId);
+    
+    if (existingItem) { 
+        existingItem.quantity += 1; 
+    } else { 
+        cart.push({ 
+            offerId: offerId, 
+            name: itemName, 
+            price: parseFloat(itemPrice), 
+            quantity: 1 
+        }); 
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    showNotification(`${itemName} добавлен в корзину!`, 'success');
+}
+
+// Favorite functionality with animation
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.favorite-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.favorite-btn');
+        const itemId = btn.dataset.itemId;
+        toggleFavorite(itemId, btn);
+    }
+});
+
+function toggleFavorite(itemId, btn) {
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const isFavorite = favorites.includes(itemId);
+    const icon = btn.querySelector('i');
+    
+    if (isFavorite) {
+        favorites = favorites.filter(id => id !== itemId);
+        icon.className = 'far fa-heart';
+        btn.classList.remove('text-danger');
+        showNotification('Удалено из избранного', 'info');
+    } else {
+        favorites.push(itemId);
+        icon.className = 'fas fa-heart';
+        btn.classList.add('text-danger');
+        showNotification('Добавлено в избранное', 'success');
+    }
+    
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// Initialize favorites on page load
+function initializeFavorites() {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        const itemId = btn.dataset.itemId;
+        if (favorites.includes(itemId)) {
+            btn.querySelector('i').className = 'fas fa-heart';
+            btn.classList.add('text-danger');
+        }
+    });
+}
+
+// Distance calculation
+function calculateDistances() {
+    const distanceInfos = document.querySelectorAll('.distance-info');
+    
+    if (navigator.geolocation && distanceInfos.length > 0) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            distanceInfos.forEach(info => {
+                const lat = parseFloat(info.dataset.lat);
+                const lng = parseFloat(info.dataset.lng);
+                
+                if (lat && lng) {
+                    const distance = calculateDistance(userLat, userLng, lat, lng);
+                    info.textContent = `${distance} км`;
+                }
+            });
+        }, function(error) {
+            distanceInfos.forEach(info => {
+                info.textContent = 'Недоступно';
+            });
+        });
+    }
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const lat1Rad = lat1 * Math.PI / 180;
+    const lat2Rad = lat2 * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1Rad) * Math.cos(lat2Rad);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance.toFixed(1);
+}
+
+// Load more functionality
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'loadMoreBtn') {
+        e.preventDefault();
+        loadMoreItems();
+    }
+});
+
+function loadMoreItems() {
+    const btn = document.getElementById('loadMoreBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Загрузка...';
+    btn.disabled = true;
+    
+    const url = new URL(window.location);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    url.searchParams.set('page', currentPage + 1);
+    
+    fetch(url.toString())
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newItems = doc.querySelectorAll('.item-card');
+            const itemsGrid = document.getElementById('itemsGrid');
+            
+            newItems.forEach(item => {
+                itemsGrid.appendChild(item);
+            });
+            
+            // Update results count
+            const resultsCount = document.getElementById('results-count');
+            if (resultsCount) {
+                const currentCount = parseInt(resultsCount.textContent);
+                resultsCount.textContent = currentCount + newItems.length;
+            }
+            
+            // Hide load more button if no more items
+            if (newItems.length < 12) {
+                btn.style.display = 'none';
+            } else {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+            
+            // Reinitialize for new items
+            calculateDistances();
+            initializeFavorites();
+        })
+        .catch(error => {
+            console.error('Error loading more items:', error);
+            showNotification('Ошибка при загрузке товаров', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+}
+
+// Enhanced notification system
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; animation: slideInRight 0.3s ease;';
     notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-
+    
     document.body.appendChild(notification);
-
-    // Auto-remove after 3 seconds
+    
     setTimeout(() => {
         if (notification.parentNode) {
-            notification.remove();
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
         }
     }, 3000);
 }
@@ -215,61 +586,218 @@ function debounce(func, wait) {
     };
 }
 
-function formatPrice(price) {
-    return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB'
-    }).format(price);
-}
+// Global variables for user location
+let userLocation = {
+    lat: null,
+    lng: null,
+    isDetected: false
+};
 
-function formatDate(dateString) {
-    return new Intl.DateTimeFormat('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }).format(new Date(dateString));
-}
-
-// Initialize cart counter on page load
-document.addEventListener('DOMContentLoaded', updateCartCounter);
-
-// AJAX helper function
-function makeRequest(url, options = {}) {
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    };
-
-    return fetch(url, { ...defaultOptions, ...options })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+// Auto-detect user location on page load
+function autoDetectLocation() {
+    console.log('🔍 Starting auto location detection...');
+    
+    // Check if we're on HTTPS or localhost (required for geolocation)
+    const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    console.log('🔒 Secure context:', isSecure);
+    
+    // Check if location is already stored in localStorage
+    const storedLocation = localStorage.getItem('userLocation');
+    if (storedLocation) {
+        try {
+            const location = JSON.parse(storedLocation);
+            const now = Date.now();
+            console.log('💾 Found stored location:', location);
+            
+            // Use stored location if it's less than 1 hour old
+            if (location.timestamp && (now - location.timestamp) < 3600000) {
+                userLocation = {
+                    lat: location.lat,
+                    lng: location.lng,
+                    isDetected: true
+                };
+                console.log('✅ Using cached location:', userLocation);
+                calculateDistancesWithStoredLocation();
+                return;
+            } else {
+                console.log('⏰ Cached location expired, requesting fresh location');
             }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('Request failed:', error);
-            showNotification('Произошла ошибка. Попробуйте еще раз.', 'danger');
-            throw error;
-        });
-}
-
-// Get CSRF token from cookies
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
+        } catch (e) {
+            console.log('❌ Invalid stored location data:', e);
         }
+    } else {
+        console.log('📍 No cached location found');
     }
-    return cookieValue;
+    
+    // Check geolocation support
+    if (!navigator.geolocation) {
+        console.log('❌ Geolocation not supported by browser');
+        const distanceInfos = document.querySelectorAll('.distance-info');
+        distanceInfos.forEach(info => {
+            info.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Геолокация недоступна';
+            info.classList.add('text-muted');
+        });
+        return;
+    }
+    
+    console.log('🌍 Geolocation supported, requesting position...');
+    
+    // Show loading indicator for distance elements
+    const distanceInfos = document.querySelectorAll('.distance-info');
+    console.log('📊 Found', distanceInfos.length, 'distance elements');
+    
+    distanceInfos.forEach(info => {
+        info.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Определяем...';
+        console.log('📍 Branch coordinates:', info.dataset.lat, info.dataset.lng);
+    });
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            console.log('✅ Location detected successfully!');
+            console.log('📍 User coordinates:', position.coords.latitude, position.coords.longitude);
+            console.log('🎯 Accuracy:', position.coords.accuracy, 'meters');
+            
+            userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                isDetected: true
+            };
+            
+            // Store location with timestamp
+            const locationData = {
+                lat: userLocation.lat,
+                lng: userLocation.lng,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('userLocation', JSON.stringify(locationData));
+            console.log('💾 Location cached for future use');
+            
+            calculateDistancesWithStoredLocation();
+            
+            // Show success notification
+            showNotification('Местоположение определено', 'success');
+        },
+        function(error) {
+            console.error('❌ Geolocation error:', error);
+            console.log('Error code:', error.code);
+            console.log('Error message:', error.message);
+            handleLocationError(error);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 300000 // 5 minutes
+        }
+    );
 }
+
+function handleLocationError(error) {
+    let errorMessage = 'Не удалось определить местоположение';
+    let debugMessage = '';
+    
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            errorMessage = 'Доступ к геолокации запрещен';
+            debugMessage = 'User denied geolocation permission';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Местоположение недоступно';
+            debugMessage = 'Position unavailable (GPS/network issue)';
+            break;
+        case error.TIMEOUT:
+            errorMessage = 'Время ожидания истекло';
+            debugMessage = 'Geolocation request timed out';
+            break;
+        default:
+            debugMessage = 'Unknown geolocation error';
+    }
+    
+    console.log('🚨 Location error:', debugMessage);
+    console.log('💡 Suggestion: Check browser permissions and HTTPS connection');
+    
+    const distanceInfos = document.querySelectorAll('.distance-info');
+    distanceInfos.forEach(info => {
+        info.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Недоступно';
+        info.classList.add('text-muted');
+    });
+    
+    showNotification(errorMessage, 'warning');
+}
+
+function calculateDistancesWithStoredLocation() {
+    console.log('🧮 Starting distance calculations...');
+    
+    if (!userLocation.isDetected) {
+        console.log('❌ User location not detected yet');
+        return;
+    }
+    
+    const distanceInfos = document.querySelectorAll('.distance-info');
+    console.log('📊 Calculating distances for', distanceInfos.length, 'items');
+    console.log('👤 User location:', userLocation.lat, userLocation.lng);
+    
+    let calculatedCount = 0;
+    let errorCount = 0;
+    
+    distanceInfos.forEach((info, index) => {
+        const lat = parseFloat(info.dataset.lat);
+        const lng = parseFloat(info.dataset.lng);
+        
+        console.log(`🏪 Item ${index + 1}: Branch coordinates:`, lat, lng);
+        
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+            const distance = calculateDistance(userLocation.lat, userLocation.lng, lat, lng);
+            info.innerHTML = `<i class="fas fa-location-dot me-1"></i>${distance} км`;
+            info.classList.remove('text-muted');
+            console.log(`✅ Item ${index + 1}: Distance calculated:`, distance);
+            calculatedCount++;
+        } else {
+            console.log(`❌ Item ${index + 1}: Invalid coordinates:`, lat, lng);
+            info.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>Адрес не указан';
+            info.classList.add('text-muted');
+            errorCount++;
+        }
+    });
+    
+    console.log(`📈 Distance calculation summary: ${calculatedCount} successful, ${errorCount} failed`);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFavorites();
+    autoDetectLocation();
+    
+    // Restore view mode preference
+    const savedViewMode = localStorage.getItem('viewMode');
+    if (savedViewMode) {
+        setViewMode(savedViewMode);
+    }
+    
+    // Set quick filter based on URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+    const discount = urlParams.get('discount');
+    
+    if (type === 'dishes') {
+        document.getElementById('filter-dishes').checked = true;
+    } else if (type === 'products') {
+        document.getElementById('filter-products').checked = true;
+    } else if (discount) {
+        document.getElementById('filter-discount').checked = true;
+    }
+});
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);

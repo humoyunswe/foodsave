@@ -4,7 +4,7 @@ from django.db import models
 from vendors.models import Vendor, Branch
 from users.models import User
 from django.contrib.auth import get_user_model
-
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -52,6 +52,23 @@ class Item(models.Model):
             return self.custom_unit
         return self.get_unit_display()
 
+    def get_active_offer(self):
+        """Get the first active offer for this item"""
+        from django.utils import timezone
+        return self.offers.filter(
+            is_active=True,
+            status='available',
+            start_date__lte=timezone.now().date()
+        ).first()
+
+    @property
+    def name(self):
+        """Alias for title to match template expectations"""
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('catalog:item_detail', args=[str(self.id)])
+
 class ItemImage(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='item_images/')
@@ -86,6 +103,11 @@ class Offer(models.Model):
             discount_decimal = Decimal(str(self.discount_percent))
             return self.original_price * (1 - discount_decimal / 100)
         return self.original_price
+
+    @property
+    def discounted_price(self):
+        """Alias for current_price to match template expectations"""
+        return self.current_price
 
     def __str__(self):
         return f"{self.item.title} - {self.discount_percent}% off"
