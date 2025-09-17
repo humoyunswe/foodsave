@@ -26,19 +26,57 @@ class VendorListView(ListView):
         return Vendor.objects.filter(is_active=True).prefetch_related('branches')
 
 
-class VendorDetailView(DetailView):
-    model = Vendor
-    template_name = 'vendors/vendor_detail.html'
-    context_object_name = 'vendor'
+# class VendorDetailView(DetailView):
+#     model = Vendor
+#     template_name = 'vendors/vendor_detail.html'
+#     context_object_name = 'vendor'
     
-    def get_queryset(self):
-        return Vendor.objects.filter(is_active=True).prefetch_related('branches', 'items')
+#     def get_queryset(self):
+#         return Vendor.objects.filter(is_active=True).prefetch_related('branches', 'items')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['items'] = self.object.items.filter(is_active=True)[:12]
-        context['branches'] = self.object.branches.filter(is_active=True)
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['items'] = self.object.items.filter(is_active=True)[:12]
+#         context['branches'] = self.object.branches.filter(is_active=True)
+#         return context
+
+def vendor_detail(request, pk):
+    vendor = get_object_or_404(
+        Vendor.objects.filter(is_active=True).prefetch_related('branches', 'items'),
+        pk=pk
+    )
+    
+    # Get active branches with coordinates
+    branches = vendor.branches.filter(is_active=True).order_by('name')
+    
+    # Get active items with their offers and images
+    items = vendor.items.filter(is_active=True).select_related('category', 'branch').prefetch_related(
+        'images', 
+        'offers'
+    ).order_by('-created_at')[:12]
+    
+    # Prepare branches data for JavaScript (with coordinates)
+    branches_data = []
+    for branch in branches:
+        branches_data.append({
+            'id': branch.id,
+            'name': branch.name,
+            'address': branch.address,
+            'latitude': float(branch.latitude) if branch.latitude else None,
+            'longitude': float(branch.longitude) if branch.longitude else None,
+            'phone': branch.phone,
+            'is_open': branch.is_open_now(),
+            'hours': branch.get_today_hours()
+        })
+    
+    context = {
+        'vendor': vendor,
+        'items': items,
+        'branches': branches,
+        'branches_json': branches_data,  # For JavaScript
+    }
+    return render(request, 'vendors/vendor_detail.html', context)
+
 
 
 @login_required

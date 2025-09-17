@@ -130,12 +130,24 @@
                                     <span class="badge bg-light text-dark mb-2">{{ item.category.name }}</span>
                                     {% endif %}
                                     
+                                    {% if item.branch %}
+                                    <span class="badge bg-light text-dark mb-2">{{ item.branch.name }}</span>
+                                    {% endif %}
+                                    
+                                    {% if item.offers.first %}
+                                    <span class="badge bg-light text-dark mb-2">{{ item.offers.original_price }}</span>
+                                    {% endif %}
+                                    
+                                    {% if item.offers.first %}
+                                    <span class="badge bg-light text-dark mb-2">{{ item.offers.discount_percent }}</span>
+                                    {% endif %}
+                                    
                                     <div class="mt-auto">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="price">
                                                 {% if item.offers.first %}
-                                                <span class="h6 text-primary">${{ item.offers.first.final_price }}</span>
-                                                {% if item.offers.first.discount_amount > 0 %}
+                                                <span class="h6 text-primary">${{ item.offers.first.current_price }}</span>
+                                                {% if item.offers.first.discount_percent > 0 %}
                                                 <small class="text-muted text-decoration-line-through ms-1">
                                                     ${{ item.offers.first.original_price }}
                                                 </small>
@@ -146,7 +158,9 @@
                                             </div>
                                             <button class="btn btn-primary btn-sm add-to-cart-btn" 
                                                     data-item-id="{{ item.id }}" 
-                                                    data-offer-id="{% if item.offers.first %}{{ item.offers.first.id }}{% endif %}">
+                                                    data-offer-id="{% if item.offers.first %}{{ item.offers.first.id }}{% endif %}"
+                                                    data-title="{{ item.title }}"
+                                                    data-price="{% if item.offers.first %}{{ item.offers.first.current_price }}{% else %}15.99{% endif %}">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
@@ -252,7 +266,12 @@
 {% block extra_js %}
 <script src="{% static 'js/main.js' %}"></script>
 <script>
+// Global variables
+let userLocation = null;
+let branches = {{ branches_json|safe }};
+
 document.addEventListener('DOMContentLoaded', function() {
+    initializePage();
     updateQuickCart();
     
     // Add to cart buttons
@@ -260,29 +279,160 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const itemId = this.dataset.itemId;
             const offerId = this.dataset.offerId;
+            const price = parseFloat(this.dataset.price);
+            const title = this.dataset.title;
             
-            addToCart(itemId, offerId);
+            addToCart(itemId, offerId, price, title);
             showNotification('Товар добавлен в корзину!', 'success');
             updateQuickCart();
             updateCartCounter();
         });
     });
-    
-    // Search functionality
-    const searchInput = document.querySelector('input[type="search"]');
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(function() {
-            // Implement search functionality
-            console.log('Searching for:', this.value);
-        }, 300));
-    }
 });
+
+function initializePage() {
+    // Auto-detect location and calculate distances
+    autoDetectLocation();
+    
+    // Load working hours for branches
+    loadWorkingHours();
+}
+
+function autoDetectLocation() {
+    // Check for cached location
+    const cachedLocation = localStorage.getItem('foodsave_user_location');
+    const locationTimestamp = localStorage.getItem('foodsave_location_timestamp');
+    
+    if (cachedLocation && locationTimestamp) {
+        const now = new Date().getTime();
+        const cached = new Date(parseInt(locationTimestamp)).getTime();
+        
+        // Use cached location if less than 1 hour old
+        if (now - cached < 3600000) {
+            userLocation = JSON.parse(cachedLocation);
+            calculateDistances();
+            return;
+        }
+    }
+    
+    // Request fresh location
+    if (navigator.geolocation) {
+        document.getElementById('vendor-distance').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Определяем...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                
+                // Cache location
+                localStorage.setItem('foodsave_user_location', JSON.stringify(userLocation));
+                localStorage.setItem('foodsave_location_timestamp', new Date().getTime().toString());
+                
+                calculateDistances();
+                showNotification('Местоположение определено', 'success');
+            },
+            function(error) {
+                let message = 'Не удалось определить местоположение';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = 'Доступ к геолокации запрещен';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = 'Геолокация недоступна';
+                        break;
+                    case error.TIMEOUT:
+                        message = 'Время ожидания истекло';
+                        break;
+                }
+                document.getElementById('vendor-distance').textContent = 'Расстояние недоступно';
+                console.warn('Geolocation error:', message);
+            }
+        );
+    } else {
+        document.getElementById('vendor-distance').textContent = 'Геолокация не поддерживается';
+    }
+}
+
+function calculateDistances() {
+    if (!userLocation || !branches) return;
+    
+    let minDistance = Infinity;
+    
+    // Calculate distance to each branch using data from Django
+    branches.forEach((branch, index) => {
+        if (branch.latitude && branch.longitude) {
+            const distance = calculateDistance(
+                userLocation.lat, userLocation.lng, 
+                branch.latitude, branch.longitude
+            );
+            
+            // Find corresponding DOM element
+            const branchElements = document.querySelectorAll('.branch-item');
+            if (branchElements[index]) {
+                const distanceEl = branchElements[index].querySelector('.branch-distance');
+                if (distanceEl) {
+                    if (distance < 1) {
+                        distanceEl.textContent = Math.round(distance * 1000) + ' м';
+                    } else {
+                        distanceEl.textContent = distance.toFixed(1) + ' км';
+                    }
+                }
+            }
+            
+            minDistance = Math.min(minDistance, distance);
+        }
+    });
+    
+    // Update vendor distance (closest branch)
+    if (minDistance !== Infinity) {
+        const vendorDistanceEl = document.getElementById('vendor-distance');
+        if (minDistance < 1) {
+            vendorDistanceEl.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>' + Math.round(minDistance * 1000) + ' м от вас';
+        } else {
+            vendorDistanceEl.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>' + minDistance.toFixed(1) + ' км от вас';
+        }
+    }
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function loadWorkingHours() {
+    // Use actual working hours from Django data
+    branches.forEach((branch, index) => {
+        const branchElements = document.querySelectorAll('.branch-hours .hours-text');
+        if (branchElements[index]) {
+            const hours = branch.hours || 'Уточняйте время работы';
+            branchElements[index].textContent = hours;
+        }
+    });
+    
+    // Set general working hours (use first branch or default)
+    const generalHours = branches.length > 0 && branches[0].hours ? branches[0].hours : 'Уточняйте время работы';
+    const generalHoursEl = document.getElementById('working-hours');
+    if (generalHoursEl) {
+        generalHoursEl.textContent = generalHours;
+    }
+}
 
 function updateQuickCart() {
     const cart = JSON.parse(localStorage.getItem('foodsave_cart')) || [];
     const emptyMessage = document.getElementById('emptyCartMessage');
     const cartItems = document.getElementById('cartItems');
     const cartActions = document.getElementById('cartActions');
+    const cartCount = document.getElementById('cart-count');
+    
+    cartCount.textContent = cart.length;
     
     if (cart.length === 0) {
         emptyMessage.style.display = 'block';
@@ -299,17 +449,17 @@ function updateQuickCart() {
     let total = 0;
     
     cart.forEach(item => {
-        const price = 15.99; // Mock price
+        const price = item.price || 15000;
         const itemTotal = price * item.quantity;
         total += itemTotal;
         
         html += `
             <div class="d-flex justify-content-between align-items-center mb-2 small">
                 <div>
-                    <div class="fw-bold">Пицца Маргарита</div>
+                    <div class="fw-bold">${item.title || 'Товар'}</div>
                     <div class="text-muted">x${item.quantity}</div>
                 </div>
-                <div>$${itemTotal.toFixed(2)}</div>
+                <div>${itemTotal.toLocaleString()} сум</div>
             </div>
         `;
     });
@@ -318,23 +468,41 @@ function updateQuickCart() {
         <hr class="my-2">
         <div class="d-flex justify-content-between fw-bold">
             <span>Итого:</span>
-            <span>$${total.toFixed(2)}</span>
+            <span>${total.toLocaleString()} сум</span>
         </div>
     `;
     
     cartItems.innerHTML = html;
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+function toggleFavorite(vendorId) {
+    // Toggle favorite functionality
+    const favorites = JSON.parse(localStorage.getItem('foodsave_favorites')) || [];
+    const index = favorites.indexOf(vendorId);
+    
+    if (index > -1) {
+        favorites.splice(index, 1);
+        showNotification('Удалено из избранного', 'info');
+    } else {
+        favorites.push(vendorId);
+        showNotification('Добавлено в избранное!', 'success');
+    }
+    
+    localStorage.setItem('foodsave_favorites', JSON.stringify(favorites));
+}
+
+function shareVendor() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ vendor.name }} - FoodSave',
+            text: 'Посмотрите это заведение на FoodSave!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        showNotification('Ссылка скопирована!', 'success');
+    }
 }
 </script>
 {% endblock %}

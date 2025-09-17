@@ -9,7 +9,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('main/', TemplateView.as_view(template_name='home.html'), name='home'),
     path('vendors-list/', views.VendorListView.as_view(), name='vendor_list'),
-    path('vendors/<int:pk>/', views.VendorDetailView.as_view(), name='vendor_detail'),
+    path('vendors/<int:pk>/', views.vendor_detail, name='vendor_detail'),
     
     # Vendor management dashboard
     path('dashboard/', views.vendor_dashboard, name='vendor_dashboard'),
