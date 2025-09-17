@@ -33,13 +33,10 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold text-success d-flex align-items-center" href="{% url 'vendors:home' %}">
-                <div class="bg-success text-white rounded me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 14px; font-weight: bold;">
-                    FS
-                </div>
-                FoodSave
+            <a class="navbar-brand fw-bold" href="{% url 'vendors:home' %}">
+                <i class="fas fa-utensils me-2"></i>FoodSave
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -47,73 +44,88 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Centered Search Form -->
-                <div class="mx-auto d-none d-lg-block" style="max-width: 400px; width: 100%;">
-                    <form class="position-relative" method="get" action="{% url 'catalog:search' %}">
-                        <input class="form-control pe-5" type="search" name="q" placeholder="Поиск блюд и продуктов..." 
-                               aria-label="Search" style="border-radius: 25px; background: #f8f9fa; border: 1px solid #e9ecef;">
-                        <button class="btn position-absolute end-0 top-0 h-100" type="submit" style="border-radius: 0 25px 25px 0; border: none; background: transparent;">
-                            <i class="fas fa-search text-muted"></i>
-                        </button>
-                    </form>
-                </div>
-                
-                <!-- Right side icons -->
-                <ul class="navbar-nav ms-auto">
-                    <!-- Cart -->
-                    <li class="nav-item me-3">
-                        <a class="nav-link position-relative" href="{% url 'booking:cart' %}">
-                            <i class="fas fa-shopping-cart text-dark" style="font-size: 1.2rem;"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark cart-count" style="font-size: 0.7rem; display: none;">
-                                0
-                            </span>
-                        </a>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'catalog:catalog' %}">Каталог</a>
                     </li>
-                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendors:vendor_list' %}">Рестораны</a>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex me-3 search-form" method="get" action="{% url 'catalog:search' %}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Поиск блюд..." aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <!-- User dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {% if user.avatar %}
-                                    <img src="{{ user.avatar.url }}" class="rounded-circle me-2" width="32" height="32" alt="Avatar">
-                                {% else %}
-                                    <div class="bg-secondary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                {% endif %}
-                                <span class="d-none d-md-inline text-dark">{{ user.get_full_name|default:user.username }}</span>
+                        {% if user.role == 'vendor' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Панель управления
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user me-2"></i>Профиль</a></li>
-                                <li><a class="dropdown-item" href="{% url 'booking:order_list' %}"><i class="fas fa-list me-2"></i>Мои заказы</a></li>
-                                {% if user.role == 'vendor' %}
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{% url 'vendors:vendor_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Панель управления</a></li>
-                                {% endif %}
+                        </li>
+                        {% if user.owned_vendors.exists %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-info" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-store me-1"></i>Управление заведением
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'vendors:manage_items' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-list me-2"></i>Управление товарами
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_item' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-plus me-2"></i>Добавить товар
+                                </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_branch' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Добавить филиал
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:vendor_list' %}">
+                                    <i class="fas fa-store me-2"></i>Все заведения
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' user.owned_vendors.first.id %}">
+                                    <i class="fas fa-eye me-2"></i>Просмотр моего заведения
+                                </a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-muted" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-handshake me-1"></i>Стать партнёром
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% elif user.owned_vendors.exists %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-store me-1"></i>Мои заведения
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'booking:order_list' %}">Мои заказы</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="{% url 'users:login' %}">
-                                <i class="fas fa-user me-1"></i>Войти
-                            </a>
+                            <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
                         </li>
                     {% endif %}
                 </ul>
-                
-                <!-- Mobile search -->
-                <div class="d-lg-none mt-3">
-                    <form method="get" action="{% url 'catalog:search' %}">
-                        <div class="input-group">
-                            <input class="form-control" type="search" name="q" placeholder="Поиск блюд и продуктов..." aria-label="Search">
-                            <button class="btn btn-success" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
     </nav>

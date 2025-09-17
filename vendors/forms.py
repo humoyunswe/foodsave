@@ -113,54 +113,103 @@ class BranchForm(forms.ModelForm):
         widgets = {
             'address': forms.Textarea(attrs={'rows': 3}),
         }
+        labels = {
+            'name': 'Название филиала',
+            'address': 'Адрес филиала', 
+            'latitude': 'Широта',
+            'longitude': 'Долгота',
+            'phone': 'Телефон',
+            'is_active': 'Филиал активен'
+        }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
+        self.helper.form_class = 'premium-form'
         self.helper.layout = Layout(
-            'name',
-            'address',
-            Row(
-                Column('latitude', css_class='form-group col-md-6 mb-3'),
-                Column('longitude', css_class='form-group col-md-6 mb-3'),
-                css_class='form-row'
-            ),
-            'phone',
-            'is_active',
-            FormActions(
-                Submit('submit', 'Создать филиал', css_class='btn btn-primary btn-lg'),
-                css_class='mt-3'
+            Div(
+                # Left Column
+                Div(
+                    'name',
+                    HTML('''
+                        <div class="input-group phone-group">
+                            <label for="id_phone" class="input-label">Телефон</label>
+                            <div class="phone-input-wrapper">
+                                <div class="country-flag">
+                                    <img src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 513 342'%3e%3cpath fill='%2300afca' d='M0 0h513v114H0z'/%3e%3cpath fill='%23fff' d='M0 114h513v114H0z'/%3e%3cpath fill='%23ce1126' d='M0 228h513v114H0z'/%3e%3ccircle cx='128.5' cy='57' r='34.2' fill='%23fff'/%3e%3ccircle cx='136.8' cy='57' r='27.4' fill='%2300afca'/%3e%3cpath fill='%23fff' d='m128.5 30.4 4.6 14.1h14.8l-12 8.7 4.6 14.1-12-8.7-12 8.7 4.6-14.1-12-8.7h14.8z'/%3e%3c/svg%3e" alt="UZ" class="flag-icon">
+                                    <span class="country-code">+998</span>
+                                </div>
+                    '''),
+                    'phone',
+                    HTML('</div></div>'),
+                    'address',
+                    Div(
+                        Row(
+                            Column('latitude', css_class='col-6'),
+                            Column('longitude', css_class='col-6'),
+                        ),
+                        css_class='coordinates-group'
+                    ),
+                    Div(
+                        'is_active',
+                        css_class='toggle-group'
+                    ),
+                    css_class='form-column'
+                ),
+                # Right Column  
+                Div(
+                    HTML('''
+                        <div class="map-section">
+                            <label class="input-label">Местоположение на карте</label>
+                            <div class="map-container">
+                                <div id="map"></div>
+                            </div>
+                            <p class="map-hint">Кликните на карте для выбора точного местоположения</p>
+                        </div>
+                        
+                        <div class="map-controls">
+                            <button type="button" class="control-btn" onclick="getCurrentLocation()">
+                                Моё местоположение
+                            </button>
+                            <button type="button" class="control-btn" onclick="searchByAddress()">
+                                Найти по адресу
+                            </button>
+                            <button type="button" class="control-btn" onclick="centerMap()">
+                                Центрировать
+                            </button>
+                        </div>
+                    '''),
+                    css_class='form-column'
+                ),
+                css_class='form-grid'
             )
         )
         
         # Add custom styling
         self.fields['name'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Название филиала...',
-            'required': True
+            'placeholder': '',
         })
         self.fields['address'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Адрес филиала...',
-            'required': True
+            'placeholder': '',
         })
         self.fields['latitude'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Широта',
+            'placeholder': '',
             'step': 'any',
-            'required': True
         })
         self.fields['longitude'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Долгота',
+            'placeholder': '',
             'step': 'any',
-            'required': True
         })
         self.fields['phone'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': '+7 (xxx) xxx-xx-xx',
-            'required': True
+            'placeholder': 'xx xxx xx xx',
+            'pattern': '[0-9]{2}[0-9]{3}[0-9]{2}[0-9]{2}',
+            'title': 'Формат: 90 123 45 67',
         })
 
 
