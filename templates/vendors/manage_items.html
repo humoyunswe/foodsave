@@ -92,7 +92,7 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item" href="#">
+                                            <li><a class="dropdown-item" href="{% url 'vendors:edit_item' item.id %}">
                                                 <i class="fas fa-edit me-2"></i>Редактировать
                                             </a></li>
                                             <li><a class="dropdown-item" href="#">
@@ -105,8 +105,7 @@
                                                 {{ item.is_active|yesno:'Деактивировать,Активировать' }}
                                             </a></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger" href="#" 
-                                                   onclick="confirmDelete({{ item.id }}, '{{ item.title }}')">
+                                            <li><a class="dropdown-item text-danger" href="{% url 'vendors:delete_item' item.id %}">
                                                 <i class="fas fa-trash me-2"></i>Удалить
                                             </a></li>
                                         </ul>
@@ -152,14 +151,13 @@
                                                             </div>
                                                         </div>
                                                         <div class="btn-group btn-group-sm">
-                                                            <button class="btn btn-outline-primary btn-xs" 
-                                                                    onclick="editOffer({{ offer.id }})" title="Редактировать">
+                                                            <a href="{% url 'vendors:edit_item' offer.item.id %}" class="btn btn-outline-success btn-xs" title="Редактировать товар">
                                                                 <i class="fas fa-edit"></i>
-                                                            </button>
-                                                            <button class="btn btn-outline-danger btn-xs" 
-                                                                    onclick="deleteOffer({{ offer.id }})" title="Удалить">
+                                                            </a>
+                                                            <a href="{% url 'vendors:delete_offer' offer.id %}" class="btn btn-outline-danger btn-xs" 
+                                                               onclick="return confirm('Вы уверены, что хотите удалить это предложение?')" title="Удалить предложение">
                                                                 <i class="fas fa-trash"></i>
-                                                            </button>
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 {% endfor %}

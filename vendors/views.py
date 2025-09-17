@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Vendor, Branch
 from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm
 from catalog.models import Item, Category, ItemImage, Offer
@@ -61,6 +62,11 @@ def add_branch(request, vendor_id):
             branch.save()
             messages.success(request, f'Филиал "{branch.name}" успешно добавлен!')
             return redirect('vendors:vendor_dashboard')
+        else:
+            # Add debug information
+            print("Form errors:", form.errors)
+            for field, errors in form.errors.items():
+                messages.error(request, f'{field}: {", ".join(errors)}')
     else:
         form = BranchForm()
     
@@ -211,6 +217,65 @@ def management_hub(request):
     })
 
 
+@login_required
+def edit_item(request, item_id):
+    """Edit an existing item"""
+    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    vendor = item.vendor
+    
+    if request.method == 'POST':
+        print(f"POST request received for item {item_id}")
+        print(f"POST data: {request.POST}")
+        
+        form = ItemForm(request.POST, instance=item, vendor=vendor, request=request)
+        image_formset = ItemImageFormSet(request.POST, request.FILES, instance=item)
+        
+        print(f"Form is valid: {form.is_valid()}")
+        print(f"Formset is valid: {image_formset.is_valid()}")
+        
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
+        if not image_formset.is_valid():
+            print(f"Formset errors: {image_formset.errors}")
+        
+        if form.is_valid() and image_formset.is_valid():
+            print("Saving form and formset...")
+            item = form.save()
+            image_formset.save()
+            messages.success(request, f'Товар "{item.title}" успешно обновлен!')
+            return redirect('vendors:manage_items', vendor_id=vendor.id)
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+    else:
+        form = ItemForm(instance=item, vendor=vendor, request=request)
+        image_formset = ItemImageFormSet(instance=item)
+    
+    return render(request, 'vendors/edit_item.html', {
+        'form': form,
+        'image_formset': image_formset,
+        'item': item,
+        'vendor': vendor
+    })
+
+
+@login_required
+def delete_item(request, item_id):
+    """Delete an item"""
+    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    vendor = item.vendor
+    
+    if request.method == 'POST':
+        item_title = item.title
+        item.delete()
+        messages.success(request, f'Товар "{item_title}" успешно удален!')
+        return redirect('vendors:manage_items', vendor_id=vendor.id)
+    
+    return render(request, 'vendors/delete_item.html', {
+        'item': item,
+        'vendor': vendor
+    })
+
+
 @staff_member_required
 def assign_vendor(request):
     """Staff page to assign vendor role to an existing user"""
@@ -224,3 +289,49 @@ def assign_vendor(request):
         form = AssignVendorRoleForm()
 
     return render(request, 'vendors/assign_vendor.html', { 'form': form })
+
+
+def vendor_locations_api(request):
+    """API endpoint to get vendor locations for map display"""
+    vendors = Vendor.objects.filter(is_active=True).prefetch_related('branches')
+    
+    vendor_data = []
+    for vendor in vendors:
+        branches_data = []
+        for branch in vendor.branches.filter(is_active=True):
+            if branch.latitude and branch.longitude:
+                branches_data.append({
+                    'id': branch.id,
+                    'name': branch.name,
+                    'address': branch.address,
+                    'phone': branch.phone,
+                    'latitude': str(branch.latitude),
+                    'longitude': str(branch.longitude)
+                })
+        
+        if branches_data:  # Only include vendors with branches that have coordinates
+            vendor_data.append({
+                'id': vendor.id,
+                'name': vendor.name,
+                'branches': branches_data
+            })
+    
+    return JsonResponse({'vendors': vendor_data})
+
+
+@login_required
+def delete_offer(request, offer_id):
+    """Delete an offer"""
+    offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    vendor = offer.item.vendor
+    
+    if request.method == 'POST':
+        offer_title = f"{offer.item.title} - {offer.discount_percent}% скидка"
+        offer.delete()
+        messages.success(request, f'Предложение "{offer_title}" успешно удалено!')
+        return redirect('vendors:manage_items', vendor_id=vendor.id)
+    
+    return render(request, 'vendors/delete_offer.html', {
+        'offer': offer,
+        'vendor': vendor
+    })

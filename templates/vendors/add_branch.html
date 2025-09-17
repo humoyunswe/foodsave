@@ -19,12 +19,15 @@
                 <!-- Left Column -->
                 <div class="form-column">
                     <div class="input-group">
-                        {{ form.name.label_tag }}
+                        <label for="{{ form.name.id_for_label }}" class="field-label">Название филиала</label>
                         {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="input-group phone-group">
-                        {{ form.phone.label_tag }}
+                        <label for="{{ form.phone.id_for_label }}" class="field-label">Телефон</label>
                         <div class="phone-input-wrapper">
                             <div class="country-flag">
                                 <img src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 513 342'%3e%3cpath fill='%2300afca' d='M0 0h513v114H0z'/%3e%3cpath fill='%23fff' d='M0 114h513v114H0z'/%3e%3cpath fill='%23ce1126' d='M0 228h513v114H0z'/%3e%3ccircle cx='128.5' cy='57' r='34.2' fill='%23fff'/%3e%3ccircle cx='136.8' cy='57' r='27.4' fill='%2300afca'/%3e%3cpath fill='%23fff' d='m128.5 30.4 4.6 14.1h14.8l-12 8.7 4.6 14.1-12-8.7-12 8.7 4.6-14.1-12-8.7h14.8z'/%3e%3c/svg%3e" alt="UZ" class="flag-icon">
@@ -32,21 +35,33 @@
                             </div>
                             {{ form.phone }}
                         </div>
+                        {% if form.phone.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="input-group">
-                        {{ form.address.label_tag }}
+                        <label for="{{ form.address.id_for_label }}" class="field-label">Адрес филиала</label>
                         {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="coordinates-group">
                         <div class="input-group">
-                            {{ form.latitude.label_tag }}
+                            <label for="{{ form.latitude.id_for_label }}" class="field-label">Широта</label>
                             {{ form.latitude }}
+                            {% if form.latitude.errors %}
+                                <div class="text-danger small mt-1">{{ form.latitude.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="input-group">
-                            {{ form.longitude.label_tag }}
+                            <label for="{{ form.longitude.id_for_label }}" class="field-label">Долгота</label>
                             {{ form.longitude }}
+                            {% if form.longitude.errors %}
+                                <div class="text-danger small mt-1">{{ form.longitude.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -165,44 +180,54 @@ body {
     margin-bottom: 0;
 }
 
-.input-label, label {
+.input-label, label, .field-label {
     display: block;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #01605E;
+    margin-bottom: 0.75rem;
     letter-spacing: 0.025em;
     text-align: center;
+}
+
+.field-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .form-control, .form-select, textarea {
     width: 100%;
     padding: 0.875rem 1rem;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     background: #ffffff;
     color: #111827;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .form-control:focus, .form-select:focus, textarea:focus {
     outline: none;
     border-color: #01605E;
-    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1);
+    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .phone-input-wrapper {
     display: flex;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .phone-input-wrapper:focus-within {
     border-color: #01605E;
-    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1);
+    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .country-flag {

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удалить предложение - {{ offer.item.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-trash me-2"></i>Удалить предложение
+                    </h4>
+                    <small>{{ vendor.name }}</small>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание!</strong> Это действие нельзя отменить.
+                    </div>
+                    
+                    <div class="offer-info mb-4">
+                        <h5>{{ offer.item.title }}</h5>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Филиал:</strong> {{ offer.branch.name }}</p>
+                                <p class="mb-1"><strong>Оригинальная цена:</strong> {{ offer.original_price }} сум</p>
+                                <p class="mb-1"><strong>Скидка:</strong> {{ offer.discount_percent }}%</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Цена со скидкой:</strong> {{ offer.current_price }} сум</p>
+                                <p class="mb-1"><strong>Количество:</strong> 
+                                    {% if offer.quantity == 0 %}
+                                        Неограниченно
+                                    {% else %}
+                                        {{ offer.quantity }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-1"><strong>Статус:</strong> 
+                                    <span class="badge bg-{{ offer.is_active|yesno:'success,secondary' }}">
+                                        {{ offer.is_active|yesno:'Активно,Неактивно' }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {% if offer.start_date %}
+                        <p class="mb-1"><strong>Период действия:</strong> 
+                            {{ offer.start_date }}
+                            {% if offer.end_date %}
+                                - {{ offer.end_date }}
+                            {% else %}
+                                - без ограничений
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Удалить предложение
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.offer-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 4px solid #dc3545;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0;
+}
+</style>
+{% endblock %}

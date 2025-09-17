@@ -41,6 +41,20 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Map Section -->
+            <div class="map-section mb-5">
+                <div class="card map-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-map-marker-alt me-2"></i>Карта заведений
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="map" class="yandex-map"></div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Filters Section -->
             <div class="card">
@@ -257,10 +271,196 @@
 .main-category-btn small { color: var(--premium-muted) !important; }
 .main-category-btn h4 { color: var(--premium-text); }
 
+/* Map Section */
+.map-section {
+    margin: 2rem 0;
+}
+
+.map-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.map-card .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 1.25rem 1.5rem;
+}
+
+.map-card .card-body {
+    padding: 0;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.yandex-map {
+    width: 100%;
+    height: 400px;
+    border-radius: 0 0 20px 20px;
+    border: none;
+    position: relative;
+}
+
+.yandex-map::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0 0 20px 20px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Map loading state */
+.yandex-map:empty::after {
+    content: 'Загрузка карты...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .trust-strip { grid-template-columns: 1fr; }
     .how-works { grid-template-columns: 1fr; }
+    .yandex-map { height: 300px; }
+    .map-card .card-header { padding: 1rem; }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU" type="text/javascript"></script>
+<script>
+ymaps.ready(function() {
+    // Создаем карту с центром в Ташкенте
+    var map = new ymaps.Map('map', {
+        center: [41.2995, 69.2401], // Координаты Ташкента
+        zoom: 11,
+        controls: ['zoomControl', 'fullscreenControl']
+    }, {
+        searchControlProvider: 'yandex#search'
+    });
+
+    // Стилизация карты
+    map.controls.remove('geolocationControl');
+    map.controls.remove('searchControl');
+    map.controls.remove('trafficControl');
+    map.controls.remove('typeSelector');
+    map.controls.remove('rulerControl');
+
+    // Получаем данные о заведениях через AJAX
+    fetch('/api/vendors/locations/')
+        .then(response => response.json())
+        .then(data => {
+            // Создаем коллекцию для меток
+            var objectManager = new ymaps.ObjectManager({
+                clusterize: true,
+                gridSize: 64,
+                clusterDisableClickZoom: false
+            });
+
+            // Настройка стиля кластеров
+            objectManager.clusters.options.set({
+                preset: 'islands#greenClusterIcons',
+                hintContentLayout: ymaps.templateLayoutFactory.createClass('Заведений: {{properties.geoObjects.length}}')
+            });
+
+            // Настройка стиля меток
+            objectManager.objects.options.set({
+                preset: 'islands#greenDotIcon',
+                hintContentLayout: ymaps.templateLayoutFactory.createClass('{{properties.name}}')
+            });
+
+            // Добавляем метки для каждого заведения
+            data.vendors.forEach(function(vendor, index) {
+                if (vendor.branches && vendor.branches.length > 0) {
+                    vendor.branches.forEach(function(branch) {
+                        if (branch.latitude && branch.longitude) {
+                            objectManager.add({
+                                type: 'Feature',
+                                id: 'vendor_' + vendor.id + '_branch_' + branch.id,
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: [parseFloat(branch.latitude), parseFloat(branch.longitude)]
+                                },
+                                properties: {
+                                    name: vendor.name,
+                                    branch_name: branch.name,
+                                    address: branch.address,
+                                    phone: branch.phone,
+                                    balloonContentHeader: '<strong>' + vendor.name + '</strong>',
+                                    balloonContentBody: 
+                                        '<div style="padding: 10px;">' +
+                                        '<p><strong>Филиал:</strong> ' + branch.name + '</p>' +
+                                        '<p><strong>Адрес:</strong> ' + branch.address + '</p>' +
+                                        (branch.phone ? '<p><strong>Телефон:</strong> ' + branch.phone + '</p>' : '') +
+                                        '<a href="/vendors/' + vendor.id + '/" class="btn btn-primary btn-sm mt-2">Посмотреть предложения</a>' +
+                                        '</div>',
+                                    balloonContentFooter: '<small>Нажмите для подробностей</small>'
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Добавляем объекты на карту
+            map.geoObjects.add(objectManager);
+
+            // Автоматически подстраиваем границы карты под метки
+            if (data.vendors.length > 0) {
+                map.setBounds(objectManager.getBounds(), {
+                    checkZoomRange: true,
+                    zoomMargin: 50
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки данных заведений:', error);
+            
+            // Добавляем несколько примеров меток для демонстрации
+            var sampleVendors = [
+                {
+                    coords: [41.2995, 69.2401],
+                    name: 'Центральный ресторан',
+                    address: 'ул. Навои, 1'
+                },
+                {
+                    coords: [41.3111, 69.2797],
+                    name: 'Кафе "Восток"',
+                    address: 'ул. Амира Темура, 15'
+                },
+                {
+                    coords: [41.2866, 69.2034],
+                    name: 'Магазин "Свежесть"',
+                    address: 'ул. Мирзо Улугбека, 45'
+                }
+            ];
+
+            sampleVendors.forEach(function(vendor, index) {
+                var placemark = new ymaps.Placemark(vendor.coords, {
+                    balloonContentHeader: '<strong>' + vendor.name + '</strong>',
+                    balloonContentBody: '<p><strong>Адрес:</strong> ' + vendor.address + '</p>',
+                    hintContent: vendor.name
+                }, {
+                    preset: 'islands#greenDotIcon'
+                });
+                
+                map.geoObjects.add(placemark);
+            });
+        });
+});
+</script>
 {% endblock %}

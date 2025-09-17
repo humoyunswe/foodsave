@@ -208,7 +208,7 @@ class BranchForm(forms.ModelForm):
         self.fields['phone'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'xx xxx xx xx',
-            'pattern': '[0-9]{2}[0-9]{3}[0-9]{2}[0-9]{2}',
+            'pattern': '[0-9]{2} [0-9]{3} [0-9]{2} [0-9]{2}',
             'title': 'Формат: 90 123 45 67',
         })
 
