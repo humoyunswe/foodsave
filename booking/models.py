@@ -52,3 +52,29 @@ class OrderItem(models.Model):
     
     def __str__(self):
         return f"{self.offer.item.title} x{self.quantity}"
+
+class CartItem(models.Model):
+    """Модель для хранения товаров в корзине пользователя"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items', null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)  # Для анонимных пользователей
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = [['user', 'offer'], ['session_key', 'offer']]
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.offer.item.title} x{self.quantity}"
+    
+    @property
+    def total_price(self):
+        return self.offer.current_price * self.quantity
+    
+    @property
+    def savings(self):
+        if self.offer.original_price > self.offer.current_price:
+            return (self.offer.original_price - self.offer.current_price) * self.quantity
+        return 0

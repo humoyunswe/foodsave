@@ -27,6 +27,9 @@
                                 <div>
                                     <h2 class="card-title">{{ vendor.name }}</h2>
                                     <p class="text-muted mb-2">{{ vendor.get_vendor_type_display }}</p>
+                                    <div id="vendor-distance" class="text-muted small">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Определяем расстояние...
+                                    </div>
                                 </div>
                                 <div class="text-end">
                                     {% if vendor.is_active %}
@@ -44,16 +47,16 @@
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="rating me-2">
                                             {% for i in "12345" %}
-                                                {% if forloop.counter <= 4 %}
+                                                {% if forloop.counter <= vendor.rating|floatformat:0|default:4 %}
                                                 <i class="fas fa-star text-warning"></i>
                                                 {% else %}
                                                 <i class="far fa-star text-muted"></i>
                                                 {% endif %}
                                             {% endfor %}
                                         </div>
-                                        <span class="text-muted">(4.2) • 150+ отзывов</span>
+                                        <span class="text-muted">({{ vendor.rating|default:"4.2" }}) • 150+ отзывов</span>
                                     </div>
-                                    <div class="text-muted">
+                                    <div class="text-muted" id="working-hours">
                                         <i class="fas fa-clock me-2"></i>Доставка: 30-45 мин
                                     </div>
                                 </div>
@@ -73,10 +76,10 @@
                             
                             <div class="mt-auto">
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-primary">
+                                    <button class="btn btn-outline-primary" onclick="toggleFavorite({{ vendor.id }})">
                                         <i class="fas fa-heart me-2"></i>В избранное
                                     </button>
-                                    <button class="btn btn-outline-info">
+                                    <button class="btn btn-outline-info" onclick="shareVendor()">
                                         <i class="fas fa-share me-2"></i>Поделиться
                                     </button>
                                 </div>
@@ -88,100 +91,71 @@
         </div>
     </div>
     
-    <!-- Menu Section -->
+    <!-- Menu Section with Filters -->
     <div class="row">
-        <div class="col-lg-9">
-            <div class="card">
+        <!-- Filter Sidebar -->
+        <div class="col-lg-3">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Меню</h5>
-                        <div class="d-flex gap-2">
-                            <input type="search" class="form-control form-control-sm" 
-                                   placeholder="Поиск блюд..." style="width: 200px;">
-                            <select class="form-select form-select-sm" style="width: auto;">
-                                <option value="">Все категории</option>
-                                <option value="appetizers">Закуски</option>
-                                <option value="main">Основные блюда</option>
-                                <option value="desserts">Десерты</option>
-                                <option value="drinks">Напитки</option>
-                            </select>
-                        </div>
-                    </div>
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Фильтры
+                    </h6>
                 </div>
                 <div class="card-body">
-                    {% if items %}
-                    <div class="row">
-                        {% for item in items %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100 menu-item-card">
-                                {% if item.images.first %}
-                                <img src="{{ item.images.first.image.url }}" class="card-img-top" 
-                                     alt="{{ item.title }}" style="height: 180px; object-fit: cover;">
-                                {% else %}
-                                <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop" class="card-img-top" 
-                                     alt="{{ item.title }}" style="height: 180px; object-fit: cover;">
-                                {% endif %}
-                                
-                                <div class="card-body d-flex flex-column">
-                                    <h6 class="card-title">{{ item.title }}</h6>
-                                    <p class="card-text text-muted small">{{ item.description|truncatewords:10 }}</p>
-                                    
-                                    {% if item.category %}
-                                    <span class="badge bg-light text-dark mb-2">{{ item.category.name }}</span>
-                                    {% endif %}
-                                    
-                                    {% if item.branch %}
-                                    <span class="badge bg-light text-dark mb-2">{{ item.branch.name }}</span>
-                                    {% endif %}
-                                    
-                                    {% if item.offers.first %}
-                                    <span class="badge bg-light text-dark mb-2">{{ item.offers.original_price }}</span>
-                                    {% endif %}
-                                    
-                                    {% if item.offers.first %}
-                                    <span class="badge bg-light text-dark mb-2">{{ item.offers.discount_percent }}</span>
-                                    {% endif %}
-                                    
-                                    <div class="mt-auto">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="price">
-                                                {% if item.offers.first %}
-                                                <span class="h6 text-primary">${{ item.offers.first.current_price }}</span>
-                                                {% if item.offers.first.discount_percent > 0 %}
-                                                <small class="text-muted text-decoration-line-through ms-1">
-                                                    ${{ item.offers.first.original_price }}
-                                                </small>
-                                                {% endif %}
-                                                {% else %}
-                                                <span class="h6 text-primary">$15.99</span>
-                                                {% endif %}
-                                            </div>
-                                            <button class="btn btn-primary btn-sm add-to-cart-btn" 
-                                                    data-item-id="{{ item.id }}" 
-                                                    data-offer-id="{% if item.offers.first %}{{ item.offers.first.id }}{% endif %}"
-                                                    data-title="{{ item.title }}"
-                                                    data-price="{% if item.offers.first %}{{ item.offers.first.current_price }}{% else %}15.99{% endif %}">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Поиск блюд</label>
+                        <input type="search" id="menuSearch" class="form-control form-control-sm" 
+                               placeholder="Введите название блюда...">
+                    </div>
+                    
+                    <!-- Categories Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Категории</label>
+                        <div id="categoryFilters">
+                            <!-- Categories will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Price Range Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Цена</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" id="minPrice" class="form-control form-control-sm" 
+                                       placeholder="От" min="0">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="maxPrice" class="form-control form-control-sm" 
+                                       placeholder="До" min="0">
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
-                        <h5>Меню пока не добавлено</h5>
-                        <p class="text-muted">Ресторан работает над наполнением меню</p>
+                    
+                    <!-- Availability Filter -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Наличие</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="availableOnly" checked>
+                            <label class="form-check-label small" for="availableOnly">
+                                Только в наличии
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="discountOnly">
+                            <label class="form-check-label small" for="discountOnly">
+                                Только со скидкой
+                            </label>
+                        </div>
                     </div>
-                    {% endif %}
+                    
+                    <!-- Clear Filters -->
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearAllFilters()">
+                        <i class="fas fa-times me-2"></i>Очистить фильтры
+                    </button>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-lg-3">
+            
             <!-- Branches -->
             {% if branches %}
             <div class="card mb-4">
@@ -190,17 +164,22 @@
                 </div>
                 <div class="card-body">
                     {% for branch in branches %}
-                    <div class="mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                    <div class="mb-3 branch-item {% if not forloop.last %}border-bottom pb-3{% endif %}">
                         <h6 class="mb-1">{{ branch.name }}</h6>
                         <small class="text-muted d-block">{{ branch.address }}</small>
+                        <div class="branch-distance text-primary small fw-bold">
+                            <i class="fas fa-map-marker-alt me-1"></i>Определяем...
+                        </div>
                         {% if branch.phone %}
                         <small class="text-muted d-block">
                             <i class="fas fa-phone me-1"></i>{{ branch.phone }}
                         </small>
                         {% endif %}
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>{{ branch.working_hours|default:"Уточняйте время работы" }}
-                        </small>
+                        <div class="branch-hours">
+                            <small class="text-muted hours-text">
+                                <i class="fas fa-clock me-1"></i>{{ branch.working_hours|default:"Уточняйте время работы" }}
+                            </small>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -209,8 +188,9 @@
             
             <!-- Quick Cart -->
             <div class="card sticky-top" style="top: 20px;">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Корзина</h6>
+                    <span class="badge bg-primary" id="cart-count">0</span>
                 </div>
                 <div class="card-body">
                     <div id="quickCart">
@@ -234,6 +214,136 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Menu Items -->
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Меню</h5>
+                            <small class="text-muted" id="resultsCount">Найдено {{ items|length }} блюд</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="sortSelect" style="width: auto;">
+                                <option value="default">По умолчанию</option>
+                                <option value="price_asc">Цена: по возрастанию</option>
+                                <option value="price_desc">Цена: по убыванию</option>
+                                <option value="name_asc">Название: А-Я</option>
+                                <option value="name_desc">Название: Я-А</option>
+                                <option value="discount">Сначала со скидкой</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if items %}
+                    <div class="row" id="menuItems">
+                        {% for item in items %}
+                        <div class="col-md-6 col-xl-4 mb-4 menu-item" 
+                             data-category="{% if item.category %}{{ item.category.slug }}{% endif %}"
+                             data-title="{{ item.title|lower }}"
+                             data-price="{% if item.get_active_offer %}{{ item.get_active_offer.current_price }}{% else %}0{% endif %}"
+                             data-has-discount="{% if item.get_active_offer and item.get_active_offer.discount_percent > 0 %}true{% else %}false{% endif %}"
+                             data-available="{% if item.get_active_offer %}true{% else %}false{% endif %}">
+                            <div class="card h-100 menu-item-card">
+                                {% if item.images.first %}
+                                <img src="{{ item.images.first.image.url }}" class="card-img-top" 
+                                     alt="{{ item.title }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop" class="card-img-top" 
+                                     alt="{{ item.title }}" style="height: 180px; object-fit: cover;">
+                                {% endif %}
+                                
+                                <!-- Discount Badge -->
+                                {% if item.get_active_offer and item.get_active_offer.discount_percent > 0 %}
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-danger">-{{ item.get_active_offer.discount_percent }}%</span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">{{ item.title }}</h6>
+                                    <p class="card-text text-muted small">{{ item.description|truncatewords:10 }}</p>
+                                    
+                                    <div class="mb-2">
+                                        {% if item.category %}
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-tag me-1"></i>{{ item.category.name }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if item.branch %}
+                                        <span class="badge bg-info text-white me-1">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ item.branch.name }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if item.unit %}
+                                        <span class="badge bg-secondary">{{ item.unit }}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if item.get_active_offer %}
+                                    <div class="mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Осталось: {{ item.get_active_offer.quantity_remaining }} шт.
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="price">
+                                                {% if item.get_active_offer %}
+                                                <span class="h6 text-primary">{{ item.get_active_offer.current_price|floatformat:0 }} сум</span>
+                                                {% if item.get_active_offer.discount_percent > 0 %}
+                                                <small class="text-muted text-decoration-line-through ms-1">
+                                                    {{ item.get_active_offer.original_price|floatformat:0 }} сум
+                                                </small>
+                                                {% endif %}
+                                                {% else %}
+                                                <span class="h6 text-muted">Нет в наличии</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if item.get_active_offer %}
+                                            <button class="btn btn-primary btn-sm add-to-cart-btn" 
+                                                    data-offer-id="{{ item.get_active_offer.id }}"
+                                                    data-title="{{ item.title }}"
+                                                    data-price="{{ item.get_active_offer.current_price }}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- No Results Message -->
+                    <div id="noResults" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>Ничего не найдено</h5>
+                        <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    </div>
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                        <h5>Меню пока не добавлено</h5>
+                        <p class="text-muted">Ресторан работает над наполнением меню</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -242,6 +352,7 @@
 <style>
 .menu-item-card {
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    position: relative;
 }
 
 .menu-item-card:hover {
@@ -260,6 +371,31 @@
 .add-to-cart-btn:hover {
     transform: scale(1.1);
 }
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.badge {
+    font-size: 0.7em;
+}
+
+.menu-item {
+    transition: opacity 0.3s ease;
+}
+
+.menu-item.hidden {
+    display: none !important;
+}
+
+#categoryFilters .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.sticky-top {
+    z-index: 1020;
+}
 </style>
 {% endblock %}
 
@@ -269,23 +405,25 @@
 // Global variables
 let userLocation = null;
 let branches = {{ branches_json|safe }};
+let allItems = [];
+let filteredItems = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
+    initializeFilters();
     updateQuickCart();
     
     // Add to cart buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const itemId = this.dataset.itemId;
             const offerId = this.dataset.offerId;
-            const price = parseFloat(this.dataset.price);
             const title = this.dataset.title;
+            const price = parseFloat(this.dataset.price);
             
-            addToCart(itemId, offerId, price, title);
+            addToCart(offerId, title, price);
             showNotification('Товар добавлен в корзину!', 'success');
             updateQuickCart();
-            updateCartCounter();
+            updateCartCount();
         });
     });
 });
@@ -296,212 +434,238 @@ function initializePage() {
     
     // Load working hours for branches
     loadWorkingHours();
+    
+    // Collect all menu items data
+    collectMenuItems();
 }
 
-function autoDetectLocation() {
-    // Check for cached location
-    const cachedLocation = localStorage.getItem('foodsave_user_location');
-    const locationTimestamp = localStorage.getItem('foodsave_location_timestamp');
+function collectMenuItems() {
+    const menuItemElements = document.querySelectorAll('.menu-item');
+    allItems = Array.from(menuItemElements).map(item => ({
+        element: item,
+        category: item.dataset.category || '',
+        title: item.dataset.title || '',
+        price: parseFloat(item.dataset.price) || 0,
+        hasDiscount: item.dataset.hasDiscount === 'true',
+        available: item.dataset.available === 'true'
+    }));
+    filteredItems = [...allItems];
+}
+
+function initializeFilters() {
+    // Collect unique categories
+    const categories = [...new Set(allItems.map(item => item.category).filter(cat => cat))];
     
-    if (cachedLocation && locationTimestamp) {
-        const now = new Date().getTime();
-        const cached = new Date(parseInt(locationTimestamp)).getTime();
+    // Populate category filters
+    const categoryFiltersContainer = document.getElementById('categoryFilters');
+    categoryFiltersContainer.innerHTML = '';
+    
+    categories.forEach(category => {
+        const categoryName = getCategoryDisplayName(category);
+        const itemCount = allItems.filter(item => item.category === category).length;
         
-        // Use cached location if less than 1 hour old
-        if (now - cached < 3600000) {
-            userLocation = JSON.parse(cachedLocation);
-            calculateDistances();
-            return;
-        }
-    }
-    
-    // Request fresh location
-    if (navigator.geolocation) {
-        document.getElementById('vendor-distance').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Определяем...';
-        
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                
-                // Cache location
-                localStorage.setItem('foodsave_user_location', JSON.stringify(userLocation));
-                localStorage.setItem('foodsave_location_timestamp', new Date().getTime().toString());
-                
-                calculateDistances();
-                showNotification('Местоположение определено', 'success');
-            },
-            function(error) {
-                let message = 'Не удалось определить местоположение';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = 'Доступ к геолокации запрещен';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = 'Геолокация недоступна';
-                        break;
-                    case error.TIMEOUT:
-                        message = 'Время ожидания истекло';
-                        break;
-                }
-                document.getElementById('vendor-distance').textContent = 'Расстояние недоступно';
-                console.warn('Geolocation error:', message);
-            }
-        );
-    } else {
-        document.getElementById('vendor-distance').textContent = 'Геолокация не поддерживается';
-    }
-}
-
-function calculateDistances() {
-    if (!userLocation || !branches) return;
-    
-    let minDistance = Infinity;
-    
-    // Calculate distance to each branch using data from Django
-    branches.forEach((branch, index) => {
-        if (branch.latitude && branch.longitude) {
-            const distance = calculateDistance(
-                userLocation.lat, userLocation.lng, 
-                branch.latitude, branch.longitude
-            );
-            
-            // Find corresponding DOM element
-            const branchElements = document.querySelectorAll('.branch-item');
-            if (branchElements[index]) {
-                const distanceEl = branchElements[index].querySelector('.branch-distance');
-                if (distanceEl) {
-                    if (distance < 1) {
-                        distanceEl.textContent = Math.round(distance * 1000) + ' м';
-                    } else {
-                        distanceEl.textContent = distance.toFixed(1) + ' км';
-                    }
-                }
-            }
-            
-            minDistance = Math.min(minDistance, distance);
-        }
-    });
-    
-    // Update vendor distance (closest branch)
-    if (minDistance !== Infinity) {
-        const vendorDistanceEl = document.getElementById('vendor-distance');
-        if (minDistance < 1) {
-            vendorDistanceEl.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>' + Math.round(minDistance * 1000) + ' м от вас';
-        } else {
-            vendorDistanceEl.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>' + minDistance.toFixed(1) + ' км от вас';
-        }
-    }
-}
-
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
-
-function loadWorkingHours() {
-    // Use actual working hours from Django data
-    branches.forEach((branch, index) => {
-        const branchElements = document.querySelectorAll('.branch-hours .hours-text');
-        if (branchElements[index]) {
-            const hours = branch.hours || 'Уточняйте время работы';
-            branchElements[index].textContent = hours;
-        }
-    });
-    
-    // Set general working hours (use first branch or default)
-    const generalHours = branches.length > 0 && branches[0].hours ? branches[0].hours : 'Уточняйте время работы';
-    const generalHoursEl = document.getElementById('working-hours');
-    if (generalHoursEl) {
-        generalHoursEl.textContent = generalHours;
-    }
-}
-
-function updateQuickCart() {
-    const cart = JSON.parse(localStorage.getItem('foodsave_cart')) || [];
-    const emptyMessage = document.getElementById('emptyCartMessage');
-    const cartItems = document.getElementById('cartItems');
-    const cartActions = document.getElementById('cartActions');
-    const cartCount = document.getElementById('cart-count');
-    
-    cartCount.textContent = cart.length;
-    
-    if (cart.length === 0) {
-        emptyMessage.style.display = 'block';
-        cartItems.style.display = 'none';
-        cartActions.style.display = 'none';
-        return;
-    }
-    
-    emptyMessage.style.display = 'none';
-    cartItems.style.display = 'block';
-    cartActions.style.display = 'block';
-    
-    let html = '';
-    let total = 0;
-    
-    cart.forEach(item => {
-        const price = item.price || 15000;
-        const itemTotal = price * item.quantity;
-        total += itemTotal;
-        
-        html += `
-            <div class="d-flex justify-content-between align-items-center mb-2 small">
-                <div>
-                    <div class="fw-bold">${item.title || 'Товар'}</div>
-                    <div class="text-muted">x${item.quantity}</div>
-                </div>
-                <div>${itemTotal.toLocaleString()} сум</div>
+        const checkboxHtml = `
+            <div class="form-check">
+                <input class="form-check-input category-filter" type="checkbox" 
+                       id="cat_${category}" value="${category}" checked>
+                <label class="form-check-label small" for="cat_${category}">
+                    ${categoryName} (${itemCount})
+                </label>
             </div>
         `;
+        categoryFiltersContainer.innerHTML += checkboxHtml;
     });
     
-    html += `
-        <hr class="my-2">
-        <div class="d-flex justify-content-between fw-bold">
-            <span>Итого:</span>
-            <span>${total.toLocaleString()} сум</span>
-        </div>
-    `;
-    
-    cartItems.innerHTML = html;
+    // Add event listeners
+    setupFilterEventListeners();
 }
 
-function toggleFavorite(vendorId) {
-    // Toggle favorite functionality
-    const favorites = JSON.parse(localStorage.getItem('foodsave_favorites')) || [];
-    const index = favorites.indexOf(vendorId);
+function getCategoryDisplayName(categorySlug) {
+    // Map category slugs to display names
+    const categoryMap = {
+        'appetizers': 'Закуски',
+        'main': 'Основные блюда',
+        'desserts': 'Десерты',
+        'drinks': 'Напитки',
+        'salads': 'Салаты',
+        'soups': 'Супы',
+        'pizza': 'Пицца',
+        'burgers': 'Бургеры'
+    };
     
-    if (index > -1) {
-        favorites.splice(index, 1);
-        showNotification('Удалено из избранного', 'info');
-    } else {
-        favorites.push(vendorId);
-        showNotification('Добавлено в избранное!', 'success');
+    // Try to get display name from the DOM
+    const categoryElement = document.querySelector(`[data-category="${categorySlug}"] .badge`);
+    if (categoryElement) {
+        return categoryElement.textContent.replace(/^\s*\S+\s*/, ''); // Remove icon
     }
     
-    localStorage.setItem('foodsave_favorites', JSON.stringify(favorites));
+    return categoryMap[categorySlug] || categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
 }
 
-function shareVendor() {
-    if (navigator.share) {
-        navigator.share({
-            title: '{{ vendor.name }} - FoodSave',
-            text: 'Посмотрите это заведение на FoodSave!',
-            url: window.location.href
-        });
+function setupFilterEventListeners() {
+    // Search input
+    document.getElementById('menuSearch').addEventListener('input', applyFilters);
+    
+    // Category checkboxes
+    document.querySelectorAll('.category-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', applyFilters);
+    });
+    
+    // Price inputs
+    document.getElementById('minPrice').addEventListener('input', applyFilters);
+    document.getElementById('maxPrice').addEventListener('input', applyFilters);
+    
+    // Availability checkboxes
+    document.getElementById('availableOnly').addEventListener('change', applyFilters);
+    document.getElementById('discountOnly').addEventListener('change', applyFilters);
+    
+    // Sort select
+    document.getElementById('sortSelect').addEventListener('change', applySorting);
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('menuSearch').value.toLowerCase();
+    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+    const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+    const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+    const availableOnly = document.getElementById('availableOnly').checked;
+    const discountOnly = document.getElementById('discountOnly').checked;
+    
+    filteredItems = allItems.filter(item => {
+        // Search filter
+        if (searchTerm && !item.title.includes(searchTerm)) {
+            return false;
+        }
+        
+        // Category filter
+        if (selectedCategories.length > 0 && !selectedCategories.includes(item.category)) {
+            return false;
+        }
+        
+        // Price filter
+        if (item.price < minPrice || item.price > maxPrice) {
+            return false;
+        }
+        
+        // Availability filter
+        if (availableOnly && !item.available) {
+            return false;
+        }
+        
+        // Discount filter
+        if (discountOnly && !item.hasDiscount) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    updateDisplay();
+}
+
+function applySorting() {
+    const sortValue = document.getElementById('sortSelect').value;
+    
+    switch (sortValue) {
+        case 'price_asc':
+            filteredItems.sort((a, b) => a.price - b.price);
+            break;
+        case 'price_desc':
+            filteredItems.sort((a, b) => b.price - a.price);
+            break;
+        case 'name_asc':
+            filteredItems.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case 'name_desc':
+            filteredItems.sort((a, b) => b.title.localeCompare(a.title));
+            break;
+        case 'discount':
+            filteredItems.sort((a, b) => {
+                if (a.hasDiscount && !b.hasDiscount) return -1;
+                if (!a.hasDiscount && b.hasDiscount) return 1;
+                return 0;
+            });
+            break;
+        default:
+            // Default order - no sorting
+            break;
+    }
+    
+    updateDisplay();
+}
+
+function updateDisplay() {
+    const menuContainer = document.getElementById('menuItems');
+    const noResults = document.getElementById('noResults');
+    const resultsCount = document.getElementById('resultsCount');
+    
+    // Hide all items first
+    allItems.forEach(item => {
+        item.element.classList.add('hidden');
+    });
+    
+    if (filteredItems.length === 0) {
+        noResults.style.display = 'block';
+        resultsCount.textContent = 'Ничего не найдено';
     } else {
-        // Fallback: copy to clipboard
-        navigator.clipboard.writeText(window.location.href);
-        showNotification('Ссылка скопирована!', 'success');
+        noResults.style.display = 'none';
+        resultsCount.textContent = `Найдено ${filteredItems.length} блюд`;
+        
+        // Show filtered items in order
+        filteredItems.forEach((item, index) => {
+            item.element.classList.remove('hidden');
+            item.element.style.order = index;
+        });
+    }
+}
+
+function clearAllFilters() {
+    // Reset search
+    document.getElementById('menuSearch').value = '';
+    
+    // Check all categories
+    document.querySelectorAll('.category-filter').forEach(cb => cb.checked = true);
+    
+    // Reset price inputs
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    
+    // Reset availability filters
+    document.getElementById('availableOnly').checked = true;
+    document.getElementById('discountOnly').checked = false;
+    
+    // Reset sorting
+    document.getElementById('sortSelect').value = 'default';
+    
+    // Reapply filters
+    applyFilters();
+    
+    showNotification('Фильтры очищены', 'info');
+}
+
+function addToCart(offerId, title, price) {
+    const cart = JSON.parse(localStorage.getItem('foodsave_cart')) || [];
+    const existingItem = cart.find(item => item.offerId === offerId);
+    
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cart.push({
+            offerId,
+            title,
+            price,
+            quantity: 1
+        });
+    }
+    
+    localStorage.setItem('foodsave_cart', JSON.stringify(cart));
+}
+
+function updateCartCount() {
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+        const cart = JSON.parse(localStorage.getItem('foodsave_cart')) || [];
+        cartCount.textContent = cart.length;
     }
 }
 </script>

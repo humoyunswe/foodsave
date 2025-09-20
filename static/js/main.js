@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function() {
             const offerId = this.dataset.offerId;
-            addToCart(offerId, this);
+            addToCartAPI(offerId);
         });
     });
 
@@ -354,62 +354,49 @@ function showLoadingState() {
 
 // Enhanced cart functionality
 function updateCartCount() {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    let totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    let cartBadge = document.querySelector('.cart-count');
-    
-    if (cartBadge) { 
-        cartBadge.textContent = totalItems; 
-        cartBadge.style.display = totalItems > 0 ? 'inline' : 'none'; 
-    }
+    // Получаем количество товаров через API
+    fetch('/booking/api/cart/count/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartBadge = document.querySelector('.cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.style.display = data.cart_count > 0 ? 'inline' : 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Error updating cart count:', error));
 }
 
-// Add to cart with animation
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn')) {
-        e.preventDefault();
-        const btn = e.target.closest('.add-to-cart-btn');
-        const itemId = btn.dataset.itemId;
-        const offerId = btn.dataset.offerId;
-        const card = btn.closest('.card');
-        const itemName = card.querySelector('h6').textContent;
-        const itemPrice = card.querySelector('.fw-bold').textContent.replace(/[^\d.]/g, '');
-        
-        // Add loading state to button
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-        
-        setTimeout(() => {
-            addToCart(offerId, itemName, itemPrice);
-            btn.innerHTML = '<i class="fas fa-check"></i>';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-            }, 1000);
-        }, 300);
-    }
-});
-
-function addToCart(offerId, itemName, itemPrice) {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    let existingItem = cart.find(item => item.offerId === offerId);
-    
-    if (existingItem) { 
-        existingItem.quantity += 1; 
-    } else { 
-        cart.push({ 
-            offerId: offerId, 
-            name: itemName, 
-            price: parseFloat(itemPrice), 
-            quantity: 1 
-        }); 
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    showNotification(`${itemName} добавлен в корзину!`, 'success');
+function addToCartAPI(offerId, quantity = 1, itemName = 'Товар') {
+    return fetch('/booking/api/cart/add/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            offer_id: offerId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCartCount();
+            showNotification(data.message, 'success');
+            return data;
+        } else {
+            showNotification(data.message, 'error');
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+        showNotification('Ошибка при добавлении в корзину', 'error');
+        throw error;
+    });
 }
 
 // Favorite functionality with animation
