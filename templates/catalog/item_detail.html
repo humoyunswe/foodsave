@@ -5,99 +5,135 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'catalog' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'catalog:catalog' %}">Каталог</a></li>
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb modern-breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog' %}" class="breadcrumb-link">
+                    <i class="fas fa-home me-1"></i>Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog:catalog' %}" class="breadcrumb-link">Каталог</a>
+            </li>
             {% if item.category and item.category.slug %}
-                <li class="breadcrumb-item"><a href="{% url 'catalog:category' item.category.slug %}">{{ item.category.name }}</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'catalog:category' item.category.slug %}" class="breadcrumb-link">
+                        {{ item.category.name }}
+                    </a>
+                </li>
             {% endif %}
             <li class="breadcrumb-item active">{{ item.title }}</li>
         </ol>
     </nav>
     
-    <div class="row">
-        <!-- Product Images -->
-        <div class="col-lg-6 mb-4">
-            {% if images %}
-                <div id="productCarousel" class="carousel slide premium-carousel" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        {% for image in images %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <div class="position-relative">
-                                    <img src="{{ image.image.url }}" class="d-block w-100 rounded" alt="{{ item.title }}" style="height: 400px; object-fit: cover;">
-                                    {% if offers.first and offers.first.discount_percent %}
-                                        <span class="discount-badge-overlay">-{{ offers.first.discount_percent|floatformat:0 }}%</span>
-                                    {% endif %}
+    <div class="row g-4">
+        <!-- Product Images Column -->
+        <div class="col-lg-6">
+            <!-- Image Carousel -->
+            <div class="image-section mb-4">
+                {% if images %}
+                    <div id="productCarousel" class="carousel slide product-carousel" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in images %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <div class="image-container">
+                                        <img src="{{ image.image.url }}" class="carousel-image" alt="{{ item.title }}">
+                                        {% if offers.first and offers.first.discount_percent %}
+                                            <div class="discount-overlay">
+                                                -{{ offers.first.discount_percent|floatformat:0 }}%
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if images|length > 1 %}
+                            <button class="carousel-control-prev modern-carousel-control" type="button" 
+                                    data-bs-target="#productCarousel" data-bs-slide="prev">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-control-next modern-carousel-control" type="button" 
+                                    data-bs-target="#productCarousel" data-bs-slide="next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        {% endif %}
                     </div>
-                    {% if images|length > 1 %}
-                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon"></span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon"></span>
-                        </button>
-                    {% endif %}
-                </div>
-            {% else %}
-                <div class="position-relative">
-                    <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop" class="d-block w-100 rounded" alt="{{ item.title }}" style="height: 400px; object-fit: cover;">
-                    {% if offers.first and offers.first.discount_percent %}
-                        <span class="discount-badge-overlay">-{{ offers.first.discount_percent|floatformat:0 }}%</span>
-                    {% endif %}
-                </div>
-            {% endif %}
-            
-            <!-- Branch Information Card -->
+                {% else %}
+                    <div class="image-container">
+                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop" 
+                             class="carousel-image" alt="{{ item.title }}">
+                        {% if offers.first and offers.first.discount_percent %}
+                            <div class="discount-overlay">
+                                -{{ offers.first.discount_percent|floatformat:0 }}%
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Branch Information -->
             {% if branch %}
-            <div class="card mt-4 branch-info-card">
-                <div class="card-body">
-                    <h6 class="card-title mb-3">
-                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                        Информация о филiale
+            <div class="card info-card">
+                <div class="card-header info-card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Информация о филиале
                     </h6>
-                    
-                    <div class="branch-details">
-                        <div class="detail-item mb-2">
-                            <i class="fas fa-home text-muted me-2"></i>
-                            <span class="text-muted">Адрес:</span>
-                            <span class="ms-1">{{ address }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-home info-icon"></i>
+                            <div class="info-content">
+                                <span class="info-label">Адрес</span>
+                                <span class="info-value">{{ address }}</span>
+                            </div>
                         </div>
                         
                         {% if phone %}
-                        <div class="detail-item mb-2">
-                            <i class="fas fa-phone text-muted me-2"></i>
-                            <span class="text-muted">Телефон:</span>
-                            <a href="tel:{{ phone }}" class="ms-1 text-decoration-none">{{ phone }}</a>
+                        <div class="info-item">
+                            <i class="fas fa-phone info-icon"></i>
+                            <div class="info-content">
+                                <span class="info-label">Телефон</span>
+                                <a href="tel:{{ phone }}" class="info-link">{{ phone }}</a>
+                            </div>
                         </div>
                         {% endif %}
                         
-                        <div class="detail-item mb-2">
-                            <i class="fas fa-clock text-muted me-2"></i>
-                            <span class="text-muted">Часы работы:</span>
-                            {% if opening_hours %}
-                                <span class="ms-1">{{ opening_hours }}</span>
-                                {% if is_open %}
-                                    <span class="badge bg-success ms-2">Открыто</span>
-                                {% else %}
-                                    <span class="badge bg-danger ms-2">Закрыто</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="ms-1 text-muted">Не указано</span>
-                            {% endif %}
+                        <div class="info-item">
+                            <i class="fas fa-clock info-icon"></i>
+                            <div class="info-content">
+                                <span class="info-label">Часы работы</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if opening_hours %}
+                                        <span class="info-value">{{ opening_hours }}</span>
+                                        {% if is_open %}
+                                            <span class="status-badge status-open">Открыто</span>
+                                        {% else %}
+                                            <span class="status-badge status-closed">Закрыто</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="info-value text-muted">Не указано</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <div class="detail-item mb-2">
-                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                            <span class="text-muted">Расстояние:</span>
-                            <span id="distance-display" class="ms-1"></span>
-                            <button class="btn btn-link p-0 ms-2" onclick="showOnMap({{ branch.latitude }}, {{ branch.longitude }})">
-                                <i class="fas fa-map me-1"></i>
-                                Показать на карте
-                            </button>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-route info-icon"></i>
+                            <div class="info-content">
+                                <span class="info-label">Расстояние</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span id="distance-display" class="info-value">Вычисляется...</span>
+                                    <button class="btn btn-link btn-sm p-0 map-button" 
+                                            onclick="showOnMap({{ branch.latitude }}, {{ branch.longitude }})">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        Карта
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -105,134 +141,139 @@
             {% endif %}
         </div>
         
-        <!-- Product Info -->
+        <!-- Product Information Column -->
         <div class="col-lg-6">
+            <!-- Product Header -->
             <div class="product-header mb-4">
-                <h1 class="product-title mb-3">{{ item.title }}</h1>
+                <h1 class="product-title">{{ item.title }}</h1>
                 
-                <div class="product-badges mb-3">
-                    <span class="badge bg-primary vendor-badge">
+                <div class="badge-row mb-3">
+                    <span class="modern-badge badge-vendor">
                         <i class="fas fa-store me-1"></i>{{ item.vendor.name }}
                     </span>
                     {% if item.category %}
-                        <span class="badge bg-secondary category-badge">
+                        <span class="modern-badge badge-category">
                             <i class="fas fa-tag me-1"></i>{{ item.category.name }}
                         </span>
                     {% endif %}
-                    <span class="badge bg-info unit-badge">
+                    <span class="modern-badge badge-unit">
                         <i class="fas fa-balance-scale me-1"></i>{{ item.get_unit_display }}
                     </span>
                 </div>
                 
                 {% if item.description %}
-                <p class="product-description lead mb-4">{{ item.description }}</p>
+                    <p class="product-description">{{ item.description }}</p>
                 {% endif %}
             </div>
             
-            <!-- Available Offers -->
+            <!-- Available Offers Section -->
             <div class="offers-section mb-4">
-                <h5 class="section-title mb-3">
-                    <i class="fas fa-fire text-danger me-2"></i>
-                    Доступные предложения
-                </h5>
+                <div class="section-header mb-3">
+                    <h5 class="section-title">
+                        <i class="fas fa-fire me-2"></i>
+                        Доступные предложения
+                    </h5>
+                </div>
                 
                 {% for offer in offers %}
-                    <div class="card mb-3 premium-offer">
-                        <div class="card-body">
-                            <div class="row align-items-center g-3">
-                                <div class="col-md-6">
-                                    <div class="price-section">
-                                        <div class="current-price fs-4 text-success fw-bold mb-1">
-                                            {{ offer.current_price|floatformat:0 }} сум
-                                        </div>
-                                        {% if offer.original_price != offer.current_price %}
-                                            <div class="original-price">
-                                                <small class="text-muted text-decoration-line-through me-2">
-                                                    {{ offer.original_price|floatformat:0 }} сум
-                                                </small>
-                                                <span class="badge bg-danger discount-badge">
-                                                    -{{ offer.discount_percent|floatformat:0 }}%
-                                                </span>
-                                            </div>
-                                        {% endif %}
+                    <div class="offer-card mb-3">
+                        <div class="offer-content">
+                            <div class="price-section">
+                                <div class="current-price">
+                                    {{ offer.current_price|floatformat:0 }} сум
+                                </div>
+                                {% if offer.original_price != offer.current_price %}
+                                    <div class="price-details">
+                                        <span class="original-price">
+                                            {{ offer.original_price|floatformat:0 }} сум
+                                        </span>
+                                        <span class="discount-badge">
+                                            -{{ offer.discount_percent|floatformat:0 }}%
+                                        </span>
                                     </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="offer-meta">
+                                <div class="time-chip">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Сегодня
                                 </div>
-                                
-                                <div class="col-md-3 text-center">
-                                    <div class="offer-details">
-                                        <span class="chip-time mb-2">Сегодня</span>
-                                        <div class="quantity-info">
-                                            <small class="text-muted">
-                                                <i class="fas fa-box me-1"></i>
-                                                Доступно: {{ offer.quantity_available }}
-                                            </small>
-                                        </div>
-                                    </div>
+                                <div class="quantity-info">
+                                    <i class="fas fa-box me-1"></i>
+                                    Доступно: {{ offer.quantity_available }}
                                 </div>
-                                
-                                <div class="col-md-3">
-                                    <button class="btn btn-primary btn-add-cart w-100 add-to-cart" data-offer-id="{{ offer.id }}">
-                                        <i class="fas fa-shopping-cart me-2"></i>
-                                        В корзину
-                                    </button>
-                                </div>
+                            </div>
+                            
+                            <div class="offer-action">
+                                <button class="btn btn-primary btn-add-cart" data-offer-id="{{ offer.id }}">
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    В корзину
+                                </button>
                             </div>
                         </div>
                     </div>
                 {% empty %}
                     <div class="alert alert-warning no-offers-alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        В данный момент предложений нет
+                        <div class="alert-content">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span>В данный момент предложений нет</span>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
             
-            <!-- Vendor Info -->
-            <div class="card vendor-info-card">
-                <div class="card-header bg-light">
+            <!-- Vendor Information -->
+            <div class="card info-card">
+                <div class="card-header info-card-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        <i class="fas fa-info-circle me-2"></i>
                         О {{ item.vendor.get_type_display|lower }}е
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="vendor-header d-flex align-items-center mb-3">
-                        {% if item.vendor.logo %}
-                            <img src="{{ item.vendor.logo.url }}" alt="{{ item.vendor.name }}" 
-                                 class="vendor-logo rounded me-3" width="60" height="60">
-                        {% else %}
-                            <div class="vendor-logo-placeholder rounded me-3 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-store text-muted"></i>
+                    <div class="vendor-profile">
+                        <div class="vendor-header">
+                            {% if item.vendor.logo %}
+                                <img src="{{ item.vendor.logo.url }}" alt="{{ item.vendor.name }}" 
+                                     class="vendor-logo">
+                            {% else %}
+                                <div class="vendor-logo-placeholder">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="vendor-details">
+                                <div class="vendor-name-row">
+                                    <h6 class="vendor-name">{{ item.vendor.name }}</h6>
+                                    <span class="verified-badge">
+                                        <i class="fas fa-check me-1"></i>Проверено
+                                    </span>
+                                </div>
+                                <div class="vendor-type">{{ item.vendor.get_type_display }}</div>
                             </div>
-                        {% endif %}
-                        <div class="vendor-details">
-                            <h6 class="vendor-name mb-1">
-                                {{ item.vendor.name }}
-                                <span class="badge bg-success verified-badge ms-2">
-                                    <i class="fas fa-check me-1"></i>Проверено
-                                </span>
-                            </h6>
-                            <small class="text-muted vendor-type">{{ item.vendor.get_type_display }}</small>
                         </div>
-                    </div>
-                    
-                    {% if item.vendor.description %}
-                        <p class="vendor-description mb-3">{{ item.vendor.description|truncatewords:25 }}</p>
-                    {% endif %}
-                    
-                    <div class="vendor-rating d-flex align-items-center">
-                        <span class="rating-stars text-warning me-2">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= item.vendor.rating %}
-                                    <i class="fas fa-star"></i>
-                                {% else %}
-                                    <i class="far fa-star"></i>
-                                {% endif %}
-                            {% endfor %}
-                        </span>
-                        <span class="rating-text text-muted">
-                            {{ item.vendor.rating|floatformat:1 }}/5.0
-                        </span>
+                        
+                        {% if item.vendor.description %}
+                            <p class="vendor-description">
+                                {{ item.vendor.description|truncatewords:25 }}
+                            </p>
+                        {% endif %}
+                        
+                        <div class="vendor-rating">
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= item.vendor.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="rating-text">
+                                {{ item.vendor.rating|floatformat:1 }}/5.0
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -241,11 +282,563 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+/* Modern Breadcrumb */
+.modern-breadcrumb {
+    background: transparent;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 0;
+}
+
+.breadcrumb-link {
+    color: #015654;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: #014a4a;
+}
+
+.modern-breadcrumb .breadcrumb-item.active {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Image Section */
+.image-section {
+    position: relative;
+}
+
+.product-carousel {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(1, 86, 84, 0.15);
+    background: #fff;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.carousel-image:hover {
+    transform: scale(1.02);
+}
+
+.discount-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    z-index: 2;
+}
+
+.modern-carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(1, 86, 84, 0.9);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 3;
+    backdrop-filter: blur(10px);
+}
+
+.modern-carousel-control:hover {
+    background: #015654;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-control-prev {
+    left: 20px;
+}
+
+.carousel-control-next {
+    right: 20px;
+}
+
+/* Product Header */
+.product-header {
+    padding: 1rem 0;
+}
+
+.product-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.modern-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.badge-vendor {
+    background: linear-gradient(135deg, #015654, #014a4a);
+    color: white;
+    box-shadow: 0 2px 8px rgba(1, 86, 84, 0.3);
+}
+
+.badge-category {
+    background: #f3f4f6;
+    color: #374151;
+    border-color: #e5e7eb;
+}
+
+.badge-unit {
+    background: #eff6ff;
+    color: #1e3a8a;
+    border-color: #dbeafe;
+}
+
+.product-description {
+    font-size: 1.125rem;
+    color: #6b7280;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+
+/* Section Headers */
+.section-header {
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.section-title .fas.fa-fire {
+    color: #ef4444;
+}
+
+/* Offer Cards */
+.offer-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.offer-card:hover {
+    box-shadow: 0 8px 25px rgba(1, 86, 84, 0.15);
+    transform: translateY(-2px);
+    border-color: #015654;
+}
+
+.offer-content {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.price-section .current-price {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #059669;
+    margin-bottom: 0.5rem;
+}
+
+.price-details {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.original-price {
+    color: #9ca3af;
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.discount-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.offer-meta {
+    text-align: center;
+}
+
+.time-chip {
+    background: #eff6ff;
+    color: #1e3a8a;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.quantity-info {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-add-cart {
+    background: #015654;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(1, 86, 84, 0.3);
+}
+
+.btn-add-cart:hover {
+    background: #014a4a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 86, 84, 0.4);
+    color: white;
+}
+
+/* Info Cards */
+.info-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    background: white;
+}
+
+.info-card-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+}
+
+.info-card-header h6 {
+    color: #374151;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* Info Grid */
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.info-icon {
+    color: #015654;
+    width: 20px;
+    text-align: center;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-label {
+    display: block;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.info-link {
+    color: #015654;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.info-link:hover {
+    color: #014a4a;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-open {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-closed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.map-button {
+    color: #015654 !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.map-button:hover {
+    color: #014a4a !important;
+}
+
+/* Vendor Profile */
+.vendor-profile {
+    padding: 0;
+}
+
+.vendor-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.vendor-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
+.vendor-logo-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.5rem;
+}
+
+.vendor-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.vendor-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.vendor-name {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.verified-badge {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.vendor-type {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.vendor-description {
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.vendor-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.rating-stars {
+    color: #fbbf24;
+    font-size: 1.125rem;
+}
+
+.rating-text {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* No Offers Alert */
+.no-offers-alert {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    color: #92400e;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .offer-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .vendor-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-title {
+        font-size: 1.75rem;
+    }
+    
+    .badge-row {
+        gap: 0.5rem;
+    }
+    
+    .modern-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .image-container {
+        height: 300px;
+    }
+    
+    .modern-carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .carousel-control-prev {
+        left: 15px;
+    }
+    
+    .carousel-control-next {
+        right: 15px;
+    }
+    
+    .price-section .current-price {
+        font-size: 1.5rem;
+    }
+    
+    .info-grid {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-title {
+        font-size: 1.5rem;
+    }
+    
+    .offer-card {
+        padding: 1rem;
+    }
+    
+    .discount-overlay {
+        top: 15px;
+        left: 15px;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-document.querySelectorAll('.add-to-cart').forEach(button => {
+// Add to Cart Functionality
+document.querySelectorAll('.btn-add-cart').forEach(button => {
     button.addEventListener('click', function() {
         const offerId = this.dataset.offerId;
+        const originalContent = this.innerHTML;
         
         // Add loading state
         this.disabled = true;
@@ -255,7 +848,7 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
         setTimeout(() => {
             // Reset button
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>В корзину';
+            this.innerHTML = originalContent;
             
             // Show success message
             if (window.showToast) {
@@ -263,11 +856,11 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
             }
             
             console.log('Adding offer to cart:', offerId);
-        }, 1000);
+        }, 1200);
     });
 });
 
-// Distance calculation function
+// Distance Calculation
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Earth's radius in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -279,9 +872,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-// Get user location and calculate distance
+// Get User Location and Calculate Distance
 function getUserLocationAndCalculateDistance() {
     const distanceDisplay = document.getElementById('distance-display');
+    
+    if (!distanceDisplay) return;
     
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -296,25 +891,31 @@ function getUserLocationAndCalculateDistance() {
                 const distance = calculateDistance(userLat, userLng, branchLat, branchLng);
                 
                 if (distance < 1) {
-                    distanceDisplay.innerHTML = `${Math.round(distance * 1000)} м`;
+                    distanceDisplay.textContent = `${Math.round(distance * 1000)} м`;
                 } else {
-                    distanceDisplay.innerHTML = `${distance.toFixed(1)} км`;
+                    distanceDisplay.textContent = `${distance.toFixed(1)} км`;
                 }
                 {% endif %}
             },
             function(error) {
                 console.error('Error getting location:', error);
-                distanceDisplay.innerHTML = 'Расстояние недоступно';
+                distanceDisplay.textContent = 'Недоступно';
+                distanceDisplay.className = 'info-value text-muted';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
             }
         );
     } else {
-        distanceDisplay.innerHTML = 'Геолокация не поддерживается';
+        distanceDisplay.textContent = 'Не поддерживается';
+        distanceDisplay.className = 'info-value text-muted';
     }
 }
 
-// Show on map function
+// Show Location on Map
 function showOnMap(lat, lng) {
-    // Try to open in different map applications
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
@@ -335,199 +936,142 @@ function showOnMap(lat, lng) {
     }
 }
 
-// Initialize distance calculation when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    getUserLocationAndCalculateDistance();
+// Smooth scrolling for internal links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
 });
+
+// Image loading error handler
+document.querySelectorAll('.carousel-image').forEach(img => {
+    img.addEventListener('error', function() {
+        if (!this.dataset.fallbackApplied) {
+            this.dataset.fallbackApplied = '1';
+            this.src = "{% static 'images/placeholder.jpg' %}";
+        }
+    });
+});
+
+// Enhanced carousel functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.getElementById('productCarousel');
+    if (carousel) {
+        // Add swipe support for mobile
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        carousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        carousel.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.touches[0].clientX;
+        });
+
+        carousel.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            const threshold = 50;
+            
+            if (Math.abs(diffX) > threshold) {
+                const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                if (diffX > 0) {
+                    carouselInstance.next();
+                } else {
+                    carouselInstance.prev();
+                }
+            }
+        });
+    }
+
+    // Initialize distance calculation
+    getUserLocationAndCalculateDistance();
+    
+    // Add loading animation to buttons
+    document.querySelectorAll('.btn-add-cart').forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            if (!this.disabled) {
+                this.style.transform = 'translateY(-1px)';
+            }
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            if (!this.disabled) {
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Apply animation to cards
+    document.querySelectorAll('.offer-card, .info-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+
+// Utility function for price formatting
+function formatPrice(price) {
+    return new Intl.NumberFormat('uz-UZ', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(price);
+}
+
+// Enhanced error handling for geolocation
+function handleGeolocationError(error) {
+    const distanceDisplay = document.getElementById('distance-display');
+    if (!distanceDisplay) return;
+    
+    let message = 'Недоступно';
+    
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            message = 'Доступ запрещен';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            message = 'Недоступно';
+            break;
+        case error.TIMEOUT:
+            message = 'Время ожидания';
+            break;
+        default:
+            message = 'Ошибка';
+            break;
+    }
+    
+    distanceDisplay.textContent = message;
+    distanceDisplay.className = 'info-value text-muted';
+}
 </script>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-/* Premium carousel styling */
-.premium-carousel .carousel-inner { 
-    border-radius: 12px; 
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-/* Discount badge overlay */
-.discount-badge-overlay { 
-    position: absolute; 
-    top: 15px; 
-    left: 15px; 
-    background: linear-gradient(135deg, #ef4444, #f97316); 
-    color: #fff; 
-    font-weight: 700; 
-    border-radius: 12px; 
-    padding: 8px 12px; 
-    font-size: 0.9rem;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-/* Product header styling */
-.product-title { 
-    font-size: 2rem; 
-    line-height: 1.2; 
-    margin-bottom: 1rem !important; 
-    color: #1f2937;
-    font-weight: 600;
-}
-
-.product-badges .badge { 
-    margin-right: 8px; 
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.product-description {
-    color: #6b7280;
-    line-height: 1.6;
-}
-
-/* Section titles */
-.section-title {
-    color: #1f2937;
-    font-weight: 600;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 8px;
-}
-
-/* Offer cards */
-.premium-offer { 
-    border: 1px solid #e5e7eb; 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.premium-offer:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    transform: translateY(-2px);
-}
-
-.price-section .current-price {
-    color: #059669 !important;
-}
-
-.discount-badge {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-}
-
-/* Time chip */
-.chip-time { 
-    background: #eff6ff; 
-    color: #1e3a8a; 
-    border: 1px solid #dbeafe; 
-    border-radius: 20px; 
-    padding: 6px 12px; 
-    font-weight: 600; 
-    font-size: 0.8rem;
-    display: inline-block;
-}
-
-/* Add to cart button */
-.btn-add-cart {
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 10px 16px;
-    transition: all 0.3s ease;
-}
-
-.btn-add-cart:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-/* Branch info card */
-.branch-info-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.branch-info-card .card-title {
-    color: #1f2937;
-    font-weight: 600;
-}
-
-.detail-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 0;
-}
-
-.detail-item i {
-    width: 16px;
-    text-align: center;
-}
-
-/* Vendor info card */
-.vendor-info-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.vendor-logo {
-    object-fit: cover;
-    border: 2px solid #e5e7eb;
-}
-
-.vendor-logo-placeholder {
-    width: 60px;
-    height: 60px;
-    background: #f3f4f6;
-    border: 2px solid #e5e7eb;
-}
-
-.vendor-name {
-    color: #1f2937;
-    font-weight: 600;
-}
-
-.verified-badge {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-}
-
-.vendor-description {
-    color: #6b7280;
-    line-height: 1.5;
-}
-
-.rating-stars {
-    font-size: 1.1rem;
-}
-
-/* No offers alert */
-.no-offers-alert {
-    border-radius: 12px;
-    border: 1px solid #fbbf24;
-    background: #fef3c7;
-    color: #92400e;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .product-title {
-        font-size: 1.5rem;
-    }
-    
-    .premium-offer .row > div {
-        margin-bottom: 1rem;
-    }
-    
-    .vendor-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .vendor-logo, .vendor-logo-placeholder {
-        margin-bottom: 1rem;
-    }
-}
-</style>
 {% endblock %}
