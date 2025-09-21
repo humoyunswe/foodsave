@@ -5,126 +5,368 @@
 
 {% block content %}
 <div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb modern-breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog' %}" class="breadcrumb-link">
+                    <i class="fas fa-home me-1"></i>Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'vendors:vendor_dashboard' %}" class="breadcrumb-link">Панель</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'vendors:manage_items' vendor.id %}" class="breadcrumb-link">Товары</a>
+            </li>
+            <li class="breadcrumb-item active">Редактирование</li>
+        </ol>
+    </nav>
+
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-edit me-2"></i>Редактировать товар
-                    </h4>
-                    <small>{{ vendor.name }}</small>
+        <div class="col-xl-10 col-lg-11">
+            <!-- Page Header -->
+            <div class="page-header mb-4">
+                <div class="header-content">
+                    <div class="header-info">
+                        <h1 class="page-title">Редактировать товар</h1>
+                        <p class="page-subtitle">{{ item.title }}</p>
+                        <div class="vendor-badge">
+                            <i class="fas fa-store me-2"></i>{{ vendor.name }}
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card edit-form-card">
+                <div class="card-header">
+                    <div class="card-header-content">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-edit me-2"></i>Информация о товаре
+                        </h5>
+                        <div class="form-status">
+                            {% if item.is_active %}
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-check-circle me-1"></i>Активен
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactive">
+                                    <i class="fas fa-pause-circle me-1"></i>Неактивен
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card-body">
-                    <!-- Display form errors -->
+                    <!-- Global Form Errors -->
                     {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
+                        <div class="alert alert-danger form-alert" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <div>
+                                <strong>Ошибка при сохранении:</strong>
+                                <ul class="mb-0 mt-1">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     {% endif %}
                     
                     {% if image_formset.non_form_errors %}
-                        <div class="alert alert-danger">
-                            {{ image_formset.non_form_errors }}
+                        <div class="alert alert-warning form-alert" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <div>
+                                <strong>Проблемы с изображениями:</strong>
+                                <ul class="mb-0 mt-1">
+                                    {% for error in image_formset.non_form_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     {% endif %}
                     
-                    <form method="post" enctype="multipart/form-data" action="{% url 'vendors:edit_item' item.id %}">
+                    <form method="post" enctype="multipart/form-data" 
+                          action="{% url 'vendors:edit_item' item.id %}" 
+                          class="edit-form" id="editItemForm">
                         {% csrf_token %}
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.branch.id_for_label }}" class="form-label">Филиал</label>
-                                    {{ form.branch }}
-                                    {% if form.branch.errors %}
-                                        <div class="text-danger small">{{ form.branch.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="{{ form.title.id_for_label }}" class="form-label">Название товара</label>
-                                    {{ form.title }}
-                                    {% if form.title.errors %}
-                                        <div class="text-danger small">{{ form.title.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
-                                    {{ form.category }}
-                                    {% if form.category.errors %}
-                                        <div class="text-danger small">{{ form.category.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="{{ form.unit.id_for_label }}" class="form-label">Единица измерения</label>
-                                    {{ form.unit }}
-                                    {% if form.unit.errors %}
-                                        <div class="text-danger small">{{ form.unit.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="mb-3" id="customUnitDiv" style="display: none;">
-                                    <label for="{{ form.custom_unit.id_for_label }}" class="form-label">Своя единица измерения</label>
-                                    {{ form.custom_unit }}
-                                    {% if form.custom_unit.errors %}
-                                        <div class="text-danger small">{{ form.custom_unit.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
+                        <!-- Basic Information Section -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <h6 class="section-title">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Основная информация
+                                </h6>
                             </div>
                             
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
-                                    {{ form.description }}
-                                    {% if form.description.errors %}
-                                        <div class="text-danger small">{{ form.description.errors.0 }}</div>
-                                    {% endif %}
+                            <div class="row g-4">
+                                <!-- Branch Selection -->
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.branch.id_for_label }}" class="form-label required">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            Филиал
+                                        </label>
+                                        {{ form.branch }}
+                                        {% if form.branch.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.branch.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Выберите филиал, где будет доступен товар</div>
+                                    </div>
                                 </div>
                                 
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                            Товар активен
+                                <!-- Category Selection -->
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.category.id_for_label }}" class="form-label required">
+                                            <i class="fas fa-tag me-1"></i>
+                                            Категория
                                         </label>
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.category.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Категория поможет покупателям найти товар</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Product Title -->
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="{{ form.title.id_for_label }}" class="form-label required">
+                                            <i class="fas fa-heading me-1"></i>
+                                            Название товара
+                                        </label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.title.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Краткое и понятное название товара</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                                            <i class="fas fa-align-left me-1"></i>
+                                            Описание
+                                        </label>
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.description.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Подробное описание товара, состав, особенности</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Image Management -->
-                        <div class="mb-4">
-                            <h5>Фотографии товара</h5>
-                            <div class="row">
+                        <!-- Unit and Settings Section -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <h6 class="section-title">
+                                    <i class="fas fa-cog me-2"></i>
+                                    Единица измерения и настройки
+                                </h6>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-lg-8">
+                                    <div class="form-group">
+                                        <label for="{{ form.unit.id_for_label }}" class="form-label required">
+                                            <i class="fas fa-balance-scale me-1"></i>
+                                            Единица измерения
+                                        </label>
+                                        {{ form.unit }}
+                                        {% if form.unit.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.unit.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Как измеряется количество товара</div>
+                                    </div>
+                                    
+                                    <!-- Custom Unit Field -->
+                                    <div class="form-group" id="customUnitGroup" style="display: none;">
+                                        <label for="{{ form.custom_unit.id_for_label }}" class="form-label required">
+                                            <i class="fas fa-edit me-1"></i>
+                                            Своя единица измерения
+                                        </label>
+                                        {{ form.custom_unit }}
+                                        {% if form.custom_unit.errors %}
+                                            <div class="form-error">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.custom_unit.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-hint">Укажите свою единицу измерения</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Статус товара</label>
+                                        <div class="toggle-group">
+                                            <div class="form-check form-switch">
+                                                {{ form.is_active }}
+                                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                                    <span class="switch-label">Товар активен</span>
+                                                    <small class="switch-hint d-block">Будет отображаться в каталоге</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Management Section -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <h6 class="section-title">
+                                    <i class="fas fa-images me-2"></i>
+                                    Фотографии товара
+                                </h6>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="addImageBtn">
+                                        <i class="fas fa-plus me-1"></i>Добавить фото
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="images-grid" id="imagesContainer">
+                                {{ image_formset.management_form }}
                                 {% for image_form in image_formset %}
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card">
+                                    <div class="image-item" data-form-index="{{ forloop.counter0 }}">
+                                        <div class="image-card">
                                             {% if image_form.instance.image %}
-                                                <img src="{{ image_form.instance.image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                <div class="image-preview">
+                                                    <img src="{{ image_form.instance.image.url }}" 
+                                                         alt="Изображение товара" 
+                                                         class="preview-img">
+                                                    <div class="image-overlay">
+                                                        <button type="button" class="btn btn-sm btn-danger delete-image-btn">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="image-upload-area">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <span>Выберите изображение</span>
+                                                </div>
                                             {% endif %}
-                                            <div class="card-body p-2">
-                                                {{ image_form.as_p }}
+                                            
+                                            <div class="image-controls">
+                                                <!-- Hidden fields for formset management -->
+                                                {% for hidden_field in image_form.hidden_fields %}
+                                                    {{ hidden_field }}
+                                                {% endfor %}
+                                                
+                                                <!-- File input -->
+                                                <div class="form-group mb-2">
+                                                    {{ image_form.image }}
+                                                    {% if image_form.image.errors %}
+                                                        <div class="form-error-small">{{ image_form.image.errors.0 }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Order field -->
+                                                {% if image_form.order %}
+                                                    <div class="form-group mb-2">
+                                                        <label class="form-label-small">Порядок:</label>
+                                                        {{ image_form.order }}
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Delete checkbox -->
+                                                {% if image_form.DELETE %}
+                                                    <div class="form-check">
+                                                        {{ image_form.DELETE }}
+                                                        <label class="form-check-label-small" for="{{ image_form.DELETE.id_for_label }}">
+                                                            Удалить
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
                                 {% endfor %}
                             </div>
-                            {{ image_formset.management_form }}
+                            
+                            <div class="upload-hints mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Рекомендуемый размер изображений: 800x600px. Максимальный размер файла: 5MB. 
+                                    Поддерживаемые форматы: JPG, PNG, WebP.
+                                </small>
+                            </div>
                         </div>
                         
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Назад
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Сохранить изменения
-                            </button>
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <div class="actions-left">
+                                <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Отменить
+                                </a>
+                            </div>
+                            <div class="actions-right">
+                                <button type="button" class="btn btn-outline-primary btn-lg" id="previewBtn">
+                                    <i class="fas fa-eye me-2"></i>Предварительный просмотр
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                                    <i class="fas fa-save me-2"></i>Сохранить изменения
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Предварительный просмотр
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <!-- Preview content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('saveBtn').click(); $('#previewModal').modal('hide');">
+                    <i class="fas fa-save me-2"></i>Сохранить
+                </button>
             </div>
         </div>
     </div>
@@ -133,22 +375,497 @@
 
 {% block extra_css %}
 <style>
+/* Modern Breadcrumb */
+.modern-breadcrumb {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+}
+
+.breadcrumb-link {
+    color: #015654;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: #014a4a;
+}
+
+.modern-breadcrumb .breadcrumb-item.active {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #015654, #014a4a);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    box-shadow: 0 8px 25px rgba(1, 86, 84, 0.2);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: white;
+}
+
+.page-subtitle {
+    font-size: 1.125rem;
+    margin: 0 0 1rem 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.vendor-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+/* Main Form Card */
+.edit-form-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.edit-form-card .card-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+}
+
+.card-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    color: #1f2937;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.edit-form-card .card-body {
+    padding: 2rem;
+}
+
+/* Form Alerts */
+.form-alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.form-alert i {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+/* Form Sections */
+.form-section {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.section-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-label.required::after {
+    content: '*';
+    color: #ef4444;
+    margin-left: 0.25rem;
+}
+
+.form-label i {
+    color: #015654;
+    margin-right: 0.5rem;
+}
+
+/* Form Controls */
 .form-control, .form-select {
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #015654;
+    box-shadow: 0 0 0 0.2rem rgba(1, 86, 84, 0.25);
+    outline: none;
 }
 
-.card {
+.form-control[type="file"] {
+    padding: 0.5rem;
+    border: 2px dashed #cbd5e1;
+    background: #f8fafc;
+}
+
+.form-control[type="file"]:hover {
+    border-color: #015654;
+    background: #f0fdfa;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Form Hints and Errors */
+.form-hint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-error-small {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Toggle Group */
+.toggle-group {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
+    padding: 1rem;
 }
 
-.card-header {
-    border-radius: 12px 12px 0 0;
+.form-check-label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.switch-label {
+    font-weight: 600;
+}
+
+.switch-hint {
+    color: #6b7280;
+    font-weight: 400;
+}
+
+.form-switch .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    background-color: #cbd5e1;
+    border: none;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #015654;
+    border-color: #015654;
+}
+
+/* Images Grid */
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.image-item {
+    position: relative;
+}
+
+.image-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.image-card:hover {
+    border-color: #015654;
+    box-shadow: 0 4px 12px rgba(1, 86, 84, 0.15);
+}
+
+.image-preview {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.image-preview:hover .preview-img {
+    transform: scale(1.05);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview:hover .image-overlay {
+    opacity: 1;
+}
+
+.delete-image-btn {
+    background: #ef4444;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-upload-area {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    margin: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.image-upload-area:hover {
+    color: #015654;
+    border-color: #015654;
+    background: #f0fdfa;
+}
+
+.image-upload-area i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.image-controls {
+    padding: 1rem;
+    background: #f8fafc;
+}
+
+.form-label-small {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.form-check-label-small {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.image-controls .form-control {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+}
+
+/* Upload Hints */
+.upload-hints {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 2px solid #f1f5f9;
+}
+
+.actions-left, .actions-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #015654;
+    border-color: #015654;
+    color: white;
+    box-shadow: 0 2px 8px rgba(1, 86, 84, 0.3);
+}
+
+.btn-primary:hover {
+    background: #014a4a;
+    border-color: #014a4a;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 86, 84, 0.4);
+}
+
+.btn-outline-primary {
+    border: 2px solid #015654;
+    color: #015654;
+}
+
+.btn-outline-primary:hover {
+    background: #015654;
+    border-color: #015654;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6b7280;
+    color: #6b7280;
+}
+
+.btn-outline-secondary:hover {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Modal Customization */
+.modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
 }
 </style>
 {% endblock %}
@@ -156,25 +873,200 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const unitSelect = document.querySelector('#id_unit');
-    const customUnitDiv = document.getElementById('customUnitDiv');
-    
+    // --- Unit Selection Logic ---
+    const unitSelect = document.getElementById('{{ form.unit.id_for_label }}');
+    const customUnitGroup = document.getElementById('customUnitGroup');
+    const customUnitInput = document.getElementById('{{ form.custom_unit.id_for_label }}');
+
     function toggleCustomUnit() {
-        if (unitSelect && customUnitDiv) {
-            if (unitSelect.value === 'другое') {
-                customUnitDiv.style.display = 'block';
-            } else {
-                customUnitDiv.style.display = 'none';
-            }
+        const selectedValue = unitSelect.value;
+        const otherOption = unitSelect.querySelector('option[data-is-other="true"]');
+        
+        if (otherOption && selectedValue === otherOption.value) {
+            customUnitGroup.style.display = 'block';
+            customUnitInput.required = true;
+        } else {
+            customUnitGroup.style.display = 'none';
+            customUnitInput.required = false;
+            customUnitInput.value = '';
         }
     }
-    
-    // Check initial state
-    toggleCustomUnit();
-    
-    // Add event listener
+
+    // Add data-is-other attribute to the 'Other' option for easier selection
     if (unitSelect) {
+        const options = unitSelect.options;
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].text.toLowerCase().includes('другое') || options[i].text.toLowerCase().includes('other')) {
+                options[i].setAttribute('data-is-other', 'true');
+                break;
+            }
+        }
         unitSelect.addEventListener('change', toggleCustomUnit);
+        toggleCustomUnit(); // Initial check on page load
+    }
+
+
+    // --- Image Formset Management ---
+    const imagesContainer = document.getElementById('imagesContainer');
+    const addImageBtn = document.getElementById('addImageBtn');
+    const formsetPrefix = '{{ image_formset.prefix }}';
+    const totalFormsInput = document.querySelector(`#id_${formsetPrefix}-TOTAL_FORMS`);
+
+    if (addImageBtn) {
+        addImageBtn.addEventListener('click', function() {
+            let formIndex = parseInt(totalFormsInput.value);
+            
+            // Create a new form from a template
+            const newFormHtml = `
+                <div class="image-item" data-form-index="${formIndex}">
+                    <div class="image-card">
+                        <div class="image-upload-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Выберите изображение</span>
+                        </div>
+                        <div class="image-controls">
+                            <input type="hidden" name="${formsetPrefix}-${formIndex}-id" id="id_${formsetPrefix}-${formIndex}-id">
+                            <input type="hidden" name="${formsetPrefix}-${formIndex}-item" id="id_${formsetPrefix}-${formIndex}-item" value="{{ item.id }}">
+                            <div class="form-group mb-2">
+                                <input type="file" name="${formsetPrefix}-${formIndex}-image" class="form-control" id="id_${formsetPrefix}-${formIndex}-image" accept="image/*">
+                            </div>
+                            <div class="form-group mb-2">
+                                <label class="form-label-small">Порядок:</label>
+                                <input type="number" name="${formsetPrefix}-${formIndex}-order" value="0" class="form-control" id="id_${formsetPrefix}-${formIndex}-order">
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" name="${formsetPrefix}-${formIndex}-DELETE" class="form-check-input" id="id_${formsetPrefix}-${formIndex}-DELETE" style="display:none;">
+                                <label class="form-check-label-small" for="id_${formsetPrefix}-${formIndex}-DELETE" style="display:none;">Удалить</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger new-delete-btn w-100">
+                                    <i class="fas fa-trash me-1"></i>Удалить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            imagesContainer.insertAdjacentHTML('beforeend', newFormHtml);
+            totalFormsInput.value = formIndex + 1;
+        });
+    }
+
+    // Handle image deletion (for existing and new images)
+    imagesContainer.addEventListener('click', function(e) {
+        const deleteBtn = e.target.closest('.delete-image-btn');
+        const newDeleteBtn = e.target.closest('.new-delete-btn');
+
+        if (deleteBtn) {
+            const imageItem = deleteBtn.closest('.image-item');
+            const deleteCheckbox = imageItem.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+                imageItem.style.display = 'none'; // Hide the form
+            }
+        }
+        
+        if (newDeleteBtn) {
+            const imageItem = newDeleteBtn.closest('.image-item');
+            imageItem.remove();
+            // Note: We don't decrement TOTAL_FORMS to avoid issues with form indexing on the server.
+            // The empty form will just be ignored.
+        }
+    });
+    
+    // Handle image preview
+    imagesContainer.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="file"]')) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                const imageCard = e.target.closest('.image-card');
+                let uploadArea = imageCard.querySelector('.image-upload-area');
+                let previewContainer = imageCard.querySelector('.image-preview');
+
+                reader.onload = function(event) {
+                    if (previewContainer) { // Update existing preview
+                        previewContainer.querySelector('.preview-img').src = event.target.result;
+                    } else if (uploadArea) { // Create new preview
+                        const newPreviewHtml = `
+                            <div class="image-preview">
+                                <img src="${event.target.result}" 
+                                     alt="Предпросмотр" 
+                                     class="preview-img">
+                                <div class="image-overlay">
+                                    <span class="badge bg-info">Новое</span>
+                                </div>
+                            </div>
+                        `;
+                        uploadArea.style.display = 'none';
+                        imageCard.insertAdjacentHTML('afterbegin', newPreviewHtml);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+
+
+    // --- Preview Modal Logic ---
+    const previewBtn = document.getElementById('previewBtn');
+    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const previewContent = document.getElementById('previewContent');
+
+    if (previewBtn) {
+        previewBtn.addEventListener('click', function() {
+            // Collect form data
+            const title = document.getElementById('{{ form.title.id_for_label }}').value;
+            const category = document.querySelector('#{{ form.category.id_for_label }} option:checked').textContent;
+            const branch = document.querySelector('#{{ form.branch.id_for_label }} option:checked').textContent;
+            const description = document.getElementById('{{ form.description.id_for_label }}').value;
+            const unitText = document.querySelector('#{{ form.unit.id_for_label }} option:checked').textContent;
+            const customUnit = document.getElementById('{{ form.custom_unit.id_for_label }}').value;
+            const finalUnit = (customUnitGroup.style.display === 'block' && customUnit) ? customUnit : unitText;
+            const isActive = document.getElementById('{{ form.is_active.id_for_label }}').checked;
+
+            // Find the primary image for preview
+            let imageUrl = '{% static 'images/placeholder.jpg' %}';
+            const firstImage = document.querySelector('.preview-img');
+            if (firstImage) {
+                imageUrl = firstImage.src;
+            }
+
+            // Generate preview HTML
+            const html = `
+                <div class="row">
+                    <div class="col-md-5">
+                        <img src="${imageUrl}" class="img-fluid rounded-3 mb-3">
+                        <h5>Фотографии</h5>
+                        <p class="text-muted small">Предпросмотр остальных фото будет доступен после сохранения.</p>
+                    </div>
+                    <div class="col-md-7">
+                        <h3>${title || 'Название товара'}</h3>
+                        <span class="badge bg-${isActive ? 'success' : 'danger'} mb-3">${isActive ? 'Активен' : 'Неактивен'}</span>
+                        <p>${description || '<em>Нет описания</em>'}</p>
+                        <hr>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" style="width: 150px;"><i class="fas fa-tag me-2 text-primary"></i>Категория</th>
+                                    <td>${category}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Филиал</th>
+                                    <td>${branch}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="fas fa-balance-scale me-2 text-primary"></i>Единица</th>
+                                    <td>${finalUnit}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            previewContent.innerHTML = html;
+            previewModal.show();
+        });
     }
 });
 </script>
