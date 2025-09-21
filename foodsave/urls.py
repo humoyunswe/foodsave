@@ -4,10 +4,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from vendors.views import index
+from catalog.views import catalog_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-     path('', index, name='home'),
+    path('', catalog_view, name='catalog'),
     path('accounts/', include('users.urls')),
     path('catalog/', include('catalog.urls')),
     path('vendors/', include('vendors.urls')),

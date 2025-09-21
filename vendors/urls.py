@@ -6,8 +6,7 @@ app_name = 'vendors'
 
 urlpatterns = [
     # Public vendor views
-    path('', views.index, name='index'),
-    path('main/', TemplateView.as_view(template_name='home.html'), name='home'),
+    # path('', views.index, name='index'),
     path('vendors-list/', views.VendorListView.as_view(), name='vendor_list'),
     path('vendors/<int:pk>/', views.vendor_detail, name='vendor_detail'),
     

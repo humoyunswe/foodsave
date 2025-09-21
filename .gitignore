@@ -187,10 +187,10 @@ db_backup.sqlite3
 db.sqlite3-journal
 
 
-# Migrations (если нужно игнорировать)
-*/migrations/*.py
-*/migrations/*.pyc
-!*/migrations/__init__.py
+# Migrations - commented out to allow tracking
+# */migrations/*.py
+# */migrations/*.pyc
+# !*/migrations/__init__.py
 
 # Media files (если хранятся локально)
 
