@@ -1,38 +1,748 @@
-{% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Регистрация - FoodSave{% endblock %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodSave - Регистрация</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold text-primary">Создать аккаунт</h2>
-                        <p class="text-muted">Присоединяйтесь к FoodSave и начните экономить</p>
+    <!-- Favicons & Manifest -->
+    <link rel="icon" href="{% static 'images/logo-modified.png' %}" sizes="32x32">
+    <link rel="apple-touch-icon" href="{% static 'images/placeholder.jpg' %}">
+    <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FoodSave — Экономь на еде, спасай планету">
+    <meta property="og:description" content="Выгодные наборы от проверенных заведений рядом с вами. Премиальный сервис, который спасает еду.">
+    <meta property="og:url" content="/">
+    <meta property="og:image" content="{% static 'images/placeholder.jpg' %}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FoodSave — Экономь на еде, спасай планету">
+    <meta name="twitter:description" content="Выгодные наборы от проверенных заведений рядом с вами. Премиальный сервис, который спасает еду.">
+    <meta name="twitter:image" content="{% static 'images/placeholder.jpg' %}">
+    
+</head>
+<body>
+
+<div class="register-container">
+    <div class="register-left-panel">
+        <div class="register-brand">
+            <div class="register-logo">
+                <div class="logo-icon">FS</div>
+                <div class="logo-text">FOODSAVE</div>
+            </div>
+        </div>
+        
+        <!-- Background Bag Visual -->
+        <div class="bag-logo-bg">
+            <div class="bag-icon">
+                <i class="fas fa-utensils"></i>
+                <i class="fas fa-seedling" style="font-size: 0.5em; margin-left: -0.3em; margin-top: -0.5em; position: absolute;"></i>
+            </div>
+            <div class="bag-text">FOODSAVE</div>
+        </div>
+        
+        <div class="bag-products">
+            <div class="product-item"></div>
+            <div class="product-item"></div>
+            <div class="product-item"></div>
+            <div class="product-item"></div>
+            <div class="product-item"></div>
+        </div>
+        
+        
+        <div class="register-copyright">
+            <p>© FoodSave</p>
+        </div>
                     </div>
                     
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        
-                        <div class="d-grid gap-2 mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
-                            </button>
+    <div class="register-right-panel">
+        <div class="register-visual">
+            <div class="shopping-bag-container">
+                <div class="shopping-bag">
+                    <div class="bag-logo">
+                        <div class="cutlery-icon">
+                            <i class="fas fa-utensils"></i>
                         </div>
-                    </form>
-                    
-                    <div class="text-center">
-                        <p class="mb-0">Уже есть аккаунт? 
-                            <a href="{% url 'users:login' %}" class="text-primary">Войти</a>
-                        </p>
+                        <div class="sprout-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    </div>
+                    <div class="bag-text">FOODSAVE</div>
+                </div>
+                <div class="bag-contents">
+                    <div class="food-item milk">
+                        <i class="fas fa-wine-bottle"></i>
+                    </div>
+                    <div class="food-item broccoli">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="food-item tomato">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="food-item onion">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="food-item greens">
+                        <i class="fas fa-leaf"></i>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <div class="register-form-container">
+            <h2 class="register-form-title">Зарегистрируйте свой бизнес</h2>
+            <p class="register-form-subtitle">Давайте найдем ваш магазин и начнем работу. Это займет всего несколько минут!</p>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post" class="register-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username" class="form-label">Имя пользователя *</label>
+                    <input type="text" 
+                           class="form-control register-input" 
+                           id="id_username" 
+                           name="username" 
+                           value="{{ form.username.value|default:'' }}"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_email" class="form-label">Адрес электронной почты *</label>
+                    <input type="email" 
+                           class="form-control register-input" 
+                           id="id_email" 
+                           name="email" 
+                           value="{{ form.email.value|default:'' }}"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password1" class="form-label">Пароль *</label>
+                    <div class="password-input-container">
+                        <input type="password" 
+                               class="form-control register-input" 
+                               id="id_password1" 
+                               name="password1" 
+                               required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('id_password1')">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2" class="form-label">Подтвердите пароль *</label>
+                    <div class="password-input-container">
+                        <input type="password" 
+                               class="form-control register-input" 
+                               id="id_password2" 
+                               name="password2" 
+                               required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('id_password2')">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="legal-text">
+                    <p>Продолжая, вы соглашаетесь с <a href="#" class="legal-link">Политикой конфиденциальности</a> и <a href="#" class="legal-link">Условиями использования</a> FoodSave.</p>
+                </div>
+                
+                <div class="register-buttons">
+                    <button type="submit" class="btn btn-register">
+                        ПРОДОЛЖИТЬ
+                    </button>
+                </div>
+                
+                <div class="login-link">
+                    <p>Уже есть аккаунт магазина? <a href="{% url 'users:login' %}" class="login-link-text">Войти</a></p>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-{% endblock %}
+
+<style>
+.register-container {
+    display: flex;
+    min-height: 100vh;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.register-left-panel {
+    flex: 1;
+    background: #0B6361;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-left-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    z-index: 1;
+}
+
+.register-left-panel::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    width: 300px;
+    height: 400px;
+    background: 
+        linear-gradient(135deg, #0B6361 0%, #059669 100%);
+    border-radius: 20px 20px 30px 30px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    z-index: 2;
+}
+
+.register-left-panel .bag-logo-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    z-index: 3;
+    text-align: center;
+}
+
+.register-left-panel .bag-logo-bg .bag-icon {
+    color: white;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.register-left-panel .bag-logo-bg .bag-text {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.register-left-panel .bag-products {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    z-index: 4;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    width: 200px;
+    justify-content: center;
+}
+
+.register-left-panel .product-item {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    animation: float 3s ease-in-out infinite;
+}
+
+.register-left-panel .product-item:nth-child(1) {
+    background: white;
+    animation-delay: 0s;
+}
+
+.register-left-panel .product-item:nth-child(2) {
+    background: #22c55e;
+    animation-delay: 0.5s;
+}
+
+.register-left-panel .product-item:nth-child(3) {
+    background: #ef4444;
+    animation-delay: 1s;
+}
+
+.register-left-panel .product-item:nth-child(4) {
+    background: #f97316;
+    animation-delay: 1.5s;
+}
+
+.register-left-panel .product-item:nth-child(5) {
+    background: #16a34a;
+    animation-delay: 2s;
+}
+
+.register-brand {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+}
+
+.register-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.logo-text {
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.register-main-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 1rem;
+    z-index: 10;
+    position: relative;
+}
+
+.register-main-title h1 {
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.play-button {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.play-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.register-copyright {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 10;
+}
+
+.register-copyright p {
+    color: white;
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.register-right-panel {
+    flex: 1;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.register-visual {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1;
+}
+
+.shopping-bag-container {
+    position: relative;
+    width: 200px;
+    height: 250px;
+}
+
+.shopping-bag {
+    width: 100%;
+    height: 200px;
+    background: #0B6361;
+    border-radius: 15px 15px 20px 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(11, 99, 97, 0.3);
+    transform: rotate(-5deg);
+}
+
+.bag-logo {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.cutlery-icon {
+    color: white;
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.sprout-icon {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 0.8rem;
+}
+
+.bag-text {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.bag-contents {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.food-item {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.food-item.milk {
+    background: white;
+    color: #0B6361;
+    animation-delay: 0s;
+}
+
+.food-item.broccoli {
+    background: #22c55e;
+    color: white;
+    animation-delay: 0.5s;
+}
+
+.food-item.tomato {
+    background: #ef4444;
+    color: white;
+    animation-delay: 1s;
+}
+
+.food-item.onion {
+    background: #f97316;
+    color: white;
+    animation-delay: 1.5s;
+}
+
+.food-item.greens {
+    background: #16a34a;
+    color: white;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.register-form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.register-form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+.register-form-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.register-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.register-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.register-input:focus {
+    outline: none;
+    border-color: #0B6361;
+    box-shadow: 0 0 0 3px rgba(11, 99, 97, 0.1);
+}
+
+.password-input-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.password-toggle:hover {
+    color: #0B6361;
+}
+
+.legal-text {
+    margin-bottom: 2rem;
+}
+
+.legal-text p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.legal-link {
+    color: #0B6361;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.legal-link:hover {
+    color: #059669;
+}
+
+.register-buttons {
+    margin-bottom: 2rem;
+}
+
+.btn-register {
+    background: #0B6361;
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-register:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.login-link {
+    text-align: center;
+}
+
+.login-link p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.login-link-text {
+    color: #0B6361;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.login-link-text:hover {
+    color: #059669;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.alert-danger {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .register-container {
+        flex-direction: column;
+    }
+    
+    .register-left-panel {
+        min-height: 40vh;
+        padding: 1.5rem;
+    }
+    
+    .register-main-title h1 {
+        font-size: 2rem;
+    }
+    
+    .register-right-panel {
+        padding: 1.5rem;
+    }
+    
+    .register-form-container {
+        max-width: none;
+    }
+    
+    .register-visual {
+        position: static;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .shopping-bag-container {
+        width: 150px;
+        height: 200px;
+    }
+    
+    .shopping-bag {
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-left-panel {
+        padding: 1rem;
+    }
+    
+    .register-right-panel {
+        padding: 1rem;
+    }
+    
+    .register-main-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .logo-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+</style>
+
+<script>
+function togglePassword(fieldId) {
+    const passwordInput = document.getElementById(fieldId);
+    const toggleButton = document.querySelector(`#${fieldId}`).parentElement.querySelector('.password-toggle i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleButton.classList.remove('fa-eye');
+        toggleButton.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleButton.classList.remove('fa-eye-slash');
+        toggleButton.classList.add('fa-eye');
+    }
+}
+</script>
+
+</body>
+</html>

@@ -5,20 +5,48 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="hero-title">Спасаем еду от выбрасывания</h1>
-                <p class="hero-subtitle">Покупайте качественные продукты со скидками до 70% и помогайте бороться с пищевыми отходами</p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">{{ items.paginator.count }}</span>
-                        <span class="stat-label">предложений</span>
+<div class="catalog-hero">
+
+    <!-- Main Hero Banner -->
+    <div class="catalog-banner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="banner-content">
+                        <h1 class="banner-title">Спасаем еду от выбрасывания</h1>
+                        <p class="banner-description">Покупайте качественные продукты и готовые блюда со скидками до 70% и помогайте ресторанам бороться с пищевыми отходами</p>
+                        {% comment %} <div class="banner-actions">
+                            <button class="btn btn-primary btn-lg banner-btn">
+                                СКАЧАТЬ ПРИЛОЖЕНИЕ
+                            </button>
+                            <button class="btn btn-outline-light btn-lg banner-btn">
+                                РЕГИСТРАЦИЯ БИЗНЕСА
+                            </button>
+                        </div> {% endcomment %}
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number">{{ vendors.count }}</span>
-                        <span class="stat-label">заведений</span>
+                </div>
+                <div class="col-lg-6">
+                    <div class="banner-visual">
+                        <div class="food-items">
+                            <div class="food-item item-1">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                            <div class="food-item item-2">
+                                <i class="fas fa-bread-slice"></i>
+                            </div>
+                            <div class="food-item item-3">
+                                <i class="fas fa-carrot"></i>
+                            </div>
+                            <div class="food-item item-4">
+                                <i class="fas fa-cheese"></i>
+                            </div>
+                            <div class="food-item item-5">
+                                <i class="fas fa-fish"></i>
+                            </div>
+                            <div class="food-item item-6">
+                                <i class="fas fa-lemon"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -427,45 +455,332 @@
 
 {% block extra_css %}
 <style>
-/* Hero Section */
-.hero-section {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    padding: 4rem 0 3rem;
-    margin-bottom: 2rem;
+/* Catalog Hero Section */
+.catalog-hero {
+    background: #ffffff;
 }
 
-.hero-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+/* Header Section */
+.catalog-header {
+    background: #0B6361;
+    padding: 0.5rem 0;
+    border-bottom: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-.hero-stats {
+.catalog-logo {
     display: flex;
-    gap: 2rem;
+    align-items: center;
+    gap: 0.75rem;
 }
 
-.stat-item {
-    text-align: center;
-}
-
-.stat-number {
-    display: block;
-    font-size: 2rem;
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 700;
-    line-height: 1;
+    font-size: 1.1rem;
 }
 
-.stat-label {
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.catalog-search {
+    display: flex;
+    justify-content: center;
+}
+
+.search-form {
+    width: 100%;
+    max-width: 500px;
+}
+
+.search-input-group {
+    position: relative;
+    background: #ffffff;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-input-group:focus-within {
+    border-color: #059669;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.search-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+    font-size: 1rem;
+    color: #111827;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #9ca3af;
+}
+
+.catalog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.5rem;
+}
+
+.action-item {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #0B6361;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-item:hover {
+    background: #f8f9fa;
+    color: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.cart-counter {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Main Banner */
+.catalog-banner {
+    background: #0B6361;
+    padding: 1rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.catalog-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80') center/cover;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.catalog-banner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(11, 99, 97, 0.6) 0%, rgba(11, 99, 97, 0.7) 100%);
+    pointer-events: none;
+}
+
+.banner-content {
+    position: relative;
+    z-index: 3;
+    color: white;
+}
+
+.banner-title {
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 32px;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.banner-description {
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 0.9rem;
-    opacity: 0.8;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    opacity: 0.95;
+    max-width: 400px;
+}
+
+.banner-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.banner-btn {
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    padding: 0.625rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.banner-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: white;
+    color: #0B6361;
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    background: #f8f9fa;
+    color: #0B6361;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-light {
+    background: white;
+    color: #0B6361;
+    border: 2px solid white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-outline-light:hover {
+    background: #f8f9fa;
+    color: #0B6361;
+    border-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Banner Visual */
+.banner-visual {
+    position: relative;
+    z-index: 3;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.food-items {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.food-item {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: float 6s ease-in-out infinite;
+}
+
+.food-item.item-1 {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.food-item.item-2 {
+    top: 10%;
+    right: 20%;
+    animation-delay: 1s;
+}
+
+.food-item.item-3 {
+    top: 50%;
+    left: 5%;
+    animation-delay: 2s;
+}
+
+.food-item.item-4 {
+    top: 60%;
+    right: 10%;
+    animation-delay: 3s;
+}
+
+.food-item.item-5 {
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+.food-item.item-6 {
+    bottom: 10%;
+    right: 5%;
+    animation-delay: 5s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 /* Catalog Layout */
@@ -884,6 +1199,136 @@
 .list-view .item-meta {
     flex-direction: row;
     gap: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .catalog-actions {
+        gap: 1rem;
+    }
+    
+    .banner-title {
+        font-size: 24px;
+        line-height: 24px;
+    }
+    
+    .banner-description {
+        font-size: 1.1rem;
+    }
+    
+    .banner-visual {
+        height: 80px;
+        margin-top: 0.5rem;
+    }
+    
+    .food-items {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .food-item {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .catalog-header {
+        padding: 0.75rem 0;
+    }
+    
+    .catalog-logo {
+        gap: 0.5rem;
+    }
+    
+    .logo-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .logo-text {
+        font-size: 1.25rem;
+    }
+    
+    .catalog-actions {
+        gap: 0.75rem;
+    }
+    
+    .action-item {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .catalog-banner {
+        padding: 0.75rem 0;
+    }
+    
+    .banner-title {
+        font-size: 20px;
+        line-height: 20px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .banner-description {
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .banner-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .banner-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .banner-visual {
+        height: 60px;
+        margin-top: 0.5rem;
+    }
+    
+    .food-items {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .food-item {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-input-group {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .search-input {
+        padding: 0.375rem 0.375rem 0.375rem 2rem;
+        font-size: 0.9rem;
+    }
+    
+    .search-icon {
+        left: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .banner-title {
+        font-size: 18px;
+        line-height: 18px;
+    }
+    
+    .banner-description {
+        font-size: 0.75rem;
+    }
 }
 
 /* Mobile Responsive */

@@ -158,8 +158,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Login/Logout URLs
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/vendors/main/'
-LOGOUT_REDIRECT_URL = '/vendors/main/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Allow GET requests for logout
 LOGOUT_REDIRECT_URL = '/'

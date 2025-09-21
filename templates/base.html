@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
     <!-- Favicons & Manifest -->
-    <link rel="icon" href="{% static 'images/logo.jpeg' %}" sizes="32x32">
+    <link rel="icon" href="{% static 'images/logo-modified.png' %}" sizes="32x32">
     <link rel="apple-touch-icon" href="{% static 'images/placeholder.jpg' %}">
     <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
 
@@ -33,49 +33,57 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg modern-navbar">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'catalog' %}">
-                <i class="fas fa-utensils me-2"></i>FoodSave
+            <a class="navbar-brand modern-brand" href="{% url 'catalog' %}">
+                <span class="brand-text">FoodSave</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler modern-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="toggler-icon"></span>
+                <span class="toggler-icon"></span>
+                <span class="toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'catalog:catalog' %}">Каталог</a>
+                        <a class="nav-link modern-link" href="{% url 'catalog:catalog' %}">
+                            <i class="fas fa-th-large me-2"></i>Каталог
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vendors:vendor_list' %}">Рестораны</a>
+                        <a class="nav-link modern-link" href="{% url 'vendors:vendor_list' %}">
+                            <i class="fas fa-store me-2"></i>Рестораны
+                        </a>
                     </li>
                 </ul>
                 
                 <!-- Search Form -->
-                <form class="d-flex me-3 search-form" method="get" action="{% url 'catalog:search' %}">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Поиск блюд..." aria-label="Search">
-                    <button class="btn btn-outline-light" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
+                <div class="search-container">
+                    <form class="modern-search-form" method="get" action="{% url 'catalog:search' %}">
+                        <div class="search-input-group">
+                            <i class="fas fa-search search-icon"></i>
+                            <input class="search-input" type="search" name="q" placeholder="Поиск блюд и продуктов..." aria-label="Search">
+                        </div>
+                    </form>
+                </div>
                 
                 <!-- User Menu -->
-                <ul class="navbar-nav">
+                <ul class="navbar-nav user-menu">
                     {% if user.is_authenticated %}
                         {% if user.role == 'vendor' %}
                         <li class="nav-item">
-                            <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Панель управления
+                            <a class="nav-link vendor-link" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Панель
                             </a>
                         </li>
                         {% if user.owned_vendors.exists %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-info" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-store me-1"></i>Управление заведением
+                            <a class="nav-link dropdown-toggle vendor-link" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-store me-1"></i>Заведение
                             </a>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu modern-dropdown">
                                 <li><a class="dropdown-item" href="{% url 'vendors:manage_items' user.owned_vendors.first.id %}">
                                     <i class="fas fa-list me-2"></i>Управление товарами
                                 </a></li>
@@ -91,38 +99,49 @@
                                     <i class="fas fa-store me-2"></i>Все заведения
                                 </a></li>
                                 <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' user.owned_vendors.first.id %}">
-                                    <i class="fas fa-eye me-2"></i>Просмотр моего заведения
+                                    <i class="fas fa-eye me-2"></i>Просмотр заведения
                                 </a></li>
                             </ul>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link text-muted" href="{% url 'vendors:vendor_dashboard' %}">
-                                <i class="fas fa-handshake me-1"></i>Стать партнёром
+                            <a class="nav-link partner-link" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-handshake me-1"></i>Партнёр
                             </a>
                         </li>
                         {% endif %}
                         {% elif user.owned_vendors.exists %}
                         <li class="nav-item">
-                            <a class="nav-link text-warning" href="{% url 'vendors:vendor_dashboard' %}">
-                                <i class="fas fa-store me-1"></i>Мои заведения
+                            <a class="nav-link vendor-link" href="{% url 'vendors:vendor_dashboard' %}">
+                                <i class="fas fa-store me-1"></i>Заведения
                             </a>
                         </li>
                         {% endif %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                            <a class="nav-link dropdown-toggle user-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Профиль</a></li>
-                                <li><a class="dropdown-item" href="{% url 'booking:order_list' %}">Мои заказы</a></li>
+                            <ul class="dropdown-menu modern-dropdown">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                                    <i class="fas fa-user me-2"></i>Профиль
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'booking:order_list' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>Мои заказы
+                                </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                                </a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
+                            <a class="nav-link login-link" href="{% url 'users:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Войти
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -150,7 +169,7 @@
     <!-- Partner CTA Banner -->
     {# Show only for anonymous users or authenticated customers, never for vendors #}
     {% if not user.is_authenticated %}
-    <section class="partner-cta py-3">
+    <section class="partner-cta py-5">
         <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
             <a href="{% url 'users:login' %}" class="btn btn-primary">
@@ -170,25 +189,62 @@
     {% endif %}
 
    <!-- Footer -->
-   <footer class="footer big-footer">
+   <footer class="modern-footer">
     <div class="footer-bg-text">FOOD SAVE</div>
-    <div class="footer-content">
-      <div class="footer-logo">
-        <img src="{% static 'images/logo.jpeg' %}" alt="FoodSave" />
-      </div>
-      <div class="footer-links">
-        <a href="#">О нас</a>
-        <a href="#">Контакты</a>
-        <a href="#">Партнёрам</a>
-        <a href="#">Политика</a>
-      </div>
-      <div class="footer-social">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-telegram"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
-      </div>
-      <div class="footer-copy">
-        © 2025 FoodSave. Все права защищены.
+    <div class="container">
+      <div class="footer-content">
+        <!-- Main Navigation -->
+        <div class="footer-nav">
+          <div class="footer-nav-section">
+            <h6>КАРЬЕРА</h6>
+          </div>
+          <div class="footer-nav-section">
+            <h6>ПРЕССА</h6>
+          </div>
+          <div class="footer-nav-section">
+            <h6>ПОДДЕРЖКА</h6>
+          </div>
+          <div class="footer-nav-section">
+            <h6>МОЙ МАГАЗИН</h6>
+          </div>
+        </div>
+        
+        <!-- App Download Buttons -->
+        <div class="app-download-section">
+          <a href="#" class="app-download-btn">
+            <i class="fab fa-apple me-2"></i>
+            <span>Скачать в App Store</span>
+          </a>
+          <a href="#" class="app-download-btn">
+            <i class="fab fa-google-play me-2"></i>
+            <span>Скачать в Google Play</span>
+          </a>
+          <a href="#" class="app-download-btn">
+            <i class="fas fa-mobile-alt me-2"></i>
+            <span>Скачать в Huawei AppGallery</span>
+          </a>
+        </div>
+        
+        <!-- Footer Links -->
+        <div class="footer-links-section">
+          <a href="#">Юридическая информация</a>
+          <a href="#">Политика конфиденциальности</a>
+          <a href="#">Политика использования cookie</a>
+          <a href="#">Условия использования</a>
+          <a href="#">Свяжитесь с нами</a>
+          <a href="#">Раскрытие информации DSA</a>
+        </div>
+        
+        <!-- Additional Links -->
+        <div class="footer-additional-links">
+          <a href="#">Источники пищевых отходов</a>
+          <a href="#">Статус</a>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="footer-copyright">
+          © 2025 FoodSave Uzbekistan. Все права защищены.
+        </div>
       </div>
     </div>
   </footer>
@@ -199,22 +255,344 @@
     {% block extra_js %}{% endblock %}
 
     <style>
-    .partner-cta { background:#F3F4F6; border-top:1px solid #E5E7EB; border-bottom:1px solid #E5E7EB; }
-    .partner-cta .btn { border-radius:10px; }
-    
-    /* Fix z-index for vendor dropdown menu */
-    .navbar .dropdown-menu {
-        z-index: 1060;
-    }
-    
-    .navbar .nav-item.dropdown {
-        position: relative;
-        z-index: 1061;
-    }
-    
-    /* Ensure navbar itself has high z-index */
-    .navbar {
+    /* Modern Navbar Styles inspired by Too Good To Go */
+    .modern-navbar {
+        background: #015654;
+        padding: 0.5rem 0;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        border-bottom: none;
+        position: sticky;
+        top: 0;
         z-index: 1055;
+    }
+
+    .modern-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: white !important;
+        font-weight: 700;
+        font-size: 1.25rem;
+        transition: all 0.3s ease;
+    }
+
+    .modern-brand:hover {
+        transform: scale(1.05);
+        color: #f8f9fa !important;
+    }
+
+    .brand-icon {
+        width: 35px;
+        height: 35px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-text {
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .modern-toggler {
+        border: none;
+        padding: 0.25rem;
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .toggler-icon {
+        width: 25px;
+        height: 3px;
+        background: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .modern-toggler:hover .toggler-icon {
+        background: #f8f9fa;
+    }
+
+    .modern-link {
+        color: #015654 !important;
+        background: white;
+        font-weight: 500;
+        padding: 0.5rem 1rem !important;
+        border: none;
+        border-radius: 20px;
+        margin: 0 0.25rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+    }
+
+    .modern-link:hover {
+        color: #015654 !important;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .search-container {
+        flex: 1;
+        max-width: 350px;
+        margin: 0 0.5rem;
+    }
+
+    .modern-search-form {
+        width: 100%;
+    }
+
+    .search-input-group {
+        position: relative;
+        background: white;
+        border-radius: 20px;
+        padding: 0.5rem 0.75rem;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-input-group:focus-within {
+        background: white;
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #015654;
+        font-size: 0.9rem;
+    }
+
+    .search-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.25rem 0.25rem 0.25rem 1.75rem;
+        font-size: 0.9rem;
+        color: #015654;
+        outline: none;
+    }
+
+    .search-input::placeholder {
+        color: rgba(1, 86, 84, 0.6);
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .vendor-link {
+        color: #015654 !important;
+        background: white;
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .vendor-link:hover {
+        background: #015654 !important;
+        color: white !important;
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .partner-link {
+        color: #015654 !important;
+        background: white;
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .partner-link:hover {
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: #015654 !important;
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .user-link {
+        color: #015654 !important;
+        background: white;
+        border: none;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .user-link:hover {
+        background: #015654 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .user-avatar {
+        width: 24px;
+        height: 24px;
+        background: rgba(1, 86, 84, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        transition: all 0.3s ease;
+    }
+
+    .user-link:hover .user-avatar {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .user-name {
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .login-link {
+        color: #015654 !important;
+        background: white;
+        border: none;
+        border-radius: 20px;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+    }
+
+    .login-link:hover {
+        background: #015654 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .modern-dropdown {
+        background: white;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        padding: 0.5rem 0;
+        margin-top: 0.5rem;
+        min-width: 200px;
+    }
+
+    .modern-dropdown .dropdown-item {
+        padding: 0.75rem 1.5rem;
+        color: #374151;
+        font-weight: 500;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    .modern-dropdown .dropdown-item:hover {
+        background: #f8f9fa;
+        color: #015654;
+        {% comment %} transform: translateX(4px); {% endcomment %}
+    }
+
+ 
+
+    
+
+ 
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .search-container {
+            order: 3;
+            width: 100%;
+            max-width: none;
+            margin: 1rem 0 0 0;
+        }
+        
+        .user-menu {
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .modern-navbar {
+            padding: 0.5rem 0;
+        }
+        
+        .modern-brand {
+            font-size: 1.25rem;
+        }
+        
+        .brand-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .modern-link {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.9rem;
+        }
+    }
+
+    .partner-cta { 
+        margin-top: 10px;
+        background: #f8f9fa; 
+        border-top: 1px solid #e5e7eb; 
+        border-bottom: 1px solid #e5e7eb; 
+    }
+    
+    .partner-cta .btn { 
+        border-radius: 10px; 
+        background: #015654;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .partner-cta .btn:hover {
+        background: #014a4a;
+        transform: translateY(-1px);
     }
 
     /* Footer */
@@ -283,89 +661,208 @@
         color: #2ECC71;
     }
 
-    .big-footer {
+    /* Modern Footer */
+    .modern-footer {
+
         position: relative;
-        background: #00795a;
+        background: #015654;
         color: #fff;
         overflow: hidden;
-        padding: 0;
-      }
-      .footer-bg-text {
+        padding: 60px 0 40px 0;
+        margin-top: 10px;
+    }
+    
+    .footer-bg-text {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15vw;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: clamp(80px, 15vw, 200px);
         font-weight: 900;
-        color: #fff;
-        opacity: 0.13;
+        color: rgba(255, 255, 255, 0.08);
         letter-spacing: 0.1em;
         z-index: 1;
         pointer-events: none;
         user-select: none;
         text-align: center;
         line-height: 1;
-      }
-      .footer-content {
+        white-space: nowrap;
+    }
+    
+    .footer-content {
         position: relative;
         z-index: 2;
-        padding: 80px 0 40px 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .footer-logo img {
-        width: 100px;
-        margin-bottom: 2rem;
-      }
-      .footer-links {
-        display: flex;
-        gap: 2rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .footer-links a {
-        color: #fff;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 1.1rem;
-        opacity: 0.9;
-        transition: opacity 0.2s;
-      }
-      .footer-links a:hover {
-        opacity: 1;
-        text-decoration: underline;
-      }
-      .footer-social {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      .footer-social a {
-        color: #fff;
-        font-size: 2rem;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-      }
-      .footer-social a:hover {
-        opacity: 1;
-      }
-      .footer-copy {
-        color: #fff;
-        opacity: 0.7;
-        font-size: 1rem;
-        margin-top: 1rem;
         text-align: center;
-      }
-      @media (max-width: 700px) {
-        .footer-bg-text { font-size: 16vw; }
-        .footer-content { padding: 50px 0 30px 0; }
-        .footer-logo img { width: 44px; }
-        .footer-links { gap: 1rem; font-size: 1rem; }
-        .footer-social { font-size: 1.3rem; }
-      }
+    }
+    
+    .footer-nav {
+        display: flex;
+        justify-content: center;
+        gap: 80px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-nav-section h6 {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+    
+    .app-download-section {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .app-download-btn {
+        display: flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .app-download-btn:hover {
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .footer-links-section {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-links-section a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 400;
+        transition: color 0.3s ease;
+    }
+    
+    .footer-links-section a:hover {
+        color: #fff;
+        text-decoration: underline;
+    }
+    
+    .footer-additional-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-additional-links a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 400;
+        transition: color 0.3s ease;
+    }
+    
+    .footer-additional-links a:hover {
+        color: #fff;
+        text-decoration: underline;
+    }
+    
+    .footer-copyright {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        font-weight: 400;
+        text-align: center;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .footer-nav {
+            gap: 40px;
+        }
+        
+        .footer-links-section {
+            gap: 20px;
+        }
+        
+        .footer-additional-links {
+            gap: 20px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .modern-footer {
+            padding: 40px 0 30px 0;
+        }
+        
+        .footer-nav {
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-nav-section h6 {
+            font-size: 14px;
+        }
+        
+        .app-download-section {
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .app-download-btn {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+        
+        .footer-links-section,
+        .footer-additional-links {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .footer-links-section a,
+        .footer-additional-links a {
+            font-size: 12px;
+        }
+        
+        .footer-copyright {
+            font-size: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .footer-nav {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .app-download-section {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .app-download-btn {
+            width: 200px;
+            justify-content: center;
+        }
+    }
     </style>
 
     <!-- Toast container -->
