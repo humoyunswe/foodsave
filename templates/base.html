@@ -168,7 +168,7 @@
 
     <!-- Partner CTA Banner -->
     {# Show only for anonymous users or authenticated customers, never for vendors #}
-    {% if not user.is_authenticated %}
+    {% comment %} {% if not user.is_authenticated %}
     <section class="partner-cta py-5">
         <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="fw-semibold mb-2 mb-md-0">Станьте нашим партнёром и увеличьте продажи, спасая еду</div>
@@ -186,7 +186,7 @@
             </a>
         </div>
     </section>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
    <!-- Footer -->
    <footer class="modern-footer">

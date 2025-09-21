@@ -4,65 +4,68 @@
 {% block title %}Панель управления - FoodSave{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-store me-2"></i>Панель управления</h2>
-                {% if user.is_authenticated %}
-                <div class="d-flex gap-2">
-                    {% if vendors %}
-                        {% for vendor in vendors %}
-                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-map-marker-alt me-1"></i>Добавить филиал
-                            </a>
-                            <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-box me-1"></i>Добавить товар
-                            </a>
-                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-cog me-1"></i>Управление
-                            </a>
-                            {% if not forloop.first %}<div class="vr mx-2"></div>{% endif %}
-                        {% endfor %}
-                    {% else %}
-                        <a href="https://t.me/khumoyun_04" class="btn btn-primary">
-                            <i class="fas fa-store me-1"></i>Создать заведение
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">
+                <i class="fas fa-store me-2"></i>Панель управления
+            </h1>
+            {% if user.is_authenticated %}
+            <div class="header-actions">
+                {% if vendors %}
+                    {% for vendor in vendors %}
+                        <a href="{% url 'vendors:add_branch' vendor.id %}" class="navbar-btn">
+                            <i class="fas fa-map-marker-alt me-2"></i>Добавить филиал
                         </a>
-                    {% endif %}
-                    
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-primary dropdown-toggle btn-sm" data-bs-toggle="dropdown">
-                            <i class="fas fa-plus me-1"></i>Еще
-                        </button>
-                        <ul class="dropdown-menu">
-                            {% if vendors %}
-                                {% for vendor in vendors %}
-                                    <li><h6 class="dropdown-header">{{ vendor.name }}</h6></li>
-                                    <li><a class="dropdown-item" href="{% url 'vendors:add_branch' vendor.id %}">
-                                        <i class="fas fa-map-marker-alt me-2"></i>Новый филиал
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vendors:add_item' vendor.id %}">
-                                        <i class="fas fa-box me-2"></i>Новый товар
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vendors:manage_items' vendor.id %}">
-                                        <i class="fas fa-cog me-2"></i>Управление товарами
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' vendor.id %}">
-                                        <i class="fas fa-eye me-2"></i>Просмотр заведения
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                {% endfor %}
-                            {% else %}
-                                <li><h6 class="dropdown-header text-muted">Пока нет заведений</h6></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="https://t.me/khumoyun_04">
-                                <i class="fas fa-store me-2"></i>Создать заведение
-                            </a></li>
-                        </ul>
-                    </div>
-                </div>
+                        <a href="{% url 'vendors:add_item' vendor.id %}" class="navbar-btn">
+                            <i class="fas fa-box me-2"></i>Добавить товар
+                        </a>
+                        <a href="{% url 'vendors:manage_items' vendor.id %}" class="navbar-btn">
+                            <i class="fas fa-cog me-2"></i>Управление
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <a href="https://t.me/khumoyun_04" class="navbar-btn">
+                        <i class="fas fa-store me-2"></i>Создать заведение
+                    </a>
                 {% endif %}
+                
+                <div class="dropdown">
+                    <button type="button" class="navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-plus me-2"></i>Еще
+                    </button>
+                    <ul class="dropdown-menu modern-dropdown">
+                        {% if vendors %}
+                            {% for vendor in vendors %}
+                                <li><h6 class="dropdown-header">{{ vendor.name }}</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_branch' vendor.id %}">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Новый филиал
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:add_item' vendor.id %}">
+                                    <i class="fas fa-box me-2"></i>Новый товар
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:manage_items' vendor.id %}">
+                                    <i class="fas fa-cog me-2"></i>Управление товарами
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' vendor.id %}">
+                                    <i class="fas fa-eye me-2"></i>Просмотр заведения
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% endfor %}
+                        {% else %}
+                            <li><h6 class="dropdown-header text-muted">Пока нет заведений</h6></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="https://t.me/khumoyun_04">
+                            <i class="fas fa-store me-2"></i>Создать заведение
+                        </a></li>
+                    </ul>
+                </div>
             </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="dashboard-content">
             
             {% if vendors %}
                 {% for vendor in vendors %}
@@ -90,11 +93,11 @@
                                 </div>
                                 <div class="col-md-4 text-md-end">
                                     {% if user.is_authenticated %}
-                                    <div class="btn-group">
-                                        <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-light btn-sm">
+                                    <div class="vendor-actions">
+                                        <a href="{% url 'vendors:manage_items' vendor.id %}" class="navbar-btn navbar-btn-light">
                                             <i class="fas fa-cog me-1"></i>Управление
                                         </a>
-                                        <a href="{% url 'vendors:vendor_detail' vendor.id %}" class="btn btn-outline-light btn-sm">
+                                        <a href="{% url 'vendors:vendor_detail' vendor.id %}" class="navbar-btn navbar-btn-light">
                                             <i class="fas fa-eye me-1"></i>Просмотр
                                         </a>
                                     </div>
@@ -164,7 +167,7 @@
                                         </div>
                                         {% if user.is_authenticated %}
                                         <div class="mt-2">
-                                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-outline-primary btn-sm">
+                                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="navbar-btn navbar-btn-outline">
                                                 <i class="fas fa-plus me-1"></i>Добавить филиал
                                             </a>
                                         </div>
@@ -174,7 +177,7 @@
                                             <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
                                             <p class="text-muted">Нет филиалов</p>
                                             {% if user.is_authenticated %}
-                                                <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-primary btn-sm">
+                                                <a href="{% url 'vendors:add_branch' vendor.id %}" class="navbar-btn">
                                                     <i class="fas fa-plus me-1"></i>Добавить первый филиал
                                                 </a>
                                             {% endif %}
@@ -204,10 +207,10 @@
                                                     </div>
                                                     <div class="text-end">
                                                         {% if item.offers.first %}
-                                                            <span class="price-tag small">{{ item.offers.first.current_price }} ₸</span>
+                                                            <span class="price-tag small">{{ item.offers.first.current_price }} UZS</span>
                                                         {% else %}
                                                             {% if user.is_authenticated and user.role == 'vendor' %}
-                                                            <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-outline-success btn-xs">
+                                                            <a href="{% url 'vendors:add_offer' item.id %}" class="navbar-btn navbar-btn-small">
                                                                 <i class="fas fa-plus"></i>
                                                             </a>
                                                             {% endif %}
@@ -218,10 +221,10 @@
                                         </div>
                                         {% if user.is_authenticated %}
                                         <div class="mt-2">
-                                            <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-outline-success btn-sm me-2">
+                                            <a href="{% url 'vendors:add_item' vendor.id %}" class="navbar-btn navbar-btn-outline me-2">
                                                 <i class="fas fa-plus me-1"></i>Добавить товар
                                             </a>
-                                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-primary btn-sm">
+                                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="navbar-btn navbar-btn-outline">
                                                 <i class="fas fa-cog me-1"></i>Управление
                                             </a>
                                         </div>
@@ -232,7 +235,7 @@
                                             <p class="text-muted">Нет товаров</p>
                                             {% if vendor.branches.all %}
                                                 {% if user.is_authenticated and user.role == 'vendor' %}
-                                                    <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-success btn-sm">
+                                                    <a href="{% url 'vendors:add_item' vendor.id %}" class="navbar-btn">
                                                         <i class="fas fa-plus me-1"></i>Добавить первый товар
                                                     </a>
                                                 {% endif %}
@@ -288,10 +291,10 @@
                                 
                                 <!-- Action Buttons -->
                                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                                    <a href="https://t.me/khumoyun_04" class="btn btn-primary">
+                                    <a href="https://t.me/khumoyun_04" class="navbar-btn">
                                         <i class="fas fa-envelope me-2"></i>Связаться с администратором
                                     </a>
-                                    <a href="{% url 'vendors:vendor_list' %}" class="btn btn-outline-secondary">
+                                    <a href="{% url 'vendors:vendor_list' %}" class="navbar-btn navbar-btn-outline">
                                         <i class="fas fa-eye me-2"></i>Посмотреть примеры заведений
                                     </a>
                                 </div>
@@ -338,15 +341,152 @@
 
 {% block extra_css %}
 <style>
+/* Dashboard Container */
+.dashboard-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    background: #01605E;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(1, 96, 94, 0.15);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.dashboard-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Navbar Button Styles */
+.navbar-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #01605E;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.navbar-btn:hover {
+    background: #f0f9ff;
+    color: #01605E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(1, 96, 94, 0.2);
+    border-color: #01605E;
+}
+
+.navbar-btn-outline {
+    background: transparent;
+    color: #01605E;
+    border-color: #01605E;
+}
+
+.navbar-btn-outline:hover {
+    background: #01605E;
+    color: white;
+    border-color: #01605E;
+}
+
+.navbar-btn-light {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar-btn-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* Dropdown Styles */
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+.modern-dropdown {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.modern-dropdown .dropdown-item {
+    padding: 0.75rem 1.5rem;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.modern-dropdown .dropdown-item:hover {
+    background: #f0f9ff;
+    color: #01605E;
+}
+
+.modern-dropdown .dropdown-header {
+    color: #01605E;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+}
+
+/* Vendor Card Styles */
 .vendor-card {
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    margin-bottom: 2rem;
+    background: white;
 }
 
 .bg-gradient-primary {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background: linear-gradient(135deg, #01605E 0%, #014a47 100%);
 }
 
 .vendor-logo {
@@ -354,13 +494,13 @@
     height: 60px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid rgba(255,255,255,0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .vendor-logo-placeholder {
     width: 60px;
     height: 60px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -369,50 +509,148 @@
     color: white;
 }
 
+.vendor-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Statistics Cards */
 .stat-card {
-    padding: 1rem;
-    border-radius: 10px;
-    background: #f8f9fa;
-    transition: transform 0.3s ease;
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    background: white;
 }
 
 .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.stat-icon.bg-primary {
+    background: linear-gradient(135deg, #01605E 0%, #014a47 100%);
+}
+
+.stat-icon.bg-success {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.stat-icon.bg-warning {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.stat-icon.bg-info {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+}
+
+/* Item Thumbnails */
 .item-thumb {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .item-thumb-placeholder {
-    width: 40px;
-    height: 40px;
-    background: #e9ecef;
-    border-radius: 8px;
+    width: 45px;
+    height: 45px;
+    background: #e2e8f0;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6c757d;
+    color: #64748b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-xs {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+/* Price Tags */
+.price-tag {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+/* Getting Started Section */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.card-body {
+    padding: 3rem;
+}
+
+/* Information Cards */
+.bg-light {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .header-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .navbar-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-content {
+        padding: 0 1rem 2rem;
+    }
+    
+    .vendor-actions {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-title {
+        font-size: 1.5rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .navbar-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
 {% endblock %}

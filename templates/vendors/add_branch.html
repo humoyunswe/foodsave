@@ -5,108 +5,136 @@
 {% block title %}Добавить филиал - {{ vendor.name }}{% endblock %}
 
 {% block content %}
-<div class="premium-container">
-    <div class="form-wrapper">
-        <div class="form-header">
-            <h1 class="form-title">Новый филиал</h1>
-            <p class="form-subtitle">{{ vendor.name }}</p>
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Left Cтеolumn - Branding -->
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">FS</span>
+                    </div>
+                    <div class="brand-name">FOODSAVE</div>
+                </div>
+            </div>
+            <div class="main-text">
+                <div class="text-line">ДОБАВЛЕНИЕ</div>
+                <div class="text-line">ФИЛИАЛА</div>
+            </div>
         </div>
+        
+        <!-- Right Column - Form -->
+        <div class="login-right">
+            <div class="form-container">
+                <h2 class="form-title">Добавить новый филиал</h2>
+                <p class="vendor-name">{{ vendor.name }}</p>
                 
-        <form method="post" class="premium-form" novalidate>
-            {% csrf_token %}
-            
-            <div class="form-grid">
-                <!-- Left Column -->
-                <div class="form-column">
-                    <div class="input-group">
-                        <label for="{{ form.name.id_for_label }}" class="field-label">Название филиала</label>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" class="vendor-form" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Название филиала *</label>
                         {{ form.name }}
                         {% if form.name.errors %}
-                            <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                            <div class="error-message">{{ form.name.errors.0 }}</div>
                         {% endif %}
                     </div>
                     
-                    <div class="input-group phone-group">
-                        <label for="{{ form.phone.id_for_label }}" class="field-label">Телефон</label>
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label">Телефон *</label>
                         <div class="phone-input-wrapper">
                             <div class="country-flag">
-                                <img src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 513 342'%3e%3cpath fill='%2300afca' d='M0 0h513v114H0z'/%3e%3cpath fill='%23fff' d='M0 114h513v114H0z'/%3e%3cpath fill='%23ce1126' d='M0 228h513v114H0z'/%3e%3ccircle cx='128.5' cy='57' r='34.2' fill='%23fff'/%3e%3ccircle cx='136.8' cy='57' r='27.4' fill='%2300afca'/%3e%3cpath fill='%23fff' d='m128.5 30.4 4.6 14.1h14.8l-12 8.7 4.6 14.1-12-8.7-12 8.7 4.6-14.1-12-8.7h14.8z'/%3e%3c/svg%3e" alt="UZ" class="flag-icon">
+                            
                                 <span class="country-code">+998</span>
                             </div>
                             {{ form.phone }}
                         </div>
                         {% if form.phone.errors %}
-                            <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                            <div class="error-message">{{ form.phone.errors.0 }}</div>
                         {% endif %}
                     </div>
-
-                    <div class="input-group">
-                        <label for="{{ form.address.id_for_label }}" class="field-label">Адрес филиала</label>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">Адрес филиала *</label>
                         {{ form.address }}
                         {% if form.address.errors %}
-                            <div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>
+                            <div class="error-message">{{ form.address.errors.0 }}</div>
                         {% endif %}
                     </div>
                     
-                    <div class="coordinates-group">
-                        <div class="input-group">
-                            <label for="{{ form.latitude.id_for_label }}" class="field-label">Широта</label>
+                    <div class="coordinates-row">
+                        <div class="form-group">
+                            <label for="{{ form.latitude.id_for_label }}" class="form-label">Широта</label>
                             {{ form.latitude }}
                             {% if form.latitude.errors %}
-                                <div class="text-danger small mt-1">{{ form.latitude.errors.0 }}</div>
+                                <div class="error-message">{{ form.latitude.errors.0 }}</div>
                             {% endif %}
                         </div>
-                        <div class="input-group">
-                            <label for="{{ form.longitude.id_for_label }}" class="field-label">Долгота</label>
+                        <div class="form-group">
+                            <label for="{{ form.longitude.id_for_label }}" class="form-label">Долгота</label>
                             {{ form.longitude }}
                             {% if form.longitude.errors %}
-                                <div class="text-danger small mt-1">{{ form.longitude.errors.0 }}</div>
+                                <div class="error-message">{{ form.longitude.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
                     
-                    <div class="toggle-group">
-                        <label class="toggle-label">
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
                             {{ form.is_active }}
-                            <span class="toggle-text">Филиал активен</span>
+                            <span class="checkbox-text">Филиал активен</span>
                         </label>
                     </div>
-                </div>
-                
-                <!-- Right Column -->
-                <div class="form-column">
-                    <div class="map-section">
-                        <label class="input-label">Местоположение на карте</label>
-                        <div class="map-container">
-                            <div id="map"></div>
-                        </div>
-                        <p class="map-hint">Кликните на карте для выбора точного местоположения</p>
-                    </div>
                     
-                    <div class="map-controls">
-                        <button type="button" class="control-btn" onclick="getCurrentLocation()">
-                            Моё местоположение
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            СОЗДАТЬ ФИЛИАЛ
                         </button>
-                        <button type="button" class="control-btn" onclick="searchByAddress()">
-                            Найти по адресу
-                        </button>
-                        <button type="button" class="control-btn" onclick="centerMap()">
-                            Центрировать
-                        </button>
+                        <a href="{% url 'vendors:vendor_dashboard' %}" class="btn-secondary">
+                            Назад к панели
+                        </a>
                     </div>
-                </div>
+                </form>
             </div>
-            
-            <div class="form-actions">
-                <a href="{% url 'vendors:vendor_dashboard' %}" class="btn-secondary">
-                    Назад
-                </a>
-                <button type="submit" class="btn-primary">
-                    Сохранить филиал
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
+</div>
+
+<!-- Map Section (Hidden by default, can be toggled) -->
+<div class="map-section" id="mapSection" style="display: none;">
+    <div class="map-container">
+        <div class="map-header">
+            <h3>Местоположение на карте</h3>
+            <button type="button" class="close-map" onclick="toggleMap()">×</button>
+        </div>
+        <div id="map"></div>
+        <div class="map-controls">
+            <button type="button" class="control-btn" onclick="getCurrentLocation()">
+                Моё местоположение
+            </button>
+            <button type="button" class="control-btn" onclick="searchByAddress()">
+                Найти по адресу
+            </button>
+            <button type="button" class="control-btn" onclick="centerMap()">
+                Центрировать
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Map Toggle Button -->
+<div class="map-toggle">
+    <button type="button" class="btn-map-toggle" onclick="toggleMap()">
+        <i class="fas fa-map-marker-alt me-2"></i>Открыть карту
+    </button>
 </div>
 {% endblock %}
 
@@ -114,129 +142,181 @@
 <style>
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    background: #fafafa;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
 }
 
-.premium-container {
+.login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
+    padding: 0;
+    margin: 0;
 }
 
-.form-wrapper {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(1, 96, 94, 0.08);
-    max-width: 1200px;
+.login-wrapper {
+    display: flex;
     width: 100%;
+    height: 100vh;
+    background: white;
+    border-radius: 0;
     overflow: hidden;
+    box-shadow: none;
 }
 
-.form-header {
+/* Left Column - Branding */
+.login-left {
+    flex: 1;
     background: #01605E;
-    padding: 2.5rem 2rem;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px;
+    position: relative;
+}
+
+.brand-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.logo-circle {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-text {
+    color: #01605E;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.brand-name {
     color: white;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.main-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.text-line {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 1.2;
+    letter-spacing: 2px;
+}
+
+/* Right Column - Form */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 2rem 2rem 2rem;
+    background: white;
+    overflow-y: auto;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
 }
 
 .form-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-    letter-spacing: -0.025em;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: left;
 }
 
-.form-subtitle {
-    font-size: 1rem;
-    opacity: 0.8;
-    margin: 0;
-    font-weight: 400;
+.vendor-name {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    font-weight: 500;
 }
 
-.premium-form {
-    padding: 2rem;
+.vendor-form {
+    width: 100%;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 2rem;
+.form-group {
+    margin-bottom: 20px;
 }
 
-.form-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.input-group {
-    margin-bottom: 0;
-}
-
-.input-label, label, .field-label {
+.form-label {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #01605E;
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.025em;
-    text-align: center;
-}
-
-.field-label {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
 }
 
 .form-control, .form-select, textarea {
     width: 100%;
-    padding: 0.875rem 1rem;
-    border: 2px solid #d1d5db;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    background: #ffffff;
-    color: #111827;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background: white;
+    transition: border-color 0.3s ease;
 }
 
 .form-control:focus, .form-select:focus, textarea:focus {
     outline: none;
     border-color: #01605E;
-    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
 }
 
+/* Phone Input Styling */
 .phone-input-wrapper {
     display: flex;
-    border: 2px solid #d1d5db;
-    border-radius: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease;
 }
 
 .phone-input-wrapper:focus-within {
     border-color: #01605E;
-    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
 }
 
 .country-flag {
     display: flex;
     align-items: center;
-    padding: 0.875rem 1rem;
-    background: #f9fafb;
-    border-right: 1px solid #e5e7eb;
-    gap: 0.5rem;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-right: 1px solid #ddd;
+    gap: 8px;
 }
 
 .flag-icon {
@@ -246,66 +326,194 @@ body {
 }
 
 .country-code {
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: 500;
-    color: #374151;
+    color: #333;
 }
 
 .phone-input-wrapper .form-control {
     border: none;
     border-radius: 0;
     box-shadow: none;
+    padding: 12px 16px;
 }
 
 .phone-input-wrapper .form-control:focus {
     box-shadow: none;
 }
 
+/* Coordinates Row */
+.coordinates-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 14px;
+    color: #333;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-primary, .btn-secondary {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: white;
+    color: #333;
+    border-color: #ddd;
+}
+
+.btn-primary:hover {
+    background: #f8f9fa;
+    border-color: #01605E;
+}
+
+.btn-secondary {
+    background: white;
+    color: #01605E;
+    border-color: #01605E;
+}
+
+.btn-secondary:hover {
+    background: #01605E;
+    color: white;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Map Section */
 .map-section {
-    margin-bottom: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
 .map-container {
-    border: 1.5px solid #e5e7eb;
+    background: white;
     border-radius: 8px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 80vh;
     overflow: hidden;
-    margin-bottom: 0.75rem;
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.map-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.close-map {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-map:hover {
+    color: #333;
 }
 
 #map {
     width: 100%;
-    height: 350px;
+    height: 400px;
     display: block;
-}
-
-.map-hint {
-    font-size: 0.8125rem;
-    color: #6b7280;
-    margin: 0;
-    text-align: center;
-}
-
-.coordinates-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
 }
 
 .map-controls {
     display: flex;
-    gap: 0.75rem;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #ddd;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
 .control-btn {
-    padding: 0.625rem 1.25rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.8125rem;
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
     font-weight: 500;
-    color: #374151;
+    color: #333;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -316,142 +524,104 @@ body {
     border-color: #01605E;
 }
 
-.toggle-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 8px;
+/* Map Toggle Button */
+.map-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
 }
 
-.toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    margin: 0;
-}
-
-.toggle-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-input[type="checkbox"] {
-    width: 44px;
-    height: 24px;
-    appearance: none;
-    background: #e5e7eb;
-    border-radius: 12px;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-input[type="checkbox"]:checked {
-    background: #01605E;
-}
-
-input[type="checkbox"]:before {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: white;
-    top: 2px;
-    left: 2px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-input[type="checkbox"]:checked:before {
-    transform: translateX(20px);
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-    margin-top: 1.5rem;
-}
-
-.btn-secondary, .btn-primary {
-    flex: 1;
-    padding: 0.875rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-.btn-secondary {
-    background: #f9fafb;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-}
-
-.btn-secondary:hover {
-    background: #f3f4f6;
-    text-decoration: none;
-    color: #374151;
-}
-
-.btn-primary {
+.btn-map-toggle {
     background: #01605E;
     color: white;
-}
-
-.btn-primary:hover {
-    background: #014d4b;
-    transform: translateY(-1px);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(1, 96, 94, 0.3);
 }
 
+.btn-map-toggle:hover {
+    background: #014d4b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(1, 96, 94, 0.4);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .premium-container {
-        padding: 1rem;
-    }
-    
-    .form-header {
-        padding: 2rem 1.5rem;
-    }
-    
-    .premium-form {
-        padding: 1.5rem;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .coordinates-group {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
+    .login-wrapper {
         flex-direction: column;
+        max-width: 500px;
     }
     
-    .map-controls {
-        justify-content: stretch;
+    .login-left {
+        padding: 30px 20px;
+        min-height: 200px;
     }
     
-    .control-btn {
-        flex: 1;
-        text-align: center;
+    .login-right {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .text-line {
+        font-size: 24px;
+    }
+    
+    .brand-name {
+        font-size: 20px;
+    }
+    
+    .form-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .coordinates-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .map-container {
+        margin: 10px;
+        max-height: 90vh;
     }
     
     #map {
         height: 300px;
+    }
+    
+    .map-controls {
+        flex-direction: column;
+    }
+    
+    .control-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 0;
+    }
+    
+    .login-left {
+        padding: 1rem;
+    }
+    
+    .login-right {
+        padding: 1.5rem 1rem 1rem 1rem;
+    }
+    
+    .text-line {
+        font-size: 20px;
+    }
+    
+    .brand-name {
+        font-size: 18px;
     }
 }
 </style>
@@ -464,40 +634,56 @@ input[type="checkbox"]:checked:before {
 <script>
 let myMap, placemark;
 
-// Initialize Yandex Map
-ymaps.ready(init);
+// Toggle map visibility
+function toggleMap() {
+    const mapSection = document.getElementById('mapSection');
+    const isVisible = mapSection.style.display !== 'none';
+    
+    if (isVisible) {
+        mapSection.style.display = 'none';
+    } else {
+        mapSection.style.display = 'flex';
+        // Initialize map if not already done
+        if (!myMap) {
+            initMap();
+        }
+    }
+}
 
-function init() {
-    // Default coordinates for Tashkent, Uzbekistan
-    const defaultCoords = [41.2995, 69.2401];
-    
-    // Get existing coordinates from form if available
-    const latInput = document.getElementById('id_latitude');
-    const lngInput = document.getElementById('id_longitude');
-    const existingLat = parseFloat(latInput.value);
-    const existingLng = parseFloat(lngInput.value);
-    
-    let initialCoords = defaultCoords;
-    if (!isNaN(existingLat) && !isNaN(existingLng)) {
-        initialCoords = [existingLat, existingLng];
-    }
-    
-    myMap = new ymaps.Map("map", {
-        center: initialCoords,
-        zoom: 12,
-        controls: ['zoomControl', 'searchControl', 'typeSelector', 'fullscreenControl']
-    });
-    
-    // Add placemark if coordinates exist
-    if (!isNaN(existingLat) && !isNaN(existingLng)) {
-        addPlacemark(initialCoords);
-    }
-    
-    // Click event to add/move placemark
-    myMap.events.add('click', function (e) {
-        const coords = e.get('coords');
-        addPlacemark(coords);
-        updateCoordinateInputs(coords);
+// Initialize Yandex Map
+function initMap() {
+    ymaps.ready(function() {
+        // Default coordinates for Tashkent, Uzbekistan
+        const defaultCoords = [41.2995, 69.2401];
+        
+        // Get existing coordinates from form if available
+        const latInput = document.getElementById('id_latitude');
+        const lngInput = document.getElementById('id_longitude');
+        const existingLat = parseFloat(latInput.value);
+        const existingLng = parseFloat(lngInput.value);
+        
+        let initialCoords = defaultCoords;
+        if (!isNaN(existingLat) && !isNaN(existingLng)) {
+            initialCoords = [existingLat, existingLng];
+        }
+        
+        myMap = new ymaps.Map("map", {
+            center: initialCoords,
+            zoom: 12,
+            controls: ['zoomControl', 'searchControl', 'typeSelector', 'fullscreenControl']
+        });
+        
+        // Add placemark if coordinates exist
+        if (!isNaN(existingLat) && !isNaN(existingLng)) {
+            addPlacemark(initialCoords);
+        }
+        
+        // Click event to add/move placemark
+        myMap.events.add('click', function (e) {
+            const coords = e.get('coords');
+            addPlacemark(coords);
+            updateCoordinateInputs(coords);
+        });
     });
 }
 

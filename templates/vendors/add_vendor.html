@@ -1,33 +1,159 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Добавить Vendor - FoodSave{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-plus me-2"></i>Добавить новый Vendor
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Сохранить
-                        </button>
-                    </form>
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Left Column - Branding -->
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">FS</span>
+                    </div>
+                    <div class="brand-name">FOODSAVE</div>
                 </div>
             </div>
-            
-            <div class="mt-3">
-                <a href="{% url 'vendors:vendor_list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Вернуться к списку
-                </a>
+            <div class="main-text">
+                <div class="text-line">ДОБАВЛЕНИЕ</div>
+                <div class="text-line">ВЕНДОРА</div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Form -->
+        <div class="login-right">
+            <div class="form-container">
+                <h2 class="form-title">Добавить новое заведение</h2>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data" class="vendor-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.owner.id_for_label }}" class="form-label">Владелец заведения *</label>
+                        {{ form.owner }}
+                        {% if form.owner.errors %}
+                            <div class="error-message">{{ form.owner.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.type.id_for_label }}" class="form-label">Тип заведения *</label>
+                        {{ form.type }}
+                        {% if form.type.errors %}
+                            <div class="error-message">{{ form.type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Название заведения *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="error-message">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="error-message">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">Логотип заведения</label>
+                        {{ form.logo }}
+                        {% if form.logo.errors %}
+                            <div class="error-message">{{ form.logo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.is_active }}
+                            <span class="checkbox-text">Заведение активно</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            СОЗДАТЬ ЗАВЕДЕНИЕ
+                        </button>
+                        <button type="button" class="btn-secondary" data-bs-toggle="modal" data-bs-target="#addOwnerModal">
+                            Зарегистрировать владельца
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Owner Modal -->
+<div class="modal fade" id="addOwnerModal" tabindex="-1" aria-labelledby="addOwnerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOwnerModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Добавить нового владельца
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ownerForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_username" class="form-label">Имя пользователя</label>
+                            {{ owner_form.username }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ owner_form.email }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">Имя</label>
+                            {{ owner_form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Фамилия</label>
+                            {{ owner_form.last_name }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_password" class="form-label">Пароль</label>
+                            {{ owner_form.password }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_password_confirm" class="form-label">Подтвердите пароль</label>
+                            {{ owner_form.password_confirm }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_role" class="form-label">Роль</label>
+                        {{ owner_form.role }}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveOwnerBtn">
+                    <i class="fas fa-save me-2"></i>Сохранить владельца
+                </button>
             </div>
         </div>
     </div>
@@ -36,31 +162,409 @@
 
 {% block extra_css %}
 <style>
-.card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
 }
 
-.form-control, .form-select {
-    border-radius: 10px;
-    border: 2px solid #e9ecef;
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.login-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    background: white;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+/* Left Column - Branding */
+.login-left {
+    flex: 1;
+    background: #01605E;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px;
+    position: relative;
+}
+
+.brand-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.logo-circle {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-text {
+    color: #01605E;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.brand-name {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.main-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.text-line {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 1.2;
+    letter-spacing: 2px;
+}
+
+/* Right Column - Form */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 2rem 2rem 2rem;
+    background: white;
+    overflow-y: auto;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.vendor-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background: white;
     transition: border-color 0.3s ease;
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+.form-control:focus, .form-select:focus, textarea:focus {
+    outline: none;
+    border-color: #01605E;
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: #01605E;
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 14px;
+    color: #333;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-primary, .btn-secondary {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: white;
+    color: #333;
+    border-color: #ddd;
+}
+
+.btn-primary:hover {
+    background: #f8f9fa;
+    border-color: #01605E;
+}
+
+.btn-secondary {
+    background: white;
+    color: #01605E;
+    border-color: #01605E;
+}
+
+.btn-secondary:hover {
+    background: #01605E;
+    color: white;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 8px;
     border: none;
-    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background: #01605E;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+.modal-body .form-control, .modal-body .form-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-body .form-control:focus, .modal-body .form-select:focus {
+    border-color: #01605E;
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-wrapper {
+        flex-direction: column;
+        max-width: 500px;
+    }
+    
+    .login-left {
+        padding: 30px 20px;
+        min-height: 200px;
+    }
+    
+    .login-right {
+        padding: 30px 20px;
+    }
+    
+    .text-line {
+        font-size: 24px;
+    }
+    
+    .brand-name {
+        font-size: 20px;
+    }
+    
+    .form-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 0;
+    }
+    
+    .login-left {
+        padding: 1rem;
+    }
+    
+    .login-right {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .text-line {
+        font-size: 20px;
+    }
+    
+    .brand-name {
+        font-size: 18px;
+    }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Handle owner creation via AJAX
+document.getElementById('saveOwnerBtn').addEventListener('click', function() {
+    const form = document.getElementById('ownerForm');
+    const formData = new FormData(form);
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add new owner to the select dropdown
+            const ownerSelect = document.getElementById('id_owner');
+            const newOption = document.createElement('option');
+            newOption.value = data.owner_id;
+            newOption.textContent = data.owner_name;
+            newOption.selected = true;
+            ownerSelect.appendChild(newOption);
+            
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addOwnerModal'));
+            modal.hide();
+            form.reset();
+            
+            // Show success message
+            showToast('Владелец успешно создан!', 'success');
+        } else {
+            // Show errors
+            let errorMessage = 'Ошибки в форме:\n';
+            for (const [field, errors] of Object.entries(data.errors)) {
+                errorMessage += `${field}: ${errors.join(', ')}\n`;
+            }
+            alert(errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Произошла ошибка при создании владельца', 'error');
+    });
+});
+
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
 {% endblock %}

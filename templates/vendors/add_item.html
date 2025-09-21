@@ -5,195 +5,146 @@
 {% block title %}Добавить товар - {{ vendor.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white text-center py-4">
-                    <h3 class="mb-0">
-                        <i class="fas fa-box me-2"></i>
-                        Добавить новый товар
-                    </h3>
-                    <p class="mb-0 opacity-75">{{ vendor.name }}{% if branch %} - {{ branch.name }}{% endif %}</p>
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Left Column - Branding -->
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">FS</span>
+                    </div>
+                    <div class="brand-name">FOODSAVE</div>
                 </div>
+            </div>
+            <div class="main-text">
+                <div class="text-line">ДОБАВЛЕНИЕ</div>
+                <div class="text-line">ТОВАРА</div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Form -->
+        <div class="login-right">
+            <div class="form-container">
+                <h2 class="form-title">Добавить новый товар</h2>
+                <p class="vendor-name">{{ vendor.name }}{% if branch %} - {{ branch.name }}{% endif %}</p>
                 
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        <!-- Basic Information -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary mb-3">
-                                    <i class="fas fa-info-circle me-2"></i>Основная информация
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.branch.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>Филиал *</nlabel>
-                                </label>
-                                {{ form.branch }}
-                                {% if form.branch.errors %}
-                                <div class="text-danger small mt-1">{{ form.branch.errors|join:', ' }}</div>
-                                {% endif %}
-                                <div class="form-text">Выберите филиал, к которому относится товар</div>
-                            </div>
-                        </div>
-
-                        {% if form.errors or image_formset.non_form_errors or image_formset.errors %}
-                        <div class="alert alert-danger">
-                            <div class="fw-semibold mb-2">Проверьте форму, есть ошибки:</div>
-                            {% if form.non_field_errors %}
-                                <div>{{ form.non_field_errors }}</div>
-                            {% endif %}
-                            <ul class="mb-0 small">
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                                {% for error in image_formset.non_form_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                {% if form.errors or image_formset.non_form_errors or image_formset.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <div class="fw-semibold mb-2">Проверьте форму, есть ошибки:</div>
+                    {% if form.non_field_errors %}
+                        <div>{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <ul class="mb-0 small">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in image_formset.non_form_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                <form method="post" enctype="multipart/form-data" class="vendor-form" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.branch.id_for_label }}" class="form-label">Филиал *</label>
+                        {{ form.branch }}
+                        {% if form.branch.errors %}
+                            <div class="error-message">{{ form.branch.errors.0 }}</div>
                         {% endif %}
+                    </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-8">
-                                <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-tag me-2 text-primary"></i>Название товара *
-                                </label>
-                                {{ form.title }}
-                                {% if form.title.errors %}
-                                <div class="text-danger small mt-1">{{ form.title.errors|join:', ' }}</div>
-                                {% endif %}
-                                <div class="form-text">Привлекательное название для покупателей</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-list me-2 text-success"></i>Категория *
-                                </label>
-                                {{ form.category }}
-                                <a href="{% url 'catalog:add_category' %}" class="btn btn-outline-success btn-sm mt-2 d-block" target="_blank">
-                                    <i class="fas fa-plus me-1"></i>Добавить категорию
-                                </a>
-                                {% if form.category.errors %}
-                                <div class="text-danger small mt-1">{{ form.category.errors|join:', ' }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Название товара *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="error-message">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">Категория *</label>
+                        {{ form.category }}
+                        <a href="{% url 'catalog:add_category' %}" class="add-category-link" target="_blank">
+                            <i class="fas fa-plus me-1"></i>Добавить категорию
+                        </a>
+                        {% if form.category.errors %}
+                            <div class="error-message">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                    </div>
                         
-                        <!-- New Category Field (initially hidden) -->
-                        <div class="row mb-4" id="newCategoryDiv" style="display: none;">
-                            <div class="col-md-6">
-                                <label for="{{ form.new_category.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-plus me-2 text-success"></i>Новая категория
-                                </label>
-                                {{ form.new_category }}
-                                {% if form.new_category.errors %}
-                                <div class="text-danger small mt-1">{{ form.new_category.errors|join:', ' }}</div>
-                                {% endif %}
-                                <div class="form-text">Введите название новой категории</div>
-                            </div>
-                        </div>
+                    <div class="form-group" id="newCategoryDiv" style="display: none;">
+                        <label for="{{ form.new_category.id_for_label }}" class="form-label">Новая категория</label>
+                        {{ form.new_category }}
+                        {% if form.new_category.errors %}
+                            <div class="error-message">{{ form.new_category.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="error-message">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.unit.id_for_label }}" class="form-label">Единица измерения</label>
+                        {{ form.unit }}
+                        <a href="{% url 'catalog:add_unit' %}" class="add-category-link" target="_blank">
+                            <i class="fas fa-plus me-1"></i>Добавить единицу измерения
+                        </a>
+                        {% if form.unit.errors %}
+                            <div class="error-message">{{ form.unit.errors.0 }}</div>
+                        {% endif %}
+                    </div>
                         
-                        <div class="row mb-4">
-                            <div class="col-md-8">
-                                <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-align-left me-2 text-info"></i>Описание
-                                </label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                <div class="text-danger small mt-1">{{ form.description.errors|join:', ' }}</div>
-                                {% endif %}
-                                <div class="form-text">Подробное описание товара, состав, особенности</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="{{ form.unit.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-weight me-2 text-warning"></i>Единица измерения
-                                </label>
-                                {{ form.unit }}
-                                <a href="{% url 'catalog:add_unit' %}" class="btn btn-outline-success btn-sm mt-2 d-block" target="_blank">
-                                    <i class="fas fa-plus me-1"></i>Добавить единицу измерения
-                                </a>
-                                {% if form.unit.errors %}
-                                <div class="text-danger small mt-1">{{ form.unit.errors|join:', ' }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
+                    <div class="form-group" id="customUnitDiv" style="display: none;">
+                        <label for="{{ form.custom_unit.id_for_label }}" class="form-label">Своя единица измерения</label>
+                        {{ form.custom_unit }}
+                        {% if form.custom_unit.errors %}
+                            <div class="error-message">{{ form.custom_unit.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.is_active }}
+                            <span class="checkbox-text">Товар активен</span>
+                        </label>
+                        {% if form.is_active.errors %}
+                            <div class="error-message">{{ form.is_active.errors.0 }}</div>
+                        {% endif %}
+                    </div>
                         
-                        <!-- Custom Unit Field (initially hidden) -->
-                        <div class="row mb-4" id="customUnitDiv" style="display: none;">
-                            <div class="col-md-6">
-                                <label for="{{ form.custom_unit.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-edit me-2 text-warning"></i>Своя единица измерения
-                                </label>
-                                {{ form.custom_unit }}
-                                {% if form.custom_unit.errors %}
-                                <div class="text-danger small mt-1">{{ form.custom_unit.errors|join:', ' }}</div>
-                                {% endif %}
-                                <div class="form-text">Укажите свою единицу измерения</div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <div class="form-check form-switch mt-4">
-                                    {{ form.is_active }}
-                                    <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
-                                        <i class="fas fa-toggle-on me-2 text-success"></i>Товар активен
-                                    </label>
-                                    {% if form.is_active.errors %}
-                                    <div class="text-danger small mt-1">{{ form.is_active.errors|join:', ' }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Images Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary mb-3">
-                                    <i class="fas fa-images me-2"></i>Фотографии товара
-                                </h5>
-                                <div class="alert alert-info">
-                                    <i class="fas fa-lightbulb me-2"></i>
-                                    <strong>Совет:</strong> Добавьте качественные фотографии товара. Первая фотография будет использована как основная.
-                                </div>
-                            </div>
-                        </div>
-                        
+                    <div class="form-group">
+                        <label class="form-label">Фотографии товара</label>
                         <div class="image-upload-section">
                             {{ image_formset.management_form }}
                             <div id="image-forms">
                                 {% for form in image_formset %}
-                                    <div class="image-form-row mb-3 p-3 border rounded">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-bold">
-                                                    <i class="fas fa-image me-2"></i>Изображение {{ forloop.counter }}
-                                                </label>
+                                    <div class="image-form-row">
+                                        <div class="image-form-content">
+                                            <div class="image-upload-field">
+                                                <label class="image-label">Изображение {{ forloop.counter }}</label>
                                                 {{ form.image }}
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-check">
+                                            <div class="image-options">
+                                                <div class="checkbox-option">
                                                     {{ form.is_primary }}
-                                                    <label class="form-check-label" for="{{ form.is_primary.id_for_label }}">
-                                                        Основное фото
-                                                    </label>
+                                                    <label for="{{ form.is_primary.id_for_label }}">Основное фото</label>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label">Порядок</label>
-                                                {{ form.order }}
-                                            </div>
-                                            <div class="col-md-1">
+                                                <div class="order-field">
+                                                    <label>Порядок</label>
+                                                    {{ form.order }}
+                                                </div>
                                                 {% if not forloop.first %}
-                                                    <button type="button" class="btn btn-outline-danger btn-sm remove-image" title="Удалить">
+                                                    <button type="button" class="remove-image-btn" title="Удалить">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 {% endif %}
@@ -203,58 +154,24 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <button type="button" class="btn btn-outline-primary" id="add-image">
+                            <button type="button" class="add-image-btn" id="add-image">
                                 <i class="fas fa-plus me-2"></i>Добавить ещё фото
                             </button>
                         </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="row mt-5">
-                            <div class="col-12">
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                                    <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-outline-secondary btn-lg">
-                                        <i class="fas fa-arrow-left me-2"></i>Назад
-                                    </a>
-                                    <div>
-                                        <button type="submit" name="save_and_add_offer" class="btn btn-success btn-lg me-2">
-                                            <i class="fas fa-save me-2"></i>Сохранить и добавить предложение
-                                        </button>
-                                        <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="fas fa-save me-2"></i>Сохранить товар
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Help Card -->
-            <div class="card mt-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Советы по добавлению товаров</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-camera me-2 text-primary"></i>Фотографии</h6>
-                            <ul class="small">
-                                <li>Используйте качественные, яркие фотографии</li>
-                                <li>Показывайте товар с разных ракурсов</li>
-                                <li>Первое фото - самое привлекательное</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-edit me-2 text-success"></i>Описание</h6>
-                            <ul class="small">
-                                <li>Укажите состав и ингредиенты</li>
-                                <li>Опишите вкус и особенности</li>
-                                <li>Добавьте информацию о пищевой ценности</li>
-                            </ul>
-                        </div>
                     </div>
-                </div>
+                        
+                    <div class="form-actions">
+                        <button type="submit" name="save_and_add_offer" class="btn-primary">
+                            СОХРАНИТЬ И ДОБАВИТЬ ПРЕДЛОЖЕНИЕ
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            СОХРАНИТЬ ТОВАР
+                        </button>
+                        <a href="{% url 'vendors:vendor_dashboard' %}" class="btn-secondary">
+                            Назад к панели
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -263,56 +180,486 @@
 
 {% block extra_css %}
 <style>
-.bg-gradient {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+/* Login Container - Full Screen */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0;
+    margin: 0;
+}
+
+.login-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    height: 100vh;
+    background: white;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+/* Left Column - Branding */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #01605E 0%, #014a47 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem;
+}
+
+.brand-section {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    right: 2rem;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-circle {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.logo-text {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.brand-name {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.main-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.text-line {
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Right Column - Form */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 2rem 2rem 2rem;
+    background: white;
+    overflow-y: auto;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-title {
+    color: #111827;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.vendor-name {
+    color: #6b7280;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Form Styles */
+.vendor-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
 .form-label {
-    color: #495057;
+    display: block;
+    color: #374151;
+    font-weight: 600;
     margin-bottom: 0.5rem;
+    font-size: 0.95rem;
 }
 
-.form-control, .form-select, textarea {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
+.form-control, .form-select, textarea, input[type="file"] {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: #01605E;
+}
+
+.form-control:focus, .form-select:focus, textarea:focus, input[type="file"]:focus {
+    outline: none;
+    border-color: #01605E;
+    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #374151;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #01605E;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 0.95rem;
+}
+
+/* Add Category Link */
+.add-category-link {
+    display: inline-flex;
+    align-items: center;
+    color: #01605E;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.add-category-link:hover {
+    color: #014a47;
+    text-decoration: underline;
+}
+
+/* Image Upload Section */
+.image-upload-section {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: #f9fafb;
     transition: all 0.3s ease;
 }
 
-.form-control:focus, .form-select:focus, textarea:focus {
-    border-color: #059669;
-    box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.25);
+.image-upload-section:hover {
+    border-color: #01605E;
+    background: #f0f9ff;
 }
 
 .image-form-row {
-    background: #f8f9fa;
-    border-radius: 10px !important;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
 }
 
 .image-form-row:hover {
-    background: #e9ecef;
+    border-color: #01605E;
+    box-shadow: 0 2px 8px rgba(1, 96, 94, 0.1);
 }
 
-.btn-lg {
-    padding: 0.75rem 2rem;
-    border-radius: 25px;
+.image-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.image-upload-field {
+    flex: 1;
+}
+
+.image-label {
+    display: block;
+    color: #374151;
     font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
-.card {
-    border-radius: 15px;
+.image-options {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.form-text {
-    font-size: 0.8rem;
-    color: #6c757d;
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.remove-image {
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    padding: 0;
+.checkbox-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #01605E;
+}
+
+.checkbox-option label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.order-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.order-field label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.order-field input {
+    width: 60px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.remove-image-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.remove-image-btn:hover {
+    background: #b91c1c;
+    transform: scale(1.05);
+}
+
+.add-image-btn {
+    background: #01605E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.add-image-btn:hover {
+    background: #014a47;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 96, 94, 0.3);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary {
+    background: #01605E;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(1, 96, 94, 0.2);
+}
+
+.btn-primary:hover {
+    background: #014a47;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(1, 96, 94, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #6b7280;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border-left: 4px solid #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-wrapper {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .login-left {
+        min-height: 40vh;
+        padding: 1.5rem;
+    }
+    
+    .text-line {
+        font-size: 2rem;
+    }
+    
+    .login-right {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .form-container {
+        max-width: 100%;
+    }
+    
+    .image-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .form-actions {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-left {
+        min-height: 30vh;
+        padding: 1rem;
+    }
+    
+    .text-line {
+        font-size: 1.5rem;
+    }
+    
+    .login-right {
+        padding: 1.5rem 1rem 1rem 1rem;
+    }
+    
+    .brand-logo {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .brand-name {
+        font-size: 1.25rem;
+    }
 }
 </style>
 {% endblock %}
@@ -358,7 +705,7 @@ document.getElementById('add-image').addEventListener('click', function() {
 
 // Remove image form
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('remove-image') || e.target.closest('.remove-image')) {
+    if (e.target.classList.contains('remove-image-btn') || e.target.closest('.remove-image-btn')) {
         e.preventDefault();
         const formRow = e.target.closest('.image-form-row');
         const deleteInput = formRow.querySelector('input[name$="-DELETE"]');
