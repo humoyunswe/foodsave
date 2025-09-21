@@ -16,7 +16,7 @@
                             <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-success btn-sm">
                                 <i class="fas fa-map-marker-alt me-1"></i>Добавить филиал
                             </a>
-                            <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-success btn-sm">
+                            <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-box me-1"></i>Добавить товар
                             </a>
                             <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-secondary btn-sm">
@@ -25,13 +25,13 @@
                             {% if not forloop.first %}<div class="vr mx-2"></div>{% endif %}
                         {% endfor %}
                     {% else %}
-                        <a href="https://t.me/khumoyun_04" class="btn btn-success">
+                        <a href="https://t.me/khumoyun_04" class="btn btn-primary">
                             <i class="fas fa-store me-1"></i>Создать заведение
                         </a>
                     {% endif %}
                     
                     <div class="btn-group">
-                        <button type="button" class="btn btn-outline-success dropdown-toggle btn-sm" data-bs-toggle="dropdown">
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle btn-sm" data-bs-toggle="dropdown">
                             <i class="fas fa-plus me-1"></i>Еще
                         </button>
                         <ul class="dropdown-menu">
@@ -108,7 +108,7 @@
                                 <!-- Statistics -->
                                 <div class="col-md-3 mb-3">
                                     <div class="stat-card text-center">
-                                        <div class="stat-icon bg-success">
+                                        <div class="stat-icon bg-primary">
                                             <i class="fas fa-map-marker-alt"></i>
                                         </div>
                                         <h5 class="mt-2">{{ vendor.branches.count }}</h5>
@@ -135,7 +135,7 @@
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <div class="stat-card text-center">
-                                        <div class="stat-icon bg-success">
+                                        <div class="stat-icon bg-info">
                                             <i class="fas fa-shopping-cart"></i>
                                         </div>
                                         <h5 class="mt-2">0</h5>
@@ -164,7 +164,7 @@
                                         </div>
                                         {% if user.is_authenticated %}
                                         <div class="mt-2">
-                                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-outline-success btn-sm">
+                                            <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-outline-primary btn-sm">
                                                 <i class="fas fa-plus me-1"></i>Добавить филиал
                                             </a>
                                         </div>
@@ -174,7 +174,7 @@
                                             <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
                                             <p class="text-muted">Нет филиалов</p>
                                             {% if user.is_authenticated %}
-                                                <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-success btn-sm">
+                                                <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-primary btn-sm">
                                                     <i class="fas fa-plus me-1"></i>Добавить первый филиал
                                                 </a>
                                             {% endif %}
@@ -221,7 +221,7 @@
                                             <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-outline-success btn-sm me-2">
                                                 <i class="fas fa-plus me-1"></i>Добавить товар
                                             </a>
-                                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-success btn-sm">
+                                            <a href="{% url 'vendors:manage_items' vendor.id %}" class="btn btn-outline-primary btn-sm">
                                                 <i class="fas fa-cog me-1"></i>Управление
                                             </a>
                                         </div>
@@ -252,7 +252,7 @@
                     <div class="col-md-8 mx-auto">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body text-center py-5">
-                                <i class="fas fa-store fa-4x text-success mb-4"></i>
+                                <i class="fas fa-store fa-4x text-primary mb-4"></i>
                                 <h4 class="mb-3">Добро пожаловать в панель управления!</h4>
                                 <p class="text-muted mb-4">У вас пока нет заведений, но вы можете подготовить всё необходимое для старта</p>
                                 
@@ -261,7 +261,7 @@
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-start mb-3">
                                             <div class="flex-shrink-0">
-                                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                                     <span class="fw-bold">1</span>
                                                 </div>
                                             </div>
@@ -288,7 +288,7 @@
                                 
                                 <!-- Action Buttons -->
                                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                                    <a href="https://t.me/khumoyun_04" class="btn btn-success">
+                                    <a href="https://t.me/khumoyun_04" class="btn btn-primary">
                                         <i class="fas fa-envelope me-2"></i>Связаться с администратором
                                     </a>
                                     <a href="{% url 'vendors:vendor_list' %}" class="btn btn-outline-secondary">
@@ -303,7 +303,7 @@
                             <div class="col-md-4 mb-3">
                                 <div class="card h-100 border-0 bg-light">
                                     <div class="card-body text-center">
-                                        <i class="fas fa-map-marker-alt fa-2x text-success mb-3"></i>
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-3"></i>
                                         <h6>Филиалы</h6>
                                         <small class="text-muted">Добавляйте адреса ваших точек продаж</small>
                                     </div>
