@@ -117,6 +117,18 @@
                             </a>
                         </li>
                         {% endif %}
+                        
+                        <!-- Cart Link -->
+                        <li class="nav-item">
+                            <a class="nav-link cart-link position-relative" href="{% url 'booking:cart' %}">
+                                <i class="fas fa-shopping-cart me-1"></i>
+                                <span class="d-none d-md-inline">Корзина</span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle user-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <div class="user-avatar">
@@ -896,6 +908,27 @@
         toastEl.className = 'toast align-items-center border-0 text-bg-' + (type === 'error' ? 'danger' : 'success');
         const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
         toast.show();
+    }
+
+    // Update cart count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
+
+    // Update cart count function
+    function updateCartCount() {
+        fetch('/orders/api/cart/count/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const cartBadge = document.querySelector('.cart-count');
+                    if (cartBadge) {
+                        cartBadge.textContent = data.cart_count;
+                        cartBadge.style.display = data.cart_count > 0 ? 'inline' : 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating cart count:', error));
     }
     </script>
 </body>

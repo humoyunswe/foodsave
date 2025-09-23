@@ -355,7 +355,7 @@ function showLoadingState() {
 // Enhanced cart functionality
 function updateCartCount() {
     // Получаем количество товаров через API
-    fetch('/booking/api/cart/count/')
+    fetch('/orders/api/cart/count/')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -370,7 +370,7 @@ function updateCartCount() {
 }
 
 function addToCartAPI(offerId, quantity = 1, itemName = 'Товар') {
-    return fetch('/booking/api/cart/add/', {
+    return fetch('/orders/api/cart/add/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -571,6 +571,22 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// CSRF token function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
 // Global variables for user location

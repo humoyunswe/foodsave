@@ -40,6 +40,8 @@ class CartView(TemplateView):
         total_amount = sum(item.total_price for item in cart_items)
         total_savings = sum(item.savings for item in cart_items)
         total_items = sum(item.quantity for item in cart_items)
+        original_total = total_amount + total_savings if (total_amount or total_savings) else 0
+        savings_percent = round((total_savings / original_total) * 100, 1) if original_total > 0 else 0
         
         # Группируем по продавцам для удобства отображения
         vendors_items = {}
@@ -55,6 +57,7 @@ class CartView(TemplateView):
             'total_amount': total_amount,
             'total_savings': total_savings,
             'total_items': total_items,
+            'savings_percent': savings_percent,
             'delivery_fee': 5000,  # 5000 сум фиксированная стоимость доставки
             'final_total': total_amount + 5000,
         })

@@ -108,33 +108,28 @@
     </div>
 </div>
 
-<!-- Map Section (Hidden by default, can be toggled) -->
-<div class="map-section" id="mapSection" style="display: none;">
-    <div class="map-container">
-        <div class="map-header">
-            <h3>Местоположение на карте</h3>
-            <button type="button" class="close-map" onclick="toggleMap()">×</button>
+<!-- Map Section -->
+<div class="map-section-inline">
+    <div class="map-container-inline">
+        <div class="map-header-inline">
+            <h3>Выберите местоположение на карте</h3>
+            <div class="map-controls-inline">
+                <button type="button" class="control-btn" onclick="getCurrentLocation()">
+                    <i class="fas fa-location-arrow"></i> Моё местоположение
+                </button>
+                <button type="button" class="control-btn" onclick="searchByAddress()">
+                    <i class="fas fa-search"></i> Найти по адресу
+                </button>
+                <button type="button" class="control-btn" onclick="centerMap()">
+                    <i class="fas fa-crosshairs"></i> Центрировать
+                </button>
+            </div>
         </div>
         <div id="map"></div>
-        <div class="map-controls">
-            <button type="button" class="control-btn" onclick="getCurrentLocation()">
-                Моё местоположение
-            </button>
-            <button type="button" class="control-btn" onclick="searchByAddress()">
-                Найти по адресу
-            </button>
-            <button type="button" class="control-btn" onclick="centerMap()">
-                Центрировать
-            </button>
+        <div class="map-info">
+            <small class="text-muted">Кликните на карту, чтобы выбрать точное местоположение филиала</small>
         </div>
     </div>
-</div>
-
-<!-- Map Toggle Button -->
-<div class="map-toggle">
-    <button type="button" class="btn-map-toggle" onclick="toggleMap()">
-        <i class="fas fa-map-marker-alt me-2"></i>Открыть карту
-    </button>
 </div>
 {% endblock %}
 
@@ -437,118 +432,79 @@ input[type="checkbox"] {
 }
 
 /* Map Section */
-.map-section {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.map-container {
+.map-section-inline {
     background: white;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow: hidden;
+    margin: 40px 0;
+    padding: 0;
 }
 
-.map-header {
+.map-container-inline {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.map-header-inline {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid #ddd;
+    background: #f8f9fa;
 }
 
-.map-header h3 {
+.map-header-inline h3 {
     margin: 0;
     font-size: 18px;
     color: #333;
+    font-weight: 600;
 }
 
-.close-map {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-    padding: 0;
-    width: 30px;
-    height: 30px;
+.map-controls-inline {
     display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-map:hover {
-    color: #333;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 #map {
     width: 100%;
-    height: 400px;
+    height: 450px;
     display: block;
-}
-
-.map-controls {
-    display: flex;
-    gap: 10px;
-    padding: 20px;
-    border-top: 1px solid #ddd;
-    flex-wrap: wrap;
 }
 
 .control-btn {
     padding: 8px 16px;
-    background: #f8f9fa;
-    border: 1px solid #ddd;
+    background: white;
+    border: 1px solid #01605E;
     border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: #01605E;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .control-btn:hover {
     background: #01605E;
     color: white;
-    border-color: #01605E;
 }
 
-/* Map Toggle Button */
-.map-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 999;
+.map-info {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #ddd;
+    text-align: center;
 }
 
-.btn-map-toggle {
-    background: #01605E;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 20px;
+.text-muted {
+    color: #666;
     font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(1, 96, 94, 0.3);
-}
-
-.btn-map-toggle:hover {
-    background: #014d4b;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(1, 96, 94, 0.4);
 }
 
 /* Responsive Design */
@@ -585,21 +541,40 @@ input[type="checkbox"] {
         gap: 10px;
     }
     
-    .map-container {
-        margin: 10px;
-        max-height: 90vh;
+    .map-section-inline {
+        margin: 20px 0;
+    }
+    
+    .map-container-inline {
+        margin: 0 10px;
+        border-radius: 4px;
+    }
+    
+    .map-header-inline {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+        padding: 15px;
+    }
+    
+    .map-controls-inline {
+        width: 100%;
+        justify-content: space-between;
     }
     
     #map {
         height: 300px;
     }
     
-    .map-controls {
-        flex-direction: column;
+    .control-btn {
+        flex: 1;
+        min-width: 0;
+        font-size: 12px;
+        padding: 6px 8px;
     }
     
-    .control-btn {
-        width: 100%;
+    .control-btn i {
+        display: none;
     }
 }
 
@@ -634,56 +609,52 @@ input[type="checkbox"] {
 <script>
 let myMap, placemark;
 
-// Toggle map visibility
-function toggleMap() {
-    const mapSection = document.getElementById('mapSection');
-    const isVisible = mapSection.style.display !== 'none';
-    
-    if (isVisible) {
-        mapSection.style.display = 'none';
-    } else {
-        mapSection.style.display = 'flex';
-        // Initialize map if not already done
-        if (!myMap) {
-            initMap();
-        }
-    }
-}
+// Initialize Yandex Map when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+});
 
 // Initialize Yandex Map
 function initMap() {
     ymaps.ready(function() {
-        // Default coordinates for Tashkent, Uzbekistan
-        const defaultCoords = [41.2995, 69.2401];
-        
-        // Get existing coordinates from form if available
-        const latInput = document.getElementById('id_latitude');
-        const lngInput = document.getElementById('id_longitude');
-        const existingLat = parseFloat(latInput.value);
-        const existingLng = parseFloat(lngInput.value);
-        
-        let initialCoords = defaultCoords;
-        if (!isNaN(existingLat) && !isNaN(existingLng)) {
-            initialCoords = [existingLat, existingLng];
+        try {
+            // Default coordinates for Tashkent, Uzbekistan
+            const defaultCoords = [41.2995, 69.2401];
+            
+            // Get existing coordinates from form if available
+            const latInput = document.getElementById('id_latitude');
+            const lngInput = document.getElementById('id_longitude');
+            const existingLat = parseFloat(latInput.value);
+            const existingLng = parseFloat(lngInput.value);
+            
+            let initialCoords = defaultCoords;
+            if (!isNaN(existingLat) && !isNaN(existingLng)) {
+                initialCoords = [existingLat, existingLng];
+            }
+            
+            myMap = new ymaps.Map("map", {
+                center: initialCoords,
+                zoom: 12,
+                controls: ['zoomControl', 'searchControl', 'typeSelector', 'fullscreenControl']
+            });
+            
+            // Add placemark if coordinates exist
+            if (!isNaN(existingLat) && !isNaN(existingLng)) {
+                addPlacemark(initialCoords);
+            }
+            
+            // Click event to add/move placemark
+            myMap.events.add('click', function (e) {
+                const coords = e.get('coords');
+                addPlacemark(coords);
+                updateCoordinateInputs(coords);
+            });
+            
+            console.log('Yandex Map initialized successfully');
+        } catch (error) {
+            console.error('Error initializing Yandex Map:', error);
+            showAlert('Ошибка загрузки карты. Проверьте подключение к интернету.', 'error');
         }
-        
-        myMap = new ymaps.Map("map", {
-            center: initialCoords,
-            zoom: 12,
-            controls: ['zoomControl', 'searchControl', 'typeSelector', 'fullscreenControl']
-        });
-        
-        // Add placemark if coordinates exist
-        if (!isNaN(existingLat) && !isNaN(existingLng)) {
-            addPlacemark(initialCoords);
-        }
-        
-        // Click event to add/move placemark
-        myMap.events.add('click', function (e) {
-            const coords = e.get('coords');
-            addPlacemark(coords);
-            updateCoordinateInputs(coords);
-        });
     });
 }
 

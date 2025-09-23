@@ -451,6 +451,147 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize cart functionality
+    initializeCartButtons();
+    updateCartCount();
+});
+
+function initializeCartButtons() {
+    if (window.__cartHandlersBound) { return; }
+    window.__cartHandlersBound = true;
+    // Add event listeners to all "В корзину" buttons
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const offerId = this.dataset.offerId;
+            
+            // Add loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Добавляем...';
+            this.disabled = true;
+            
+            addToCartAPI(offerId, 1)
+                .then(data => {
+                    // Success - update button temporarily
+                    this.innerHTML = '<i class="fas fa-check"></i> Добавлено';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-success');
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success');
+                        this.disabled = false;
+                    }, 2000);
+                })
+                .catch(error => {
+                    // Error - reset button
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
+        });
+    });
+}
+
+function addToCartAPI(offerId, quantity = 1, itemName = 'Товар') {
+    return fetch('/orders/api/cart/add/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            offer_id: offerId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCartCount();
+            showNotification(data.message, 'success');
+            return data;
+        } else {
+            showNotification(data.message, 'error');
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+        showNotification('Ошибка при добавлении в корзину', 'error');
+        throw error;
+    });
+}
+
+function updateCartCount() {
+    fetch('/orders/api/cart/count/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartBadge = document.querySelector('.cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.style.display = data.cart_count > 0 ? 'inline' : 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Error updating cart count:', error));
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; animation: slideInRight 0.3s ease;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<!-- Add CSS animations -->
+<style>
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+</style>
+{% endblock %}
+
 {% block extra_css %}
 <style>
 /* Catalog Hero Section */
@@ -1641,6 +1782,8 @@ function toggleFavorite(itemId, button) {
 
 // Cart functionality
 function initCart() {
+    if (window.__cartHandlersBound) { return; }
+    window.__cartHandlersBound = true;
     document.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1655,7 +1798,7 @@ function addToCart(offerId, button) {
     button.textContent = 'Добавляем...';
     button.disabled = true;
     
-    fetch(`/api/cart/add/`, {
+    fetch(`/orders/api/cart/add/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -1674,8 +1817,8 @@ function addToCart(offerId, button) {
                 button.disabled = false;
             }, 2000);
             
-            // Update cart counter if exists
-            updateCartCounter();
+            // Update global cart counter
+            if (typeof updateCartCount === 'function') { updateCartCount(); }
         } else {
             throw new Error(data.message);
         }
@@ -1688,14 +1831,6 @@ function addToCart(offerId, button) {
         }, 2000);
         console.error('Error:', error);
     });
-}
-
-function updateCartCounter() {
-    const counter = document.querySelector('.cart-counter');
-    if (counter) {
-        const currentCount = parseInt(counter.textContent) || 0;
-        counter.textContent = currentCount + 1;
-    }
 }
 
 // Utility function to get CSRF token
