@@ -115,6 +115,31 @@
             <form method="post" class="register-form">
                 {% csrf_token %}
                 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_first_name" class="form-label">Имя *</label>
+                            <input type="text" 
+                                   class="form-control register-input" 
+                                   id="id_first_name" 
+                                   name="first_name" 
+                                   value="{{ form.first_name.value|default:'' }}"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_last_name" class="form-label">Фамилия *</label>
+                            <input type="text" 
+                                   class="form-control register-input" 
+                                   id="id_last_name" 
+                                   name="last_name" 
+                                   value="{{ form.last_name.value|default:'' }}"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="id_username" class="form-label">Имя пользователя *</label>
                     <input type="text" 
@@ -133,6 +158,16 @@
                            name="email" 
                            value="{{ form.email.value|default:'' }}"
                            required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_phone" class="form-label">Телефон</label>
+                    <input type="tel" 
+                           class="form-control register-input" 
+                           id="id_phone" 
+                           name="phone" 
+                           value="{{ form.phone.value|default:'' }}"
+                           placeholder="+998 XX XXX XX XX">
                 </div>
                 
                 <div class="form-group">
