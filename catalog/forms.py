@@ -253,7 +253,7 @@ class OfferForm(forms.ModelForm):
     
     class Meta:
         model = Offer
-        fields = ['branch', 'original_price', 'discount_percent', 'quantity', 'start_date', 'end_date', 'is_active']
+        fields = ['original_price', 'discount_percent', 'quantity', 'start_date', 'end_date', 'is_active']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
@@ -263,11 +263,7 @@ class OfferForm(forms.ModelForm):
         }
     
     def __init__(self, *args, **kwargs):
-        vendor = kwargs.pop('vendor', None)
         super().__init__(*args, **kwargs)
-        
-        if vendor:
-            self.fields['branch'].queryset = vendor.branches.filter(is_active=True)
         
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -278,7 +274,6 @@ class OfferForm(forms.ModelForm):
                 css_class='form-row'
             ),
             Row(
-                Column('branch', css_class='form-group col-md-6 mb-3'),
                 Column('quantity', css_class='form-group col-md-6 mb-3'),
                 css_class='form-row'
             ),
@@ -296,10 +291,7 @@ class OfferForm(forms.ModelForm):
         
         # Add custom styling
         for field_name, field in self.fields.items():
-            if field_name in ['branch']:
-                field.widget.attrs.update({'class': 'form-select'})
-            else:
-                field.widget.attrs.update({'class': 'form-control'})
+            field.widget.attrs.update({'class': 'form-control'})
         
         # Add placeholders
         self.fields['original_price'].widget.attrs['placeholder'] = 'Оригинальная цена в сумах'

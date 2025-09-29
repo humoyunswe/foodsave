@@ -370,9 +370,9 @@
                                             <span class="original-price">{{ active_offer.original_price|floatformat:0 }} сум</span>
                                         {% endif %}
                                     </div>
-                                    <button class="btn btn-success btn-sm add-to-cart" data-offer-id="{{ active_offer.id }}">
+                                    {% comment %} <button class="btn btn-success btn-sm add-to-cart" data-offer-id="{{ active_offer.id }}">
                                         В корзину
-                                    </button>
+                                    </button> {% endcomment %}
                                 </div>
                                 {% else %}
                                 <div class="d-flex justify-content-between align-items-center">

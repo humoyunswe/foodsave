@@ -5,216 +5,129 @@
 {% block title %}Добавить предложение - {{ item.title }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white text-center py-4">
-                    <h3 class="mb-0">
-                        <i class="fas fa-percent me-2"></i>
-                        Добавить предложение
-                    </h3>
-                    <p class="mb-0 opacity-75">{{ item.title }}</p>
-                </div>
-                
-                <div class="card-body p-4">
-                    <!-- Item Preview -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-3">
-                                            {% if item.images.first %}
-                                                <img src="{{ item.images.first.image.url }}" 
-                                                     class="img-fluid rounded" alt="{{ item.title }}"
-                                                     style="max-height: 100px; object-fit: cover;">
-                                            {% else %}
-                                                <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
-                                                     style="height: 100px;">
-                                                    <i class="fas fa-image fa-2x text-white"></i>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="col-md-9">
-                                            <h5 class="mb-1">{{ item.title }}</h5>
-                                            <p class="text-muted mb-1">{{ item.category.name }}</p>
-                                            <p class="mb-0 small">{{ item.description|truncatechars:100 }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Left Column - Branding -->
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">FS</span>
                     </div>
-                    
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        <!-- Pricing Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary mb-3">
-                                    <i class="fas fa-money-bill-wave me-2"></i>Ценообразование
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <label for="{{ form.original_price.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-tag me-2 text-secondary"></i>Обычная цена *
-                                </label>
-                                <div class="input-group">
-                                    {{ form.original_price }}
-                                    <span class="input-group-text">сум</span>
-                                </div>
-                                <div class="form-text">Базовая цена товара</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="{{ form.discount_percent.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-percent me-2 text-warning"></i>Скидка
-                                </label>
-                                <div class="input-group">
-                                    {{ form.discount_percent }}
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div class="form-text">Размер скидки (0-100%)</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-calculator me-2 text-success"></i>Итоговая цена
-                                </label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="final-price" readonly>
-                                    <span class="input-group-text">сум</span>
-                                </div>
-                                <div class="form-text">Автоматический расчёт</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Quantity Section -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-boxes me-2 text-info"></i>Количество
-                                </label>
-                                {{ form.quantity }}
-                                <div class="form-text">Доступное количество (0 = неограниченно)</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.branch.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Филиал *
-                                </label>
-                                {{ form.branch }}
-                                <div class="form-text">Выберите филиал для этого предложения</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Validity Period -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary mb-3">
-                                    <i class="fas fa-calendar me-2"></i>Период действия
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.start_date.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-play me-2 text-success"></i>Дата начала *
-                                </label>
-                                {{ form.start_date }}
-                                <div class="form-text">Когда предложение станет активным</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.end_date.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-stop me-2 text-danger"></i>Дата окончания
-                                </label>
-                                {{ form.end_date }}
-                                <div class="form-text">Оставьте пустым для бессрочного предложения</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Status -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch">
-                                    {{ form.is_active }}
-                                    <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
-                                        <i class="fas fa-toggle-on me-2 text-success"></i>Предложение активно
-                                    </label>
-                                    <div class="form-text">Активные предложения отображаются в каталоге</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Price Preview Card -->
-                        <div class="card border-success mb-4" id="price-preview" style="display: none;">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Предварительный просмотр</h6>
-                            </div>
-                            <div class="card-body text-center">
-                                <div class="row">
-                                    <div class="col-4">
-                                        <h6 class="text-muted">Обычная цена</h6>
-                                        <h4 class="text-muted"><s><span id="preview-original">0</span> сум</s></h4>
-                                    </div>
-                                    <div class="col-4">
-                                        <h6 class="text-warning">Скидка</h6>
-                                        <h4 class="text-warning"><span id="preview-discount">0</span>%</h4>
-                                    </div>
-                                    <div class="col-4">
-                                        <h6 class="text-success">Итоговая цена</h6>
-                                        <h4 class="text-success"><span id="preview-final">0</span> сум</h4>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <span class="badge bg-success fs-6">
-                                        Экономия: <span id="preview-savings">0</span> сум
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                            <a href="{% url 'vendors:manage_items' item.vendor.id %}" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-arrow-left me-2"></i>Назад
-                            </a>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-save me-2"></i>Создать предложение
-                            </button>
-                        </div>
-                    </form>
+                    <div class="brand-name">FOODSAVE</div>
                 </div>
             </div>
-            
-            <!-- Help Card -->
-            <div class="card mt-4 border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Советы по созданию предложений</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-percent me-2 text-warning"></i>Скидки</h6>
-                            <ul class="small">
-                                <li>Используйте привлекательные скидки (10-50%)</li>
-                                <li>Круглые числа работают лучше (20%, 30%)</li>
-                                <li>Учитывайте конкурентов</li>
-                            </ul>
+            <div class="main-text">
+                <div class="text-line">ДОБАВЛЕНИЕ</div>
+                <div class="text-line">ПРЕДЛОЖЕНИЯ</div>
+            </div>
+        </div>
+
+        <!-- Right Column - Form -->
+        <div class="login-right">
+            <div class="form-container">
+                <h2 class="form-title">Добавить новое предложение</h2>
+                <p class="vendor-name">{{ item.vendor.name }} — {{ item.title }}</p>
+
+                <form method="post" class="vendor-form needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Branch (read-only) -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Филиал</label>
+                        <div class="form-control" style="background:#f1f5f9;">{{ item.branch.name }}</div>
+                        <div class="form-text">Филиал наследуется от товара и менять его нельзя</div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="form-group">
+                        <label for="{{ form.original_price.id_for_label }}" class="form-label">Обычная цена *</label>
+                        <div class="input-group">
+                            {{ form.original_price }}
+                            <span class="input-group-text">сум</span>
                         </div>
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-clock me-2 text-info"></i>Время</h6>
-                            <ul class="small">
-                                <li>Ограниченные предложения создают спрос</li>
-                                <li>Планируйте акции на выходные</li>
-                                <li>Обновляйте предложения регулярно</li>
-                            </ul>
+                        <div class="form-text">Базовая цена товара</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.discount_percent.id_for_label }}" class="form-label">Скидка</label>
+                        <div class="input-group">
+                            {{ form.discount_percent }}
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div id="quick-discounts" class="mt-2"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Итоговая цена</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="final-price" readonly>
+                            <span class="input-group-text">сум</span>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Quantity -->
+                    <div class="form-group">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">Количество</label>
+                        {{ form.quantity }}
+                        <div class="form-text">0 = неограниченно</div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="form-group">
+                        <label for="{{ form.start_date.id_for_label }}" class="form-label">Дата начала *</label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.end_date.id_for_label }}" class="form-label">Дата окончания</label>
+                        {{ form.end_date }}
+                        <div class="form-text">Оставьте пустым для бессрочного предложения</div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.is_active }}
+                            <span class="checkbox-text">Предложение активно</span>
+                        </label>
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="card border-success mb-4" id="price-preview" style="display: none;">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Предварительный просмотр</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="row">
+                                <div class="col-4">
+                                    <h6 class="text-muted">Обычная цена</h6>
+                                    <h4 class="text-muted"><s><span id="preview-original">0</span> сум</s></h4>
+                                </div>
+                                <div class="col-4">
+                                    <h6 class="text-warning">Скидка</h6>
+                                    <h4 class="text-warning"><span id="preview-discount">0</span>%</h4>
+                                </div>
+                                <div class="col-4">
+                                    <h6 class="text-success">Итоговая цена</h6>
+                                    <h4 class="text-success"><span id="preview-final">0</span> сум</h4>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-success fs-6">
+                                    Экономия: <span id="preview-savings">0</span> сум
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            СОЗДАТЬ ПРЕДЛОЖЕНИЕ
+                        </button>
+                        <a href="{% url 'vendors:manage_items' item.vendor.id %}" class="btn-secondary">Назад к товарам</a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -223,59 +136,54 @@
 
 {% block extra_css %}
 <style>
-.bg-gradient {
-    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+/* Layout borrowed from add_item page for a consistent look */
+.login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+.login-wrapper { display: flex; width: 100%; max-width: 1400px; height: 100vh; background: white; overflow: hidden; }
+.login-left { flex: 1; background: linear-gradient(135deg, #01605E 0%, #014a47 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 2rem; }
+.brand-section { position: absolute; top: 2rem; left: 2rem; right: 2rem; }
+.brand-logo { display: flex; align-items: center; gap: 1rem; }
+.logo-circle { width: 60px; height: 60px; background: rgba(255,255,255,.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,.3); }
+.logo-text { color: #fff; font-size: 1.5rem; font-weight: 700; }
+.brand-name { color: #fff; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px; }
+.main-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.text-line { color: #fff; font-size: 3rem; font-weight: 700; line-height: 1.2; margin-bottom: .5rem; text-shadow: 0 4px 8px rgba(0,0,0,.3); }
+
+.login-right { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 3rem 2rem 2rem; background: #fff; overflow-y: auto; }
+.form-container { width: 100%; max-width: 500px; }
+.form-title { color: #111827; font-size: 2rem; font-weight: 700; margin-bottom: .5rem; text-align: center; }
+.vendor-name { color: #6b7280; font-size: 1rem; text-align: center; margin-bottom: 2rem; }
+
+.vendor-form { width: 100%; }
+.form-group { margin-bottom: 1.5rem; }
+.form-label { display: block; color: #374151; font-weight: 600; margin-bottom: .5rem; font-size: .95rem; }
+.form-control, .form-select, input[type="date"] { width: 100%; padding: .875rem 1rem; border: 2px solid #d1d5db; border-radius: 12px; font-size: .95rem; transition: all .3s ease; background: #fff; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.form-control:focus, .form-select:focus, input[type="date"]:focus { outline: none; border-color: #01605E; box-shadow: 0 0 0 3px rgba(1,96,94,.1), 0 2px 8px rgba(0,0,0,.15); transform: translateY(-1px); }
+.input-group { display: flex; align-items: stretch; }
+.input-group .form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.input-group-text { display: inline-flex; align-items: center; padding: .875rem 1rem; border: 2px solid #d1d5db; border-left: 0; border-top-right-radius: 12px; border-bottom-right-radius: 12px; background: #f8fafb; }
+
+.checkbox-group { display: flex; align-items: center; gap: .75rem; }
+.checkbox-label { display: flex; align-items: center; gap: .75rem; cursor: pointer; font-weight: 500; color: #374151; }
+.checkbox-label input[type="checkbox"] { width: 20px; height: 20px; accent-color: #01605E; cursor: pointer; }
+
+.form-actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.btn-primary { background: #01605E; color: #fff; border: none; border-radius: 12px; padding: 1rem 2rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .3s ease; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(1,96,94,.2); }
+.btn-primary:hover { background: #014a47; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(1,96,94,.3); }
+.btn-secondary { background: transparent; color: #6b7280; border: 2px solid #d1d5db; border-radius: 12px; padding: 1rem 2rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .3s ease; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.btn-secondary:hover { background: #f9fafb; border-color: #9ca3af; color: #374151; transform: translateY(-1px); text-decoration: none; }
+
+@media (max-width: 768px) {
+  .login-wrapper { flex-direction: column; height: auto; min-height: 100vh; }
+  .login-left { min-height: 40vh; padding: 1.5rem; }
+  .text-line { font-size: 2rem; }
+  .login-right { padding: 2rem 1.5rem 1.5rem; }
 }
 
-.form-label {
-    color: #495057;
-    margin-bottom: 0.5rem;
-}
-
-.form-control, .form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #ffc107;
-    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
-}
-
-.input-group-text {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-left: none;
-}
-
-.form-control:focus + .input-group-text {
-    border-color: #ffc107;
-}
-
-.btn-lg {
-    padding: 0.75rem 2rem;
-    border-radius: 25px;
-    font-weight: 600;
-}
-
-.card {
-    border-radius: 15px;
-}
-
-.form-text {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-#price-preview {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+@media (max-width: 480px) {
+  .login-left { min-height: 30vh; padding: 1rem; }
+  .text-line { font-size: 1.5rem; }
+  .brand-logo { flex-direction: column; gap: .5rem; text-align: center; }
+  .brand-name { font-size: 1.25rem; }
 }
 </style>
 {% endblock %}
@@ -367,19 +275,18 @@ function setDiscount(percent) {
 
 // Add quick discount buttons
 document.addEventListener('DOMContentLoaded', function() {
-    const discountInput = document.getElementById('id_discount_percent');
-    const quickButtons = document.createElement('div');
-    quickButtons.className = 'mt-2';
-    quickButtons.innerHTML = `
-        <small class="text-muted d-block mb-1">Быстрый выбор:</small>
-        <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-warning" onclick="setDiscount(10)">10%</button>
-            <button type="button" class="btn btn-outline-warning" onclick="setDiscount(20)">20%</button>
-            <button type="button" class="btn btn-outline-warning" onclick="setDiscount(30)">30%</button>
-            <button type="button" class="btn btn-outline-warning" onclick="setDiscount(50)">50%</button>
-        </div>
-    `;
-    discountInput.parentNode.appendChild(quickButtons);
+    const container = document.getElementById('quick-discounts');
+    if (container) {
+        container.innerHTML = `
+            <small class="text-muted d-block mb-1">Быстрый выбор:</small>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-success" onclick="setDiscount(10)">10%</button>
+                <button type="button" class="btn btn-outline-success" onclick="setDiscount(20)">20%</button>
+                <button type="button" class="btn btn-outline-success" onclick="setDiscount(30)">30%</button>
+                <button type="button" class="btn btn-outline-success" onclick="setDiscount(50)">50%</button>
+            </div>
+        `;
+    }
 });
 </script>
 {% endblock %}

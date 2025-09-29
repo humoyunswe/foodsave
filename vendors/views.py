@@ -162,15 +162,17 @@ def add_offer(request, item_id):
     vendor = item.vendor
     
     if request.method == 'POST':
-        form = OfferForm(request.POST, vendor=vendor)
+        form = OfferForm(request.POST)
         if form.is_valid():
             offer = form.save(commit=False)
             offer.item = item
+            # inherit branch from the item
+            offer.branch = item.branch
             offer.save()
             messages.success(request, f'Предложение для "{item.title}" создано!')
             return redirect('vendors:manage_items', vendor_id=vendor.id)
     else:
-        form = OfferForm(vendor=vendor)
+        form = OfferForm()
     
     return render(request, 'vendors/add_offer.html', {
         'form': form,
