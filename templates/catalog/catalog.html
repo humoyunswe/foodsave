@@ -58,7 +58,7 @@
 <div class="container-fluid catalog-container">
     <div class="row g-0">
         <!-- Sidebar Filters -->
-        <div class="col-lg-3 col-xl-2 filters-sidebar">
+        <div class="col-lg-3 col-xl-2 filters-sidebar d-none d-lg-block">
             <div class="filters-container">
                 <div class="filters-header">
                     <h5><i class="fas fa-sliders-h me-2"></i>Фильтры</h5>
@@ -457,6 +457,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize cart functionality
     initializeCartButtons();
     updateCartCount();
+
+    // Initialize responsive filters (move form into offcanvas on mobile)
+    setupResponsiveFilters();
 });
 
 function initializeCartButtons() {
@@ -542,6 +545,50 @@ function updateCartCount() {
         .catch(error => console.error('Error updating cart count:', error));
 }
 
+// --- Mobile Filters: move the existing filters form into the offcanvas on small screens ---
+function setupResponsiveFilters() {
+    const offcanvas = document.getElementById('mobileFilters');
+    if (!offcanvas) return;
+
+    const offcanvasBody = offcanvas.querySelector('.offcanvas-body');
+    const sidebarContainer = document.querySelector('.filters-sidebar .filters-container');
+    const filtersForm = document.getElementById('filtersForm');
+
+    if (!offcanvasBody || !sidebarContainer || !filtersForm) return;
+
+    const mq = window.matchMedia('(max-width: 991.98px)'); // < lg
+
+    const moveForm = () => {
+        if (mq.matches) {
+            // Move into offcanvas for mobile
+            if (filtersForm.parentElement !== offcanvasBody) {
+                offcanvasBody.appendChild(filtersForm);
+            }
+        } else {
+            // Move back to sidebar for desktop
+            if (filtersForm.parentElement !== sidebarContainer) {
+                sidebarContainer.appendChild(filtersForm);
+            }
+        }
+    };
+
+    // Initial placement
+    moveForm();
+
+    // Listen to viewport changes (debounced)
+    const debouncedMove = debounce(moveForm, 100);
+    mq.addEventListener ? mq.addEventListener('change', debouncedMove) : mq.addListener(debouncedMove);
+    window.addEventListener('resize', debouncedMove);
+}
+
+function debounce(fn, delay) {
+    let t;
+    return function() {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, arguments), delay);
+    };
+}
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
@@ -588,6 +635,111 @@ function getCookie(name) {
 @keyframes slideOutRight {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Mobile filters offcanvas tweaks */
+#mobileFilters.offcanvas {
+    background-color: #f8f9fa;
+}
+
+#mobileFilters .offcanvas-header {
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #0B6361;
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+#mobileFilters .offcanvas-title {
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+#mobileFilters .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+#mobileFilters .offcanvas-body {
+    padding: 1.5rem;
+}
+
+#mobileFilters .filter-group {
+    margin-bottom: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+#mobileFilters .filter-title {
+    color: #0B6361;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#mobileFilters .form-check-input:checked {
+    background-color: #0B6361;
+    border-color: #0B6361;
+}
+
+#mobileFilters .btn-outline-secondary:hover {
+    background-color: #0B6361;
+    color: white;
+    border-color: #0B6361;
+}
+
+#mobileFilters .filter-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+#mobileFilters .filter-pill {
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+#mobileFilters .filter-pill:hover {
+    background-color: #0B6361;
+    color: white;
+}
+
+#mobileFilters .filter-pill.active {
+    background-color: #0B6361;
+    color: white;
+}
+
+#mobileFilters .form-control {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+#mobileFilters .form-control:focus {
+    border-color: #0B6361;
+    box-shadow: 0 0 0 0.25rem rgba(11, 99, 97, 0.15);
+}
+
+#mobileFilters .btn-success {
+    background-color: #0B6361;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+#mobileFilters .btn-success:hover {
+    background-color: #094e4c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 </style>
 {% endblock %}
