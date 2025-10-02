@@ -253,6 +253,32 @@
           <a href="#">Статус</a>
         </div>
         
+        <!-- Contact Information -->
+        <div class="footer-contact-section">
+          <div class="contact-card">
+            <div class="contact-icon">
+              <i class="fas fa-phone-alt"></i>
+            </div>
+            <div class="contact-info">
+              <span class="contact-label">Служба поддержки</span>
+              <a href="tel:+998942182609" class="contact-phone">+998 94 218 26 09</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-contact-section">
+            <div class="contact-card">
+              <div class="contact-icon">
+                <i class="fas fa-phone-alt"></i>
+              </div>
+              <div class="contact-info">
+                <span class="contact-label">Служба поддержки</span>
+                <a href="tel:+998333000318" class="contact-phone">+998 33 300 03 18</a>
+              </div>
+            </div>
+          </div>
+          
+        
         <!-- Copyright -->
         <div class="footer-copyright">
           © 2025 FoodSave Uzbekistan. Все права защищены.
@@ -795,6 +821,74 @@
         text-decoration: underline;
     }
     
+    .footer-contact-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .contact-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 20px 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .contact-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    
+    .contact-icon i {
+        color: white;
+        font-size: 20px;
+    }
+    
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .contact-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .contact-phone {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 600;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+        transition: color 0.3s ease;
+    }
+    
+    .contact-phone:hover {
+        color: #4CAF50;
+    }
+    
     .footer-copyright {
         color: rgba(255, 255, 255, 0.7);
         font-size: 14px;
@@ -814,6 +908,19 @@
         
         .footer-additional-links {
             gap: 20px;
+        }
+        
+        .contact-card {
+            padding: 18px 25px;
+        }
+        
+        .contact-icon {
+            width: 45px;
+            height: 45px;
+        }
+        
+        .contact-phone {
+            font-size: 16px;
         }
     }
     
@@ -851,6 +958,28 @@
         .footer-links-section a,
         .footer-additional-links a {
             font-size: 12px;
+        }
+        
+        .contact-card {
+            padding: 15px 20px;
+            gap: 12px;
+        }
+        
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .contact-icon i {
+            font-size: 18px;
+        }
+        
+        .contact-phone {
+            font-size: 15px;
+        }
+        
+        .contact-label {
+            font-size: 11px;
         }
         
         .footer-copyright {

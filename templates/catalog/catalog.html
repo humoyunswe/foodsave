@@ -290,7 +290,7 @@
                 
                 {% if min_price or max_price %}
                     <span class="active-filter-tag">
-                        Цена: {{ min_price|default:'0' }} - {{ max_price|default:'∞' }} сум
+                        Цена: {{ min_price|default:'0' }} - {{ max_price|default:'∞' }} сўм
                         <button type="button" class="btn-close btn-close-sm ms-1" onclick="removeFilter('price')"></button>
                     </span>
                 {% endif %}
@@ -365,9 +365,9 @@
                                 {% if active_offer %}
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="price-info">
-                                        <span class="current-price">{{ active_offer.current_price|floatformat:0 }} сум</span>
+                                        <span class="current-price" data-price="{{ active_offer.current_price|floatformat:0 }}">{{ active_offer.current_price|floatformat:0 }} сўм</span>
                                         {% if active_offer.original_price > active_offer.current_price %}
-                                            <span class="original-price">{{ active_offer.original_price|floatformat:0 }} сум</span>
+                                            <span class="original-price" data-price="{{ active_offer.original_price|floatformat:0 }}">{{ active_offer.original_price|floatformat:0 }} сўм</span>
                                         {% endif %}
                                     </div>
                                     {% comment %} <button class="btn btn-success btn-sm add-to-cart" data-offer-id="{{ active_offer.id }}">
@@ -460,7 +460,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize responsive filters (move form into offcanvas on mobile)
     setupResponsiveFilters();
+    
+    // Format prices with thousand separators
+    formatPrices();
 });
+
+function formatPrices() {
+    // Format all prices on the page
+    document.querySelectorAll('.current-price, .original-price').forEach(priceElement => {
+        const price = priceElement.getAttribute('data-price');
+        if (price) {
+            const formattedPrice = formatNumberWithSmallDigits(price);
+            priceElement.innerHTML = formattedPrice + ' сўм';
+        }
+    });
+}
+
+function formatNumberWithSmallDigits(num) {
+    const numStr = num.toString();
+    
+    // If number has more than 6 digits, make the extra digits small
+    if (numStr.length > 6) {
+        const mainPart = numStr.slice(0, 6);
+        const smallPart = numStr.slice(6);
+        
+        // Add thousand separators to main part
+        const formattedMain = mainPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        
+        return formattedMain + '<small>' + smallPart + '</small>';
+    } else {
+        // For numbers with 6 or fewer digits, just add thousand separators
+        return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+}
 
 function initializeCartButtons() {
     if (window.__cartHandlersBound) { return; }
@@ -678,6 +710,13 @@ function getCookie(name) {
     font-weight: 600;
     margin-bottom: 0.75rem;
     text-transform: uppercase;
+}
+
+/* Price formatting styles */
+.current-price small,
+.original-price small {
+    font-size: 0.75em;
+}
     letter-spacing: 0.5px;
 }
 
