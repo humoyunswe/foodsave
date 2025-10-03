@@ -118,7 +118,7 @@
                         </li>
                         {% endif %}
                         
-                        <!-- Cart Link -->
+                        {% comment %} <!-- Cart Link -->
                         <li class="nav-item">
                             <a class="nav-link cart-link position-relative" href="{% url 'booking:cart' %}">
                                 <i class="fas fa-shopping-cart me-1"></i>
@@ -127,7 +127,7 @@
                                     0
                                 </span>
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle user-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">

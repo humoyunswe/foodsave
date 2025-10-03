@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 import math
-from .models import Item, Category, Offer
+from .models import Item, Category, Offer, SurpriseBox
 from .forms import CategoryForm, UnitForm
 from vendors.models import Vendor, Branch
 from django.utils import timezone
@@ -109,9 +109,18 @@ def catalog_view(request):
     # Get all vendors for the filter
     vendors = Vendor.objects.filter(is_active=True).order_by('name')
     
+    # Get available Surprise Boxes
+    surprise_boxes = SurpriseBox.objects.filter(
+        is_active=True,
+        status='available',
+        available_from__lte=timezone.now(),
+        available_until__gte=timezone.now()
+    ).select_related('vendor', 'branch').prefetch_related('items')[:6]  # Показываем только 6 боксов
+    
     # Context data
     context = {
         'items': items,
+        'surprise_boxes': surprise_boxes,
         'categories': Category.objects.filter(is_active=True),
         'vendors': vendors,
         'current_type': request.GET.get('type', ''),

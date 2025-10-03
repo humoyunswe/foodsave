@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Управление Сюрприз Боксами - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-gift text-success me-2"></i>Сюрприз Боксы
+                    </h2>
+                    <p class="text-muted mb-0">{{ vendor.name }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'vendors:create_surprise_box' vendor.id %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Создать новый бокс
+                    </a>
+                    <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-arrow-left me-2"></i>Назад
+                    </a>
+                </div>
+            </div>
+
+            <!-- Surprise Boxes Grid -->
+            {% if surprise_boxes %}
+                <div class="row">
+                    {% for box in surprise_boxes %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card surprise-box-card h-100">
+                            {% if box.image %}
+                                <img src="{{ box.image.url }}" class="card-img-top surprise-box-image" alt="{{ box.title }}">
+                            {% else %}
+                                <div class="surprise-box-placeholder">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ box.title }}</h5>
+                                    <span class="badge badge-{{ box.status }}">
+                                        {% if box.status == 'available' %}
+                                            <i class="fas fa-check-circle me-1"></i>Доступен
+                                        {% elif box.status == 'sold_out' %}
+                                            <i class="fas fa-times-circle me-1"></i>Продан
+                                        {% elif box.status == 'expired' %}
+                                            <i class="fas fa-clock me-1"></i>Истек
+                                        {% else %}
+                                            <i class="fas fa-pause-circle me-1"></i>{{ box.get_status_display }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <p class="card-text text-muted small">{{ box.description|truncatewords:15 }}</p>
+                                
+                                <div class="box-details">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-4">
+                                            <div class="detail-item">
+                                                <strong class="text-success">{{ box.selling_price|floatformat:0 }}</strong>
+                                                <small class="text-muted d-block">сўм</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="detail-item">
+                                                <strong class="text-danger">-{{ box.discount_percent }}%</strong>
+                                                <small class="text-muted d-block">скидка</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="detail-item">
+                                                <strong class="text-info">{{ box.available_quantity }}</strong>
+                                                <small class="text-muted d-block">осталось</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="box-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ box.branch.name }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>{{ box.pickup_start }} - {{ box.pickup_end }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-box me-1"></i>{{ box.items.count }} товар{{ box.items.count|pluralize:"а,ов" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-transparent">
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{% url 'vendors:surprise_box_detail' vendor.id box.id %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Просмотр
+                                    </a>
+                                    <a href="{% url 'vendors:edit_surprise_box' vendor.id box.id %}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Изменить
+                                    </a>
+                                    <a href="{% url 'vendors:delete_surprise_box' vendor.id box.id %}" 
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash me-1"></i>Удалить
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-icon mb-3">
+                        <i class="fas fa-gift fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">Пока нет сюрприз боксов</h4>
+                    <p class="text-muted mb-4">Создайте свой первый сюрприз бокс и начните продавать товары со скидкой!</p>
+                    <a href="{% url 'vendors:create_surprise_box' vendor.id %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus me-2"></i>Создать первый бокс
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.surprise-box-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.surprise-box-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.surprise-box-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+.surprise-box-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+.badge-available {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-sold_out {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-expired {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-reserved {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.detail-item {
+    padding: 0.5rem 0;
+}
+
+.box-meta {
+    border-top: 1px solid #e9ecef;
+    padding-top: 0.75rem;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    opacity: 0.5;
+}
+</style>
+{% endblock %}

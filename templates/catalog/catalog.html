@@ -297,8 +297,100 @@
             </div>
             {% endif %}
 
+            <!-- Surprise Boxes Section -->
+            {% if surprise_boxes %}
+            <div class="surprise-boxes-section mb-5">
+                <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-gift text-success me-2"></i>Сюрприз Боксы
+                        <small class="text-muted">Скидки до 70%</small>
+                    </h3>
+                    <a href="#" class="btn btn-outline-success btn-sm">Все боксы</a>
+                </div>
+                
+                <div class="items-grid surprise-boxes-grid">
+                        {% for box in surprise_boxes %}
+                        <div class="item-card" data-item-id="{{ box.id }}">
+                            <div class="card item-card-inner">
+                                <div class="discount-badge">-{{ box.discount_percent }}%</div>
+                                <div class="surprise-box-badge">
+                                    <i class="fas fa-gift me-1"></i>БОКС
+                                </div>
+                                
+                                <div class="item-image-container">
+                                    {% if box.image %}
+                                        <img src="{{ box.image.url }}" class="item-image" alt="{{ box.title }}">
+                                    {% else %}
+                                        <div class="item-image-placeholder">
+                                            <i class="fas fa-gift"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="item-overlay">
+                                        <button class="btn btn-light btn-sm favorite-btn" data-item-id="{{ box.id }}">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="item-content">
+                                    <div class="item-header">
+                                        <h6 class="item-title">
+                                            <a href="#">{{ box.title }}</a>
+                                        </h6>
+                                        <div class="vendor-info">
+                                            <small class="text-muted">{{ box.vendor.name }}</small>
+                                            <div class="rating-badge">
+                                                <i class="fas fa-star"></i>
+                                                {{ box.vendor.rating|floatformat:1 }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="item-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ box.branch.name|truncatechars:30 }}</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="text-success">{{ box.pickup_start }} - {{ box.pickup_end }}</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-box"></i>
+                                            <span>{{ box.items.count }} товар{{ box.items.count|pluralize:"а,ов" }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="item-price">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="price-info">
+                                                <span class="current-price">{{ box.selling_price|floatformat:0 }} сўм</span>
+                                                {% if box.original_price %}
+                                                    <span class="original-price">{{ box.original_price|floatformat:0 }} сўм</span>
+                                                {% endif %}
+                                            </div>
+                                            <button class="btn btn-success btn-sm add-to-cart" data-box-id="{{ box.id }}">
+                                                В корзину
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Items Grid -->
             <div class="items-grid" id="itemsContainer">
+                <div class="section-header mb-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-utensils text-primary me-2"></i>Все товары
+                    </h3>
+                </div>
+                
                 {% for item in items %}
                 {% with active_offer=item.offers.first %}
                 <div class="item-card" data-item-id="{{ item.id }}">
@@ -2043,4 +2135,58 @@ function getCookie(name) {
 // Clear filters button
 document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
 </script>
+
+<style>
+/* Surprise Box Styles */
+.surprise-boxes-section {
+    background: linear-gradient(135deg, #f8fff9, #e8f5e8);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-weight: 600;
+    color: #015654;
+}
+
+.surprise-box-badge {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Section headers */
+.section-header .section-title {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header .section-title small {
+    background: #ffc107;
+    color: #212529;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .surprise-boxes-section {
+        padding: 1rem;
+    }
+}
+</style>
 {% endblock %}

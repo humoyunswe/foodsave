@@ -27,6 +27,13 @@ urlpatterns = [
     path('item/<int:item_id>/add-offer/', views.add_offer, name='add_offer'),
     path('offer/<int:offer_id>/delete/', views.delete_offer, name='delete_offer'),
     
+    # Surprise Box management
+    path('<int:vendor_id>/create-surprise-box/', views.create_surprise_box, name='create_surprise_box'),
+    path('<int:vendor_id>/manage-surprise-boxes/', views.manage_surprise_boxes, name='manage_surprise_boxes'),
+    path('<int:vendor_id>/surprise-box/<int:box_id>/', views.surprise_box_detail, name='surprise_box_detail'),
+    path('<int:vendor_id>/surprise-box/<int:box_id>/edit/', views.edit_surprise_box, name='edit_surprise_box'),
+    path('<int:vendor_id>/surprise-box/<int:box_id>/delete/', views.delete_surprise_box, name='delete_surprise_box'),
+    
     # Admin only
     path('add/', views.add_vendor, name='add_vendor'),
     path('assign-vendor/', views.assign_vendor, name='assign_vendor'),

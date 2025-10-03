@@ -118,3 +118,123 @@ class Offer(models.Model):
         if self.end_date:
             return timezone.now().date() > self.end_date
         return False
+
+
+class SurpriseBox(models.Model):
+    """
+    Surprise Box model similar to Too Good To Go functionality
+    Allows vendors to create mystery boxes with multiple items at discounted prices
+    """
+    STATUS_CHOICES = [
+        ('available', 'Available'),
+        ('reserved', 'Reserved'), 
+        ('sold_out', 'Sold Out'),
+        ('expired', 'Expired'),
+    ]
+    
+    BOX_TYPE_CHOICES = [
+        ('mixed', 'Смешанный бокс'),
+        ('bakery', 'Хлебобулочные изделия'),
+        ('meals', 'Готовые блюда'),
+        ('groceries', 'Продукты'),
+        ('desserts', 'Десерты'),
+        ('beverages', 'Напитки'),
+    ]
+    
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='surprise_boxes')
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='surprise_boxes')
+    
+    # Box information
+    title = models.CharField(max_length=200, help_text="Например: 'Сюрприз бокс от Osh Markazi'")
+    description = models.TextField(help_text="Описание того, что может быть в боксе")
+    box_type = models.CharField(max_length=20, choices=BOX_TYPE_CHOICES, default='mixed')
+    
+    # Items in the box
+    items = models.ManyToManyField(Item, through='SurpriseBoxItem', related_name='surprise_boxes')
+    
+    # Pricing
+    original_value = models.DecimalField(max_digits=10, decimal_places=2, help_text="Общая стоимость товаров в боксе")
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Цена продажи бокса")
+    
+    # Availability
+    total_quantity = models.PositiveIntegerField(default=1, help_text="Сколько боксов доступно")
+    reserved_quantity = models.PositiveIntegerField(default=0)
+    sold_quantity = models.PositiveIntegerField(default=0)
+    
+    # Time constraints
+    available_from = models.DateTimeField(help_text="С какого времени доступен бокс")
+    available_until = models.DateTimeField(help_text="До какого времени доступен бокс")
+    pickup_start = models.TimeField(blank=True, null=True, help_text="Время начала самовывоза")
+    pickup_end = models.TimeField(blank=True, null=True, help_text="Время окончания самовывоза")
+    
+    # Status and metadata
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Image for the box
+    image = models.ImageField(upload_to='surprise_boxes/', null=True, blank=True)
+    
+    class Meta:
+        verbose_name = "Сюрприз бокс"
+        verbose_name_plural = "Сюрприз боксы"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.vendor.name}"
+    
+    @property
+    def discount_percent(self):
+        """Calculate discount percentage"""
+        if self.original_value > 0:
+            discount = (self.original_value - self.selling_price) / self.original_value * 100
+            return round(discount, 1)
+        return 0
+    
+    @property
+    def available_quantity(self):
+        """Get available quantity (not reserved or sold)"""
+        return self.total_quantity - self.reserved_quantity - self.sold_quantity
+    
+    @property
+    def is_available(self):
+        """Check if box is currently available"""
+        from django.utils import timezone
+        now = timezone.now()
+        
+        return (
+            self.is_active and
+            self.status == 'available' and
+            self.available_quantity > 0 and
+            self.available_from <= now <= self.available_until
+        )
+    
+    @property
+    def is_pickup_time(self):
+        """Check if it's currently pickup time"""
+        from django.utils import timezone
+        current_time = timezone.now().time()
+        return self.pickup_start <= current_time <= self.pickup_end
+    
+    def get_absolute_url(self):
+        return reverse('catalog:surprise_box_detail', args=[str(self.id)])
+
+
+class SurpriseBoxItem(models.Model):
+    """
+    Through model for items in surprise boxes
+    Allows specifying quantity and notes for each item
+    """
+    surprise_box = models.ForeignKey(SurpriseBox, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1, help_text="Количество этого товара в боксе")
+    notes = models.CharField(max_length=200, blank=True, help_text="Дополнительные заметки о товаре")
+    
+    class Meta:
+        unique_together = ('surprise_box', 'item')
+        verbose_name = "Товар в сюрприз боксе"
+        verbose_name_plural = "Товары в сюрприз боксе"
+    
+    def __str__(self):
+        return f"{self.item.title} x{self.quantity} в {self.surprise_box.title}"

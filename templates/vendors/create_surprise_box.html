@@ -1,0 +1,901 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Создать Сюрприз Бокс - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Left Column - Branding -->
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">FS</span>
+                    </div>
+                    <div class="brand-name">FOODSAVE</div>
+                </div>
+            </div>
+            <div class="main-text">
+                <div class="text-line">СЮРПРИЗ</div>
+                <div class="text-line">БОКС</div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Form -->
+        <div class="login-right">
+            <div class="form-container">
+                <h2 class="form-title">Создать Сюрприз Бокс</h2>
+                <p class="vendor-name">{{ vendor.name }}</p>
+                
+                {% if form.errors or form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <div class="fw-semibold mb-2">Проверьте форму, есть ошибки:</div>
+                    {% if form.non_field_errors %}
+                        <div>{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <ul class="mb-0 small">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="vendor-form" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-group">
+                        <label for="{{ form.branch.id_for_label }}" class="form-label">Филиал *</label>
+                        {{ form.branch }}
+                        {% if form.branch.errors %}
+                            <div class="error-message">{{ form.branch.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Название бокса *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="error-message">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.box_type.id_for_label }}" class="form-label">Тип бокса *</label>
+                        {{ form.box_type }}
+                        {% if form.box_type.errors %}
+                            <div class="error-message">{{ form.box_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="error-message">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">Изображение бокса</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="error-message">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="form-group">
+                        <label for="{{ form.original_value.id_for_label }}" class="form-label">Оригинальная стоимость (сўм) *</label>
+                        {{ form.original_value }}
+                        {% if form.original_value.errors %}
+                            <div class="error-message">{{ form.original_value.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discount_percent" class="form-label">Процент скидки *</label>
+                        <select id="discount_percent" class="form-control">
+                            <option value="">Выберите процент скидки</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                            <option value="30">30%</option>
+                            <option value="40">40%</option>
+                            <option value="50">50%</option>
+                            <option value="60">60%</option>
+                            <option value="70">70%</option>
+                        </select>
+                        <small class="text-muted">Выберите процент скидки или введите цену вручную ниже</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.selling_price.id_for_label }}" class="form-label">Цена продажи (сўм) *</label>
+                        {{ form.selling_price }}
+                        <div class="discount-preview-inline">
+                            <small class="text-muted">Скидка: </small>
+                            <span class="discount-percent-display text-success fw-bold">0%</span>
+                            <small class="text-muted"> | Экономия: </small>
+                            <span class="savings-display text-success fw-bold">0 сўм</span>
+                        </div>
+                        {% if form.selling_price.errors %}
+                            <div class="error-message">{{ form.selling_price.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.total_quantity.id_for_label }}" class="form-label">Количество боксов *</label>
+                        {{ form.total_quantity }}
+                        {% if form.total_quantity.errors %}
+                            <div class="error-message">{{ form.total_quantity.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Time Settings -->
+                    <div class="form-group">
+                        <label for="{{ form.available_from.id_for_label }}" class="form-label">Доступен с *</label>
+                        {{ form.available_from }}
+                        {% if form.available_from.errors %}
+                            <div class="error-message">{{ form.available_from.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.available_until.id_for_label }}" class="form-label">Доступен до *</label>
+                        {{ form.available_until }}
+                        {% if form.available_until.errors %}
+                            <div class="error-message">{{ form.available_until.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Items Selection -->
+                    {% if vendor_items %}
+                    <div class="form-group">
+                        <label class="form-label">Товары в боксе (минимум 2) *</label>
+                        <p class="text-muted small mb-3">
+                            <i class="fas fa-hand-pointer me-1"></i>
+                            Кликните на карточки товаров для выбора
+                        </p>
+                        
+                        <div class="items-selection-container">
+                            <div class="items-selection-grid">
+                                {% for item in vendor_items %}
+                                <div class="item-selection-card" data-item-id="{{ item.id }}">
+                                    {% if item.images.first %}
+                                        <img src="{{ item.images.first.image.url }}" alt="{{ item.title }}" class="item-thumb">
+                                    {% else %}
+                                        <div class="item-thumb-placeholder">
+                                            <i class="fas fa-utensils"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="item-selection-info">
+                                        <h6 class="item-selection-name">{{ item.title }}</h6>
+                                        <small class="text-muted">{{ item.category.name|default:'Без категории' }}</small>
+                                    </div>
+                                    
+                                    <div class="quantity-control" style="display: none;">
+                                        <button type="button" class="qty-btn minus-btn">-</button>
+                                        <input type="number" class="qty-input" value="1" min="1" max="10">
+                                        <button type="button" class="qty-btn plus-btn">+</button>
+                                    </div>
+                                    
+                                    <div class="selection-check">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Hidden original form field -->
+                            <div style="display: none;">
+                                {{ form.items }}
+                            </div>
+                            
+                            <div class="selected-summary">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Выбрано товаров: <span id="selected-count" class="fw-bold text-success">0</span>
+                            </div>
+                        </div>
+                        
+                        {% if form.items.errors %}
+                            <div class="error-message">{{ form.items.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        У вас пока нет товаров для создания бокса. 
+                        <a href="{% url 'vendors:add_item' vendor.id %}" class="alert-link">Добавьте товары</a> сначала.
+                    </div>
+                    {% endif %}
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save me-2"></i>СОЗДАТЬ СЮРПРИЗ БОКС
+                        </button>
+                        <a href="{% url 'vendors:vendor_dashboard' %}" class="btn-secondary">
+                            Назад к панели
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Login Container - Full Screen */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0;
+    margin: 0;
+}
+
+.login-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    height: 100vh;
+    background: white;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+/* Left Column - Branding */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #01605E 0%, #014a47 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem;
+}
+
+.brand-section {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    right: 2rem;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-circle {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.logo-text {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.brand-name {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.main-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.text-line {
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Right Column - Form */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 2rem 2rem 2rem;
+    background: white;
+    overflow-y: auto;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-title {
+    color: #111827;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.vendor-name {
+    color: #6b7280;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Form Styles */
+.vendor-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select, textarea, input[type="file"], input[type="datetime-local"], input[type="time"] {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: #01605E;
+}
+
+.form-control:focus, .form-select:focus, textarea:focus, input[type="file"]:focus, input[type="datetime-local"]:focus, input[type="time"]:focus {
+    outline: none;
+    border-color: #01605E;
+    box-shadow: 0 0 0 3px rgba(1, 96, 94, 0.1), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Discount Preview Inline */
+.discount-preview-inline {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 8px;
+    border-left: 4px solid #01605E;
+}
+
+/* Items Selection */
+.items-selection-container {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: #f9fafb;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.items-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.item-selection-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    user-select: none;
+}
+
+.item-selection-card:hover {
+    border-color: #01605E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(1, 96, 94, 0.15);
+}
+
+.item-selection-card.selected {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.item-thumb, .item-thumb-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 auto 0.75rem;
+    object-fit: cover;
+}
+
+.item-thumb-placeholder {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.25rem;
+}
+
+.item-selection-card.selected .item-thumb-placeholder {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.item-selection-info {
+    margin-bottom: 0.5rem;
+}
+
+.item-selection-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #111827;
+}
+
+.item-selection-card.selected .item-selection-name {
+    color: #15803d;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.qty-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    border-color: #01605E;
+    color: #01605E;
+    background: #f9fafb;
+}
+
+.qty-input {
+    width: 40px;
+    height: 24px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0;
+}
+
+.qty-input:focus {
+    outline: none;
+    border-color: #01605E;
+}
+
+.selection-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 20px;
+    height: 20px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.item-selection-card.selected .selection-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.selected-summary {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    color: #075985;
+    font-size: 0.9rem;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary {
+    background: #01605E;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(1, 96, 94, 0.2);
+}
+
+.btn-primary:hover {
+    background: #014a47;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(1, 96, 94, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #6b7280;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border-left: 4px solid #dc2626;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    color: #d97706;
+    border-left: 4px solid #d97706;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-wrapper {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .login-left {
+        min-height: 40vh;
+        padding: 1.5rem;
+    }
+    
+    .text-line {
+        font-size: 2rem;
+    }
+    
+    .login-right {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .form-container {
+        max-width: 100%;
+    }
+    
+    .items-selection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .login-left {
+        min-height: 30vh;
+        padding: 1rem;
+    }
+    
+    .text-line {
+        font-size: 1.5rem;
+    }
+    
+    .login-right {
+        padding: 1.5rem 1rem 1rem 1rem;
+    }
+    
+    .brand-logo {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .brand-name {
+        font-size: 1.25rem;
+    }
+    
+    .items-selection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const originalValueInput = document.getElementById('{{ form.original_value.id_for_label }}');
+    const sellingPriceInput = document.getElementById('{{ form.selling_price.id_for_label }}');
+    const discountPercentSelect = document.getElementById('discount_percent');
+    const discountPercentDisplay = document.querySelector('.discount-percent-display');
+    const savingsDisplay = document.querySelector('.savings-display');
+    
+    // Add form classes
+    document.querySelectorAll('input, select, textarea').forEach(field => {
+        if (!field.classList.contains('qty-input') && !field.type === 'checkbox') {
+            field.classList.add('form-control');
+        }
+    });
+    
+    // Calculate discount from percent
+    function calculateFromPercent(percent) {
+        const originalValue = parseFloat(originalValueInput.value) || 0;
+        if (originalValue > 0 && percent > 0) {
+            const sellingPrice = originalValue * (1 - percent / 100);
+            sellingPriceInput.value = sellingPrice.toFixed(2);
+            updateDiscountDisplay();
+        }
+    }
+    
+    // Update discount display
+    function updateDiscountDisplay() {
+        const originalValue = parseFloat(originalValueInput.value) || 0;
+        const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
+        
+        if (originalValue > 0 && sellingPrice > 0 && sellingPrice < originalValue) {
+            const discount = ((originalValue - sellingPrice) / originalValue) * 100;
+            const savings = originalValue - sellingPrice;
+            
+            discountPercentDisplay.textContent = Math.round(discount) + '%';
+            savingsDisplay.textContent = Math.round(savings).toLocaleString() + ' сўм';
+        } else {
+            discountPercentDisplay.textContent = '0%';
+            savingsDisplay.textContent = '0 сўм';
+        }
+    }
+    
+    // Event listeners
+    discountPercentSelect.addEventListener('change', function() {
+        const percent = parseFloat(this.value);
+        if (percent) {
+            calculateFromPercent(percent);
+        }
+    });
+    
+    originalValueInput.addEventListener('input', function() {
+        const selectedPercent = parseFloat(discountPercentSelect.value);
+        if (selectedPercent) {
+            calculateFromPercent(selectedPercent);
+        } else {
+            updateDiscountDisplay();
+        }
+    });
+    
+    sellingPriceInput.addEventListener('input', function() {
+        updateDiscountDisplay();
+        // Clear percent select if manually editing price
+        discountPercentSelect.value = '';
+    });
+    
+    // Items selection
+    let selectedItems = new Set();
+    
+    function selectItem(card) {
+        const itemId = card.dataset.itemId;
+        const checkbox = document.querySelector(`input[value="${itemId}"]`);
+        const quantityControl = card.querySelector('.quantity-control');
+        
+        if (!checkbox) return;
+        
+        const isSelected = card.classList.contains('selected');
+        
+        if (isSelected) {
+            card.classList.remove('selected');
+            checkbox.checked = false;
+            selectedItems.delete(itemId);
+            if (quantityControl) quantityControl.style.display = 'none';
+        } else {
+            card.classList.add('selected');
+            checkbox.checked = true;
+            selectedItems.add(itemId);
+            if (quantityControl) quantityControl.style.display = 'flex';
+        }
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const countSpan = document.getElementById('selected-count');
+        const cards = document.querySelectorAll('.item-selection-card.selected');
+        
+        let totalQuantity = 0;
+        cards.forEach(card => {
+            const qtyInput = card.querySelector('.qty-input');
+            totalQuantity += parseInt(qtyInput ? qtyInput.value : 1);
+        });
+        
+        if (cards.length > 0) {
+            countSpan.innerHTML = `${cards.length} (всего: ${totalQuantity} шт.)`;
+        } else {
+            countSpan.textContent = '0';
+        }
+        
+        // Update summary color
+        const summary = document.querySelector('.selected-summary');
+        if (summary) {
+            if (cards.length >= 2) {
+                summary.style.background = '#dcfce7';
+                summary.style.borderColor = '#86efac';
+                summary.style.color = '#15803d';
+            } else {
+                summary.style.background = '#f0f9ff';
+                summary.style.borderColor = '#bae6fd';
+                summary.style.color = '#075985';
+            }
+        }
+    }
+    
+    // Card click handlers
+    document.querySelectorAll('.item-selection-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (!e.target.closest('.quantity-control')) {
+                selectItem(this);
+            }
+        });
+    });
+    
+    // Quantity button handlers
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const isPlus = this.classList.contains('plus-btn');
+            const input = this.parentElement.querySelector('.qty-input');
+            
+            if (input) {
+                let value = parseInt(input.value);
+                
+                if (isPlus && value < 10) {
+                    input.value = value + 1;
+                } else if (!isPlus && value > 1) {
+                    input.value = value - 1;
+                }
+                
+                updateSelectedCount();
+            }
+        });
+    });
+    
+    // Quantity input handlers
+    document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('input', updateSelectedCount);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const selectedCards = document.querySelectorAll('.item-selection-card.selected');
+        selectedCards.forEach(card => {
+            const itemId = card.dataset.itemId;
+            const qtyInput = card.querySelector('.qty-input');
+            const quantity = qtyInput ? qtyInput.value : 1;
+            
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `item_quantity_${itemId}`;
+            hiddenInput.value = quantity;
+            this.appendChild(hiddenInput);
+        });
+    });
+});
+</script>
+{% endblock %}

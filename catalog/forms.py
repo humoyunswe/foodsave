@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit, Div, HTML
 from crispy_forms.bootstrap import FormActions
-from .models import Item, Category, ItemImage, Offer
+from .models import Item, Category, ItemImage, Offer, SurpriseBox, SurpriseBoxItem
 
 User = get_user_model()
 
@@ -305,5 +305,84 @@ class OfferForm(forms.ModelForm):
         
         if start_date and end_date and end_date <= start_date:
             raise forms.ValidationError('Дата окончания должна быть позже даты начала.')
+        
+        return cleaned_data
+
+
+class SurpriseBoxForm(forms.ModelForm):
+    """Form for creating/editing surprise boxes"""
+    
+    # Multiple select for items
+    items = forms.ModelMultipleChoiceField(
+        queryset=Item.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        help_text="Выберите товары, которые будут включены в бокс"
+    )
+    
+    class Meta:
+        model = SurpriseBox
+        fields = [
+            'branch', 'title', 'description', 'box_type', 'image',
+            'original_value', 'selling_price', 'total_quantity',
+            'available_from', 'available_until', 'pickup_start', 'pickup_end',
+            'items'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Опишите, что может быть в боксе...'}),
+            'available_from': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'available_until': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'pickup_start': forms.TimeInput(attrs={'type': 'time'}),
+            'pickup_end': forms.TimeInput(attrs={'type': 'time'}),
+            'original_value': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+            'selling_price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+            'total_quantity': forms.NumberInput(attrs={'min': '1'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        vendor = kwargs.pop('vendor', None)
+        super().__init__(*args, **kwargs)
+        
+        if vendor:
+            # Filter branches and items by vendor
+            self.fields['branch'].queryset = vendor.branches.filter(is_active=True)
+            self.fields['items'].queryset = vendor.items.filter(is_active=True)
+            self.fields['branch'].empty_label = "Выберите филиал"
+        
+        # Make pickup fields optional
+        self.fields['pickup_start'].required = False
+        self.fields['pickup_end'].required = False
+        
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_enctype = 'multipart/form-data'
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        original_value = cleaned_data.get('original_value')
+        selling_price = cleaned_data.get('selling_price')
+        available_from = cleaned_data.get('available_from')
+        available_until = cleaned_data.get('available_until')
+        pickup_start = cleaned_data.get('pickup_start')
+        pickup_end = cleaned_data.get('pickup_end')
+        items = cleaned_data.get('items')
+        
+        # Validate pricing
+        if original_value and selling_price:
+            if selling_price >= original_value:
+                raise forms.ValidationError('Цена продажи должна быть меньше оригинальной стоимости.')
+        
+        # Validate time periods
+        if available_from and available_until:
+            if available_until <= available_from:
+                raise forms.ValidationError('Время окончания должно быть позже времени начала.')
+        
+        if pickup_start and pickup_end:
+            if pickup_end <= pickup_start:
+                raise forms.ValidationError('Время окончания самовывоза должно быть позже времени начала.')
+        
+        # Validate items selection
+        if not items or items.count() < 2:
+            raise forms.ValidationError('Выберите минимум 2 товара для создания бокса.')
         
         return cleaned_data

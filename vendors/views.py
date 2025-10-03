@@ -9,8 +9,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Vendor, Branch
 from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm
-from catalog.models import Item, Category, ItemImage, Offer
-from catalog.forms import ItemForm, ItemImageFormSet, OfferForm
+from catalog.models import Item, Category, ItemImage, Offer, SurpriseBox, SurpriseBoxItem
+from catalog.forms import ItemForm, ItemImageFormSet, OfferForm, SurpriseBoxForm
 from django import forms
 
 def index(request):
@@ -374,4 +374,126 @@ def delete_offer(request, offer_id):
     return render(request, 'vendors/delete_offer.html', {
         'offer': offer,
         'vendor': vendor
+    })
+
+
+@login_required
+def create_surprise_box(request, vendor_id):
+    """Create a new surprise box"""
+    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    
+    if request.method == 'POST':
+        form = SurpriseBoxForm(request.POST, request.FILES, vendor=vendor)
+        if form.is_valid():
+            surprise_box = form.save(commit=False)
+            surprise_box.vendor = vendor
+            surprise_box.save()
+            
+            # Save the selected items to the box with quantities
+            selected_items = form.cleaned_data['items']
+            for item in selected_items:
+                # Get quantity from POST data (sent by JavaScript)
+                quantity_key = f'item_quantity_{item.id}'
+                quantity = int(request.POST.get(quantity_key, 1))
+                
+                SurpriseBoxItem.objects.create(
+                    surprise_box=surprise_box,
+                    item=item,
+                    quantity=quantity
+                )
+            
+            messages.success(request, f'Сюрприз бокс "{surprise_box.title}" успешно создан!')
+            return redirect('vendors:manage_surprise_boxes', vendor_id=vendor.id)
+    else:
+        form = SurpriseBoxForm(vendor=vendor)
+    
+    # Get vendor items with additional info for cards
+    vendor_items = vendor.items.filter(is_active=True).select_related('category').prefetch_related('images')
+    
+    return render(request, 'vendors/create_surprise_box.html', {
+        'form': form,
+        'vendor': vendor,
+        'vendor_items': vendor_items
+    })
+
+
+@login_required
+def manage_surprise_boxes(request, vendor_id):
+    """Manage vendor's surprise boxes"""
+    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    surprise_boxes = SurpriseBox.objects.filter(vendor=vendor).order_by('-created_at')
+    
+    return render(request, 'vendors/manage_surprise_boxes.html', {
+        'vendor': vendor,
+        'surprise_boxes': surprise_boxes
+    })
+
+
+@login_required
+def edit_surprise_box(request, vendor_id, box_id):
+    """Edit an existing surprise box"""
+    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    surprise_box = get_object_or_404(SurpriseBox, id=box_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        form = SurpriseBoxForm(request.POST, request.FILES, instance=surprise_box, vendor=vendor)
+        if form.is_valid():
+            surprise_box = form.save()
+            
+            # Update items in the box
+            # First, remove existing items
+            SurpriseBoxItem.objects.filter(surprise_box=surprise_box).delete()
+            
+            # Then add new items
+            selected_items = form.cleaned_data['items']
+            for item in selected_items:
+                SurpriseBoxItem.objects.create(
+                    surprise_box=surprise_box,
+                    item=item,
+                    quantity=1
+                )
+            
+            messages.success(request, f'Сюрприз бокс "{surprise_box.title}" успешно обновлен!')
+            return redirect('vendors:manage_surprise_boxes', vendor_id=vendor.id)
+    else:
+        # Pre-populate the items field with current items
+        form = SurpriseBoxForm(instance=surprise_box, vendor=vendor)
+        form.fields['items'].initial = surprise_box.items.all()
+    
+    return render(request, 'vendors/edit_surprise_box.html', {
+        'form': form,
+        'vendor': vendor,
+        'surprise_box': surprise_box
+    })
+
+
+@login_required
+def delete_surprise_box(request, vendor_id, box_id):
+    """Delete a surprise box"""
+    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    surprise_box = get_object_or_404(SurpriseBox, id=box_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        box_title = surprise_box.title
+        surprise_box.delete()
+        messages.success(request, f'Сюрприз бокс "{box_title}" успешно удален!')
+        return redirect('vendors:manage_surprise_boxes', vendor_id=vendor.id)
+    
+    return render(request, 'vendors/delete_surprise_box.html', {
+        'surprise_box': surprise_box,
+        'vendor': vendor
+    })
+
+
+@login_required
+def surprise_box_detail(request, vendor_id, box_id):
+    """View surprise box details"""
+    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    surprise_box = get_object_or_404(SurpriseBox, id=box_id, vendor=vendor)
+    box_items = SurpriseBoxItem.objects.filter(surprise_box=surprise_box).select_related('item')
+    
+    return render(request, 'vendors/surprise_box_detail.html', {
+        'vendor': vendor,
+        'surprise_box': surprise_box,
+        'box_items': box_items
     })

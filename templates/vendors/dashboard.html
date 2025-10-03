@@ -20,8 +20,14 @@
                         <a href="{% url 'vendors:add_item' vendor.id %}" class="navbar-btn">
                             <i class="fas fa-box me-2"></i>Добавить товар
                         </a>
+                        <a href="{% url 'vendors:create_surprise_box' vendor.id %}" class="navbar-btn navbar-btn-special">
+                            <i class="fas fa-gift me-2"></i>Создать Box
+                        </a>
                         <a href="{% url 'vendors:manage_items' vendor.id %}" class="navbar-btn">
-                            <i class="fas fa-cog me-2"></i>Управление
+                            <i class="fas fa-cog me-2"></i>Управление товарами
+                        </a>
+                        <a href="{% url 'vendors:manage_surprise_boxes' vendor.id %}" class="navbar-btn">
+                            <i class="fas fa-gift me-2"></i>Мои боксы
                         </a>
                     {% endfor %}
                 {% else %}
@@ -44,8 +50,14 @@
                                 <li><a class="dropdown-item" href="{% url 'vendors:add_item' vendor.id %}">
                                     <i class="fas fa-box me-2"></i>Новый товар
                                 </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:create_surprise_box' vendor.id %}">
+                                    <i class="fas fa-gift me-2"></i>Создать Box
+                                </a></li>
                                 <li><a class="dropdown-item" href="{% url 'vendors:manage_items' vendor.id %}">
                                     <i class="fas fa-cog me-2"></i>Управление товарами
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'vendors:manage_surprise_boxes' vendor.id %}">
+                                    <i class="fas fa-gift me-2"></i>Мои боксы
                                 </a></li>
                                 <li><a class="dropdown-item" href="{% url 'vendors:vendor_detail' vendor.id %}">
                                     <i class="fas fa-eye me-2"></i>Просмотр заведения
@@ -651,6 +663,38 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* Special styling for Surprise Box button */
+.navbar-btn-special {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.navbar-btn-special:hover {
+    background: linear-gradient(135deg, #218838, #1ea080) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.navbar-btn-special::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.navbar-btn-special:hover::before {
+    left: 100%;
 }
 </style>
 {% endblock %}
