@@ -107,6 +107,21 @@ class VendorForm(forms.ModelForm):
 class BranchForm(forms.ModelForm):
     """Form for creating branches"""
     
+    # Days of week choices
+    DAYS_CHOICES = [
+        ('monday', 'Понедельник'),
+        ('tuesday', 'Вторник'),
+        ('wednesday', 'Среда'),
+        ('thursday', 'Четверг'),
+        ('friday', 'Пятница'),
+        ('saturday', 'Суббота'),
+        ('sunday', 'Воскресенье'),
+    ]
+    
+    # Time choices (30-minute intervals)
+    TIME_CHOICES = [(f"{h:02d}:{m:02d}", f"{h:02d}:{m:02d}") 
+                    for h in range(24) for m in [0, 30]]
+    
     class Meta:
         model = Branch
         fields = ['name', 'address', 'latitude', 'longitude', 'phone', 'is_active']

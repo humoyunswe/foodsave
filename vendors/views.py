@@ -97,6 +97,24 @@ def add_branch(request, vendor_id):
         if form.is_valid():
             branch = form.save(commit=False)
             branch.vendor = vendor
+            
+            # Process opening hours from POST data
+            opening_hours = {}
+            days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            
+            for day in days:
+                is_enabled = request.POST.get(f'day_{day}')
+                if is_enabled == 'on':
+                    open_time = request.POST.get(f'open_{day}')
+                    close_time = request.POST.get(f'close_{day}')
+                    if open_time and close_time:
+                        opening_hours[day] = f"{open_time}-{close_time}"
+                    else:
+                        opening_hours[day] = "closed"
+                else:
+                    opening_hours[day] = "closed"
+            
+            branch.opening_hours = opening_hours
             branch.save()
             messages.success(request, f'Филиал "{branch.name}" успешно добавлен!')
             return redirect('vendors:vendor_dashboard')
@@ -108,9 +126,14 @@ def add_branch(request, vendor_id):
     else:
         form = BranchForm()
     
+    # Generate time choices for template
+    time_choices = [(f"{h:02d}:{m:02d}", f"{h:02d}:{m:02d}") 
+                    for h in range(24) for m in [0, 30]]
+    
     return render(request, 'vendors/add_branch.html', {
         'form': form, 
-        'vendor': vendor
+        'vendor': vendor,
+        'time_choices': time_choices
     })
 
 

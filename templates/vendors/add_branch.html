@@ -94,6 +94,166 @@
                         </label>
                     </div>
                     
+                    <!-- Opening Hours Section -->
+                    <div class="opening-hours-section">
+                        <h3 class="section-title">Часы работы</h3>
+                        <p class="section-description">Выберите дни и время работы филиала</p>
+                        
+                        <div class="hours-container">
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_monday" name="day_monday" class="day-toggle" checked>
+                                    <label for="day_monday" class="day-label">Понедельник</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_monday" id="open_monday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_monday" id="close_monday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_tuesday" name="day_tuesday" class="day-toggle" checked>
+                                    <label for="day_tuesday" class="day-label">Вторник</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_tuesday" id="open_tuesday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_tuesday" id="close_tuesday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_wednesday" name="day_wednesday" class="day-toggle" checked>
+                                    <label for="day_wednesday" class="day-label">Среда</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_wednesday" id="open_wednesday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_wednesday" id="close_wednesday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_thursday" name="day_thursday" class="day-toggle" checked>
+                                    <label for="day_thursday" class="day-label">Четверг</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_thursday" id="open_thursday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_thursday" id="close_thursday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_friday" name="day_friday" class="day-toggle" checked>
+                                    <label for="day_friday" class="day-label">Пятница</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_friday" id="open_friday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_friday" id="close_friday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_saturday" name="day_saturday" class="day-toggle" checked>
+                                    <label for="day_saturday" class="day-label">Суббота</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_saturday" id="open_saturday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_saturday" id="close_saturday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="day-row">
+                                <div class="day-checkbox">
+                                    <input type="checkbox" id="day_sunday" name="day_sunday" class="day-toggle" checked>
+                                    <label for="day_sunday" class="day-label">Воскресенье</label>
+                                </div>
+                                <div class="time-selectors">
+                                    <select name="open_sunday" id="open_sunday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "09:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="time-separator">—</span>
+                                    <select name="close_sunday" id="close_sunday" class="time-select" size="1">
+                                        {% for time_val, time_display in time_choices %}
+                                            <option value="{{ time_val }}" {% if time_val == "22:00" %}selected{% endif %}>{{ time_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <button type="button" class="quick-btn" onclick="applyToAll()">
+                                <i class="fas fa-copy"></i> Применить ко всем
+                            </button>
+                            <button type="button" class="quick-btn" onclick="setWeekdaysOnly()">
+                                <i class="fas fa-briefcase"></i> Только будни
+                            </button>
+                            <button type="button" class="quick-btn" onclick="set24Hours()">
+                                <i class="fas fa-clock"></i> 24/7
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">
                             СОЗДАТЬ ФИЛИАЛ
@@ -507,6 +667,206 @@ input[type="checkbox"] {
     font-size: 14px;
 }
 
+/* Opening Hours Section */
+.opening-hours-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.section-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.hours-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+.day-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 15px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.day-row:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.day-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.day-checkbox {
+    display: flex;
+    align-items: center;
+    min-width: 140px;
+    flex-shrink: 0;
+}
+
+.day-toggle {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: #01605E;
+}
+
+.day-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    margin: 0;
+    user-select: none;
+}
+
+.time-selectors {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.time-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.time-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.time-select {
+    padding: 6px 24px 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    background: white;
+    cursor: pointer;
+    min-width: 75px;
+    height: 32px;
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+}
+
+.time-select:hover {
+    border-color: #01605E;
+    background-color: #fafafa;
+}
+
+.time-select:focus {
+    outline: none;
+    border-color: #01605E;
+    box-shadow: 0 0 0 2px rgba(1, 96, 94, 0.1);
+    background-color: white;
+}
+
+.time-select:disabled {
+    background-color: #f5f5f5;
+    background-image: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+    color: #999;
+}
+
+/* Стили для выпадающего списка */
+.time-select option {
+    padding: 8px 12px;
+    font-size: 13px;
+    background: white;
+    color: #333;
+    line-height: 1.5;
+}
+
+.time-select option:hover {
+    background: #f0f0f0;
+}
+
+.time-select option:checked {
+    background: #01605E;
+    color: white;
+    font-weight: 600;
+}
+
+.time-separator {
+    font-size: 14px;
+    color: #999;
+    font-weight: 400;
+    user-select: none;
+    margin: 0 4px;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.quick-btn {
+    padding: 10px 18px;
+    background: white;
+    border: 2px solid #01605E;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #01605E;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.quick-btn:hover {
+    background: #01605E;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(1, 96, 94, 0.2);
+}
+
+.quick-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.quick-btn i {
+    font-size: 13px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .login-wrapper {
@@ -575,6 +935,65 @@ input[type="checkbox"] {
     
     .control-btn i {
         display: none;
+    }
+    
+    /* Opening Hours Responsive */
+    .hours-container {
+        padding: 12px;
+    }
+    
+    .day-row {
+        flex-wrap: wrap;
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    
+    .day-checkbox {
+        width: 100%;
+        margin-bottom: 4px;
+    }
+    
+    .time-selectors {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+    
+    .time-select {
+        flex: 1;
+        min-width: 0;
+        padding: 5px 22px 5px 8px;
+        font-size: 12px;
+        height: 30px;
+        background-size: 12px;
+        background-position: right 5px center;
+    }
+    
+    .time-select option {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+    
+    .time-separator {
+        font-size: 12px;
+        flex-shrink: 0;
+        margin: 0 2px;
+    }
+    
+    .quick-actions {
+        gap: 8px;
+    }
+    
+    .quick-btn {
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .quick-btn i {
+        font-size: 12px;
     }
 }
 
@@ -787,5 +1206,107 @@ function showAlert(message, type) {
         });
     }, false);
 })();
+
+// Opening Hours Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    // Setup event listeners for day toggles
+    days.forEach(day => {
+        const checkbox = document.getElementById(`day_${day}`);
+        const openSelect = document.getElementById(`open_${day}`);
+        const closeSelect = document.getElementById(`close_${day}`);
+        
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                const isEnabled = this.checked;
+                openSelect.disabled = !isEnabled;
+                closeSelect.disabled = !isEnabled;
+                
+                // Visual feedback
+                const dayRow = this.closest('.day-row');
+                if (isEnabled) {
+                    dayRow.style.opacity = '1';
+                } else {
+                    dayRow.style.opacity = '0.5';
+                }
+            });
+        }
+    });
+});
+
+// Apply Monday's hours to all other days
+function applyToAll() {
+    const mondayOpen = document.getElementById('open_monday').value;
+    const mondayClose = document.getElementById('close_monday').value;
+    const days = ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    days.forEach(day => {
+        document.getElementById(`open_${day}`).value = mondayOpen;
+        document.getElementById(`close_${day}`).value = mondayClose;
+    });
+    
+    showAlert('Часы работы понедельника применены ко всем дням', 'success');
+}
+
+// Set only weekdays (Monday-Friday) as active
+function setWeekdaysOnly() {
+    const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    const weekend = ['saturday', 'sunday'];
+    
+    // Enable weekdays
+    weekdays.forEach(day => {
+        const checkbox = document.getElementById(`day_${day}`);
+        const openSelect = document.getElementById(`open_${day}`);
+        const closeSelect = document.getElementById(`close_${day}`);
+        
+        checkbox.checked = true;
+        openSelect.disabled = false;
+        closeSelect.disabled = false;
+        openSelect.value = '09:00';
+        closeSelect.value = '22:00';
+        
+        const dayRow = checkbox.closest('.day-row');
+        dayRow.style.opacity = '1';
+    });
+    
+    // Disable weekend
+    weekend.forEach(day => {
+        const checkbox = document.getElementById(`day_${day}`);
+        const openSelect = document.getElementById(`open_${day}`);
+        const closeSelect = document.getElementById(`close_${day}`);
+        
+        checkbox.checked = false;
+        openSelect.disabled = true;
+        closeSelect.disabled = true;
+        
+        const dayRow = checkbox.closest('.day-row');
+        dayRow.style.opacity = '0.5';
+    });
+    
+    showAlert('Установлен режим работы только в будни', 'success');
+}
+
+// Set 24/7 mode
+function set24Hours() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    days.forEach(day => {
+        const checkbox = document.getElementById(`day_${day}`);
+        const openSelect = document.getElementById(`open_${day}`);
+        const closeSelect = document.getElementById(`close_${day}`);
+        
+        checkbox.checked = true;
+        openSelect.disabled = false;
+        closeSelect.disabled = false;
+        openSelect.value = '00:00';
+        closeSelect.value = '23:30';
+        
+        const dayRow = checkbox.closest('.day-row');
+        dayRow.style.opacity = '1';
+    });
+    
+    showAlert('Установлен режим работы 24/7', 'success');
+}
 </script>
 {% endblock %}
