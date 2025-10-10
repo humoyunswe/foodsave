@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from .models import Vendor, Branch
 from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm
 from catalog.models import Item, Category, ItemImage, Offer, SurpriseBox, SurpriseBoxItem
@@ -42,6 +43,9 @@ class VendorListView(ListView):
 #         return context
 
 def vendor_detail(request, pk):
+    from django.db.models import Q
+    from django.utils import timezone
+    
     vendor = get_object_or_404(
         Vendor.objects.filter(is_active=True).prefetch_related('branches', 'items'),
         pk=pk
@@ -50,8 +54,12 @@ def vendor_detail(request, pk):
     # Get active branches with coordinates
     branches = vendor.branches.filter(is_active=True).order_by('name')
     
-    # Get active items with their offers and images
-    items = vendor.items.filter(is_active=True).select_related('category', 'branch').prefetch_related(
+    # Get active items with their offers and images (exclude expired items)
+    items = vendor.items.filter(
+        is_active=True
+    ).filter(
+        Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
+    ).select_related('category', 'branch').prefetch_related(
         'images', 
         'offers'
     ).order_by('-created_at')[:12]
@@ -430,8 +438,14 @@ def create_surprise_box(request, vendor_id):
     else:
         form = SurpriseBoxForm(vendor=vendor)
     
-    # Get vendor items with additional info for cards
-    vendor_items = vendor.items.filter(is_active=True).select_related('category').prefetch_related('images')
+    # Get vendor items with additional info for cards (exclude expired items)
+    from django.db.models import Q
+    from django.utils import timezone
+    vendor_items = vendor.items.filter(
+        is_active=True
+    ).filter(
+        Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
+    ).select_related('category').prefetch_related('images')
     
     return render(request, 'vendors/create_surprise_box.html', {
         'form': form,
@@ -519,4 +533,50 @@ def surprise_box_detail(request, vendor_id, box_id):
         'vendor': vendor,
         'surprise_box': surprise_box,
         'box_items': box_items
+    })
+
+
+@login_required
+@require_POST
+def toggle_item_status(request, item_id):
+    """Toggle item active/inactive status via AJAX"""
+    import json
+    from django.utils import timezone
+    
+    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    
+    # If trying to activate an expired item, request new expiry date
+    if not item.is_active and item.is_expired():
+        # Check if new expiry date is provided
+        try:
+            data = json.loads(request.body) if request.body else {}
+            new_expiry_date = data.get('new_expiry_date')
+            
+            if not new_expiry_date:
+                return JsonResponse({
+                    'success': False,
+                    'require_expiry': True,
+                    'message': 'Срок годности истек. Необходимо указать новый срок годности.',
+                    'current_expiry': item.expiry_date.isoformat() if item.expiry_date else None
+                })
+            
+            # Update expiry date
+            from datetime import datetime
+            item.expiry_date = datetime.strptime(new_expiry_date, '%Y-%m-%d').date()
+        except (json.JSONDecodeError, ValueError) as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Неверный формат даты'
+            })
+    
+    # Toggle the status
+    item.is_active = not item.is_active
+    item.save()
+    
+    return JsonResponse({
+        'success': True,
+        'is_active': item.is_active,
+        'status_text': 'Активен' if item.is_active else 'Неактивен',
+        'message': f'Товар "{item.title}" {"активирован" if item.is_active else "деактивирован"}',
+        'expiry_date': item.expiry_date.isoformat() if item.expiry_date else None
     })

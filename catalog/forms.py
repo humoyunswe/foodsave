@@ -13,10 +13,11 @@ class ItemForm(forms.ModelForm):
     
     class Meta:
         model = Item
-        fields = ['branch', 'category', 'title', 'description', 'unit', 'custom_unit', 'is_active']
+        fields = ['branch', 'category', 'title', 'description', 'unit', 'custom_unit', 'expiry_date', 'is_active']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'custom_unit': forms.TextInput(attrs={'placeholder': 'Укажите единицу измерения'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -86,7 +87,11 @@ class ItemForm(forms.ModelForm):
                 id='customUnitDiv'
             ),
             'description',
-            'is_active',
+            Row(
+                Column('expiry_date', css_class='form-group col-md-6 mb-3'),
+                Column('is_active', css_class='form-group col-md-6 mb-3'),
+                css_class='form-row'
+            ),
             HTML('''
                 <script>
                 // Custom unit toggle
@@ -124,6 +129,10 @@ class ItemForm(forms.ModelForm):
         self.fields['custom_unit'].widget.attrs.update({
             'class': 'form-control'
         })
+        self.fields['expiry_date'].widget.attrs.update({
+            'class': 'form-control'
+        })
+        self.fields['expiry_date'].required = False
 
     def clean(self):
         cleaned_data = super().clean()

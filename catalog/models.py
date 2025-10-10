@@ -39,6 +39,7 @@ class Item(models.Model):
     description = models.TextField(blank=True)
     unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='шт')
     custom_unit = models.CharField(max_length=50, blank=True, help_text="Укажите единицу измерения, если выбрали 'Другое'")
+    expiry_date = models.DateField(null=True, blank=True, help_text="Срок годности товара")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,6 +61,17 @@ class Item(models.Model):
             status='available',
             start_date__lte=timezone.now().date()
         ).first()
+    
+    def is_expired(self):
+        """Check if item has expired"""
+        from django.utils import timezone
+        if self.expiry_date:
+            return timezone.now().date() > self.expiry_date
+        return False
+    
+    def is_available(self):
+        """Check if item is available (active and not expired)"""
+        return self.is_active and not self.is_expired()
 
     @property
     def name(self):

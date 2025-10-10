@@ -22,6 +22,7 @@ urlpatterns = [
     path('<int:vendor_id>/manage-items/', views.manage_items, name='manage_items'),
     path('item/<int:item_id>/edit/', views.edit_item, name='edit_item'),
     path('item/<int:item_id>/delete/', views.delete_item, name='delete_item'),
+    path('item/<int:item_id>/toggle-status/', views.toggle_item_status, name='toggle_item_status'),
     
     # Offer management
     path('item/<int:item_id>/add-offer/', views.add_offer, name='add_offer'),

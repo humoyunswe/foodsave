@@ -20,7 +20,15 @@ import json
 from vendors.models import Branch, Vendor
 
 def catalog_view(request):
-    queryset = Item.objects.filter(is_active=True).select_related('vendor', 'category', 'branch').prefetch_related(
+    from django.db.models import Q
+    from django.utils import timezone
+    
+    # Filter active items that are not expired
+    queryset = Item.objects.filter(
+        is_active=True
+    ).filter(
+        Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
+    ).select_related('vendor', 'category', 'branch').prefetch_related(
         'images',
         'offers__branch'
     )
@@ -145,8 +153,15 @@ class CategoryView(ListView):
     paginate_by = 12
     
     def get_queryset(self):
+        from django.db.models import Q
+        from django.utils import timezone
         self.category = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-        return Item.objects.filter(category=self.category, is_active=True).select_related('vendor')
+        return Item.objects.filter(
+            category=self.category, 
+            is_active=True
+        ).filter(
+            Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
+        ).select_related('vendor')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

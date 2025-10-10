@@ -273,6 +273,44 @@
         </div>
     </div>
 </div>
+
+<!-- Expiry Date Update Modal -->
+<div class="modal fade" id="expiryDateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Срок годности истек
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-calendar-times me-2"></i>
+                    <strong>Товар просрочен!</strong> Для активации необходимо указать новый срок годности.
+                </div>
+                
+                <div class="mb-3">
+                    <label for="newExpiryDate" class="form-label">
+                        <i class="fas fa-calendar-plus me-2"></i>Новый срок годности
+                    </label>
+                    <input type="date" class="form-control" id="newExpiryDate" required>
+                    <div class="form-text">Укажите дату до которой товар будет годен</div>
+                </div>
+                
+                <div id="expiryDateError" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Отмена
+                </button>
+                <button type="button" class="btn btn-success" id="confirmExpiryUpdate">
+                    <i class="fas fa-check me-2"></i>Активировать товар
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
@@ -355,12 +393,130 @@
 
 {% block extra_js %}
 <script>
-function toggleItemStatus(itemId) {
-    if (confirm('Изменить статус товара?')) {
-        // Here you would make an AJAX call to toggle the status
-        // For now, we'll just reload the page
-        alert('Функция будет добавлена в следующем обновлении');
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
     }
+    return cookieValue;
+}
+
+let currentItemId = null;
+
+function toggleItemStatus(itemId, newExpiryDate = null) {
+    event.preventDefault();
+    
+    if (!newExpiryDate && !confirm('Изменить статус товара?')) {
+        return;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    const body = newExpiryDate ? JSON.stringify({ new_expiry_date: newExpiryDate }) : '';
+    
+    fetch(`/vendors/item/${itemId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: body
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showToast(data.message, 'success');
+            
+            // Close modal if open
+            const modal = bootstrap.Modal.getInstance(document.getElementById('expiryDateModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            // Reload page after short delay to reflect changes
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else if (data.require_expiry) {
+            // Show expiry date modal
+            currentItemId = itemId;
+            showExpiryDateModal(data.message);
+        } else {
+            showToast(data.message || 'Ошибка при изменении статуса', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Произошла ошибка при изменении статуса', 'error');
+    });
+}
+
+function showExpiryDateModal(message) {
+    // Set minimum date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    document.getElementById('newExpiryDate').setAttribute('min', minDate);
+    document.getElementById('newExpiryDate').value = minDate;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('expiryDateModal'));
+    modal.show();
+}
+
+// Handle expiry date confirmation
+document.getElementById('confirmExpiryUpdate').addEventListener('click', function() {
+    const newExpiryDate = document.getElementById('newExpiryDate').value;
+    const errorDiv = document.getElementById('expiryDateError');
+    
+    if (!newExpiryDate) {
+        errorDiv.textContent = 'Пожалуйста, укажите дату';
+        errorDiv.classList.remove('d-none');
+        return;
+    }
+    
+    // Validate date is in future
+    const selectedDate = new Date(newExpiryDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate <= today) {
+        errorDiv.textContent = 'Срок годности должен быть в будущем';
+        errorDiv.classList.remove('d-none');
+        return;
+    }
+    
+    errorDiv.classList.add('d-none');
+    
+    // Call toggle with new expiry date
+    if (currentItemId) {
+        toggleItemStatus(currentItemId, newExpiryDate);
+    }
+});
+
+function showToast(message, type) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed top-0 start-50 translate-middle-x mt-3`;
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 function confirmDelete(itemId, itemName) {
