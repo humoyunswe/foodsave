@@ -28,6 +28,19 @@
     <meta name="twitter:title" content="FoodSave — Экономь на еде, спасай планету">
     <meta name="twitter:description" content="Выгодные наборы от проверенных заведений рядом с вами. Премиальный сервис, который спасает еду.">
     <meta name="twitter:image" content="{% static 'images/placeholder.jpg' %}">
+
+    {% comment %} Telegram bot {% endcomment %}
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();         // сигнал готовности UI
+        tg.expand();        // развернуть на всю высоту
+        /
+        tg.setHeaderColor('secondary_bg_color');
+        tg.setBackgroundColor('secondary_bg_color');
+    </script>
+
     
     {% block extra_css %}{% endblock %}
 </head>
