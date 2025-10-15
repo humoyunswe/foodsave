@@ -39,9 +39,9 @@
                                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                     <div class="image-container">
                                         <img src="{{ image.image.url }}" class="carousel-image" alt="{{ item.title }}">
-                                        {% if offers.first and offers.first.discount_percent %}
+                                        {% if offers.0 and offers.0.discount_percent %}
                                             <div class="discount-overlay">
-                                                -{{ offers.first.discount_percent|floatformat:0 }}%
+                                                -{{ offers.0.discount_percent|floatformat:0 }}%
                                             </div>
                                         {% endif %}
                                     </div>
@@ -176,7 +176,7 @@
                 </div>
                 
                 {% for offer in offers %}
-                    <div class="offer-card mb-3">
+                    <div class="offer-card mb-3 {% if offer.is_expired %}offer-expired{% endif %}">
                         <div class="offer-content">
                             <div class="price-section">
                                 <div class="current-price">
@@ -192,12 +192,18 @@
                                         </span>
                                     </div>
                                 {% endif %}
+                                {% if offer.is_expired %}
+                                    <div class="expired-notice">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Скидка истекла
+                                    </div>
+                                {% endif %}
                             </div>
                             
                             <div class="offer-meta">
-                                <div class="time-chip">
+                                <div class="time-chip {% if offer.is_expired %}time-chip-expired{% endif %}">
                                     <i class="fas fa-clock me-1"></i>
-                                    Сегодня
+                                    {% if offer.is_expired %}Истекло{% else %}Сегодня{% endif %}
                                 </div>
                                 <div class="quantity-info">
                                     <i class="fas fa-box me-1"></i>
@@ -206,10 +212,17 @@
                             </div>
                             
                             <div class="offer-action">
-                                <button class="btn btn-primary btn-add-cart" data-offer-id="{{ offer.id }}">
-                                    <i class="fas fa-shopping-cart me-2"></i>
-                                    В корзину
-                                </button>
+                                {% if offer.is_expired %}
+                                    <button class="btn btn-outline-danger" disabled>
+                                        <i class="fas fa-times me-2"></i>
+                                        Истекло
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-primary btn-add-cart" data-offer-id="{{ offer.id }}">
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        В корзину
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -742,6 +755,36 @@
 .rating-text {
     color: #6b7280;
     font-weight: 500;
+}
+
+/* Expired Offers */
+.offer-expired {
+    opacity: 0.7;
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.offer-expired .current-price {
+    color: #6b7280;
+}
+
+.offer-expired .discount-badge {
+    background: #9ca3af;
+    color: white;
+}
+
+.expired-notice {
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.time-chip-expired {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 /* No Offers Alert */

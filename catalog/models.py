@@ -54,8 +54,10 @@ class Item(models.Model):
         return self.get_unit_display()
 
     def get_active_offer(self):
-        """Get the first active offer for this item"""
+        """Get the first active offer for this item (include expired offers)"""
         from django.utils import timezone
+        from django.db.models import Q
+        
         return self.offers.filter(
             is_active=True,
             status='available',

@@ -82,29 +82,31 @@
                             <div class="mt-auto">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        {% for offer in item.offers.all %}
-                                            {% if offer.is_active and offer.status == 'available' %}
+                                        {% with active_offer=item.get_active_offer %}
+                                            {% if active_offer %}
                                                 <div class="price-info">
-                                                    {% if offer.discount_percent > 0 %}
-                                                        <span class="text-decoration-line-through text-muted">{{ offer.original_price }} сум</span>
-                                                        <span class="text-success fw-bold">{{ offer.discounted_price }} сум</span>
-                                                        <span class="badge bg-danger">-{{ offer.discount_percent }}%</span>
+                                                    {% if active_offer.discount_percent > 0 %}
+                                                        <span class="text-decoration-line-through text-muted">{{ active_offer.original_price }} сум</span>
+                                                        <span class="text-success fw-bold">{{ active_offer.discounted_price }} сум</span>
+                                                        <span class="badge bg-danger">-{{ active_offer.discount_percent }}%</span>
                                                     {% else %}
-                                                        <span class="fw-bold">{{ offer.original_price }} сум</span>
+                                                        <span class="fw-bold">{{ active_offer.original_price }} сум</span>
                                                     {% endif %}
                                                 </div>
+                                            {% else %}
+                                                <span class="fw-bold text-success">Цена по запросу</span>
                                             {% endif %}
-                                        {% empty %}
-                                            <span class="fw-bold text-success">Цена по запросу</span>
-                                        {% endfor %}
+                                        {% endwith %}
                                     </div>
                                     <div>
                                         <a href="{% url 'catalog:item_detail' item.pk %}" class="btn btn-sm btn-outline-primary me-1">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-primary" onclick="addToCart({{ item.pk }}, '{{ item.title|escapejs }}', {% for offer in item.offers.all %}{% if offer.is_active and offer.status == 'available' %}{{ offer.discounted_price|default:offer.original_price }}{% endif %}{% empty %}1000{% endfor %})">
+                                        {% with active_offer=item.get_active_offer %}
+                                        <button class="btn btn-sm btn-primary" onclick="addToCart({{ item.pk }}, '{{ item.title|escapejs }}', {{ active_offer.discounted_price|default:active_offer.original_price|default:1000 }})">
                                             <i class="fas fa-cart-plus"></i>
                                         </button>
+                                        {% endwith %}
                                     </div>
                                 </div>
                             </div>

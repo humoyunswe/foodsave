@@ -58,14 +58,16 @@
                                         {% endif %}
                                         
                                         <div class="mt-auto">
-                                            {% if item.offers.first %}
+                                            {% with active_offer=item.get_active_offer %}
+                                            {% if active_offer %}
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span class="price-tag">{{ item.offers.first.current_price }} ₸</span>
-                                                    {% if item.offers.first.discount_percent > 0 %}
-                                                        <span class="discount-badge">-{{ item.offers.first.discount_percent }}%</span>
+                                                    <span class="price-tag">{{ active_offer.current_price }} ₸</span>
+                                                    {% if active_offer.discount_percent > 0 %}
+                                                        <span class="discount-badge">-{{ active_offer.discount_percent }}%</span>
                                                     {% endif %}
                                                 </div>
                                             {% endif %}
+                                            {% endwith %}
                                             
                                             <a href="{% url 'catalog:item_detail' item.pk %}" 
                                                class="btn btn-outline-primary btn-sm w-100">

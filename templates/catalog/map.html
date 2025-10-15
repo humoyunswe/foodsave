@@ -121,19 +121,21 @@
                             <div class="mt-auto">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        {% for offer in item_data.item.offers.all %}
-                                            {% if offer.is_active %}
+                                        {% with active_offer=item_data.item.get_active_offer %}
+                                            {% if active_offer %}
                                                 <div class="price-info">
-                                                    {% if offer.discount_percent > 0 %}
-                                                        <span class="text-decoration-line-through text-muted">{{ offer.original_price }} сум</span>
-                                                        <span class="text-success fw-bold">{{ offer.discounted_price }} сум</span>
-                                                        <span class="badge bg-danger">-{{ offer.discount_percent }}%</span>
+                                                    {% if active_offer.discount_percent > 0 %}
+                                                        <span class="text-decoration-line-through text-muted">{{ active_offer.original_price }} сум</span>
+                                                        <span class="text-success fw-bold">{{ active_offer.discounted_price }} сум</span>
+                                                        <span class="badge bg-danger">-{{ active_offer.discount_percent }}%</span>
                                                     {% else %}
-                                                        <span class="fw-bold">{{ offer.original_price }} сум</span>
+                                                        <span class="fw-bold">{{ active_offer.original_price }} сум</span>
                                                     {% endif %}
                                                 </div>
+                                            {% else %}
+                                                <span class="fw-bold text-success">Цена по запросу</span>
                                             {% endif %}
-                                        {% endfor %}
+                                        {% endwith %}
                                     </div>
                                     <div>
                                         <a href="{% url 'catalog:item_detail' item_data.item.pk %}" class="btn btn-sm btn-outline-primary me-1">

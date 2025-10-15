@@ -370,9 +370,10 @@
                                                     <span class="original-price">{{ box.original_price|floatformat:0 }} сўм</span>
                                                 {% endif %}
                                             </div>
-                                            <button class="btn btn-success btn-sm add-to-cart" data-box-id="{{ box.id }}">
+                                            <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm add-to-cart">
+                                                <i class="fas fa-shopping-cart me-1"></i>
                                                 В корзину
-                                            </button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -392,7 +393,7 @@
                 </div>
                 
                 {% for item in items %}
-                {% with active_offer=item.offers.first %}
+                {% with active_offer=item.get_active_offer %}
                 <div class="item-card" data-item-id="{{ item.id }}">
                     <div class="card item-card-inner">
                         {% if active_offer and active_offer.discount_percent > 0 %}
@@ -437,10 +438,38 @@
                                         {{ item.branch.address|truncatechars:30 }}
                                     </span>
                                 </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span class="{% if item.branch.is_open_now %}text-success{% else %}text-warning{% endif %}">
-                                        {% if item.branch.is_open_now %}Открыто до {{ item.branch.get_closing_time }}{% else %}Закрыто{% endif %}
+                                
+                                <!-- Branch working hours - highlighted -->
+                                <div class="meta-item branch-hours {% if item.branch.is_open_now %}branch-open{% else %}branch-closed{% endif %}">
+                                    <i class="fas fa-store"></i>
+                                    <span>
+                                        {% if item.branch.is_open_now %}
+                                            <strong>Открыто до {{ item.branch.get_closing_time }}</strong>
+                                        {% else %}
+                                            <strong>Закрыто</strong>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Offer countdown timer -->
+                                {% if active_offer and active_offer.end_date %}
+                                <div class="meta-item offer-countdown">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span class="countdown-timer" 
+                                          data-end-date="{{ active_offer.end_date|date:'Y-m-d' }}"
+                                          data-end-time="23:59:59">
+                                        <strong class="countdown-display">Загрузка...</strong>
+                                    </span>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Item expiry date -->
+                                {% if item.expiry_date %}
+                                <div class="meta-item item-expiry">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>
+                                        <strong>Годен до: {{ item.expiry_date|date:'d.m.Y' }}</strong>
                                     </span>
                                 </div>
                                 {% endif %}
@@ -455,22 +484,49 @@
                             
                             <div class="item-price">
                                 {% if active_offer %}
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="price-section">
                                     <div class="price-info">
                                         <span class="current-price" data-price="{{ active_offer.current_price|floatformat:0 }}">{{ active_offer.current_price|floatformat:0 }} сўм</span>
                                         {% if active_offer.original_price > active_offer.current_price %}
                                             <span class="original-price" data-price="{{ active_offer.original_price|floatformat:0 }}">{{ active_offer.original_price|floatformat:0 }} сўм</span>
                                         {% endif %}
                                     </div>
-                                    {% comment %} <button class="btn btn-success btn-sm add-to-cart" data-offer-id="{{ active_offer.id }}">
-                                        В корзину
-                                    </button> {% endcomment %}
+                                    
+                                    {% if active_offer.is_expired %}
+                                        <div class="expired-offer-section">
+                                            <div class="expired-sticker">
+                                                <div class="sticker-icon">⏰</div>
+                                                <div class="sticker-content">
+                                                    <div class="sticker-title">Скидка закончилась</div>
+                                                    <div class="sticker-subtitle">Скоро будут новые!</div>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm notify-btn" data-item-id="{{ item.id }}">
+                                                <i class="fas fa-bell me-1"></i>
+                                                Уведомить о скидке
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="active-offer-section">
+                                            <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm add-to-cart">
+                                                <i class="fas fa-shopping-cart me-1"></i>
+                                                В корзину
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 {% else %}
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">Нет предложений</span>
-                                    <button class="btn btn-outline-secondary btn-sm" disabled>
-                                        Недоступно
+                                <div class="no-offer-section">
+                                    <div class="no-offer-sticker">
+                                        <div class="sticker-icon">🔍</div>
+                                        <div class="sticker-content">
+                                            <div class="sticker-title">Нет предложений</div>
+                                            <div class="sticker-subtitle">Следите за обновлениями!</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm notify-btn" data-item-id="{{ item.id }}">
+                                        <i class="fas fa-bell me-1"></i>
+                                        Уведомить о появлении
                                     </button>
                                 </div>
                                 {% endif %}
@@ -589,6 +645,7 @@ function formatNumberWithSmallDigits(num) {
 function initializeCartButtons() {
     if (window.__cartHandlersBound) { return; }
     window.__cartHandlersBound = true;
+    
     // Add event listeners to all "В корзину" buttons
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -620,6 +677,37 @@ function initializeCartButtons() {
                     this.innerHTML = originalText;
                     this.disabled = false;
                 });
+        });
+    });
+    
+    // Add event listeners to notification buttons
+    document.querySelectorAll('.notify-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const itemId = this.dataset.itemId;
+            const originalText = this.innerHTML;
+            
+            // Add loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Подписываем...';
+            this.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check"></i> Подписано';
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-outline-success');
+                
+                // Show success message
+                showNotification('Вы будете уведомлены о новых предложениях!', 'success');
+                
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.classList.remove('btn-outline-success');
+                    this.classList.add('btn-outline-primary');
+                    this.disabled = false;
+                }, 3000);
+            }, 1000);
         });
     });
 }
@@ -1377,57 +1465,66 @@ function getCookie(name) {
     margin-left: 0.5rem;
 }
 
-/* Items Grid */
+/* Items Grid - Vertical Compact Cards */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
 }
 
-/* Item Cards */
+/* Item Cards - Vertical Compact YandexEats Style */
 .item-card-inner {
     border: none;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    position: relative;
+    border: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
 
 .item-card-inner:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .discount-badge {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #ef4444;
+    top: 8px;
+    left: 8px;
+    background: #10b981;
     color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
     z-index: 2;
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+    letter-spacing: 0.01em;
 }
 
-/* Item Image */
+/* Item Image - Vertical Compact */
 .item-image-container {
     position: relative;
-    height: 180px;
+    width: 100%;
+    height: 140px;
     overflow: hidden;
+    background: #f5f5f5;
+    flex-shrink: 0;
 }
 
 .item-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .item-card-inner:hover .item-image {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .item-image-placeholder {
@@ -1453,100 +1550,325 @@ function getCookie(name) {
     opacity: 1;
 }
 
-/* Item Content */
+/* Item Content - Vertical Compact */
 .item-content {
-    padding: 1rem;
+    flex: 1;
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #ffffff;
 }
 
 .item-header {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.4rem;
 }
 
 .item-title {
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.3rem 0;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    color: #1a1a1a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 2.3em;
 }
 
 .item-title a {
     text-decoration: none;
     color: inherit;
+    transition: all 0.3s ease;
+    display: inline-block;
 }
 
 .item-title a:hover {
     color: #10b981;
+    transform: translateX(2px);
 }
 
 .vendor-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.3rem;
+}
+
+.vendor-info small {
+    color: #999;
+    font-size: 0.75rem;
+    font-weight: 400;
 }
 
 .rating-badge {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-    padding: 0.125rem 0.5rem;
-    border-radius: 10px;
+    background: transparent;
+    color: #999;
+    padding: 0;
+    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 500;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
 }
 
 .rating-badge i {
     font-size: 0.7rem;
+    color: #ffc107;
 }
 
-/* Item Meta */
+/* Item Meta - Vertical Compact */
 .item-meta {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0;
 }
 
 .meta-item {
     display: flex;
     align-items: center;
-    font-size: 0.75rem;
-    color: #6b7280;
+    font-size: 0.7rem;
+    color: #999;
+    padding: 0;
+    transition: all 0.2s ease;
+    font-weight: 400;
 }
 
 .meta-item i {
-    width: 12px;
-    margin-right: 0.5rem;
+    width: auto;
+    margin-right: 4px;
     text-align: center;
+    font-size: 0.7rem;
 }
 
-/* Item Price */
+/* Branch hours styling - Uber Style */
+.meta-item.branch-hours {
+    background: transparent;
+    border: none;
+    padding: 2px 0;
+}
+
+.meta-item.branch-hours.branch-open {
+    color: #34c759;
+}
+
+.meta-item.branch-hours.branch-open i {
+    color: #34c759;
+}
+
+.meta-item.branch-hours.branch-closed {
+    color: #ff3b30;
+}
+
+.meta-item.branch-hours.branch-closed i {
+    color: #ff3b30;
+}
+
+/* Offer countdown styling - Uber Style */
+.meta-item.offer-countdown {
+    background: transparent;
+    border: none;
+    color: #ff9500;
+    font-weight: 600;
+    padding: 2px 0;
+}
+
+.meta-item.offer-countdown i {
+    color: #ff9500;
+}
+
+.countdown-display {
+    font-weight: 600;
+    color: #ff9500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Item expiry styling - Uber Style */
+.meta-item.item-expiry {
+    background: transparent;
+    border: none;
+    color: #007aff;
+    padding: 2px 0;
+}
+
+.meta-item.item-expiry i {
+    color: #007aff;
+}
+
+/* Item Price - Horizontal Layout */
 .item-price {
     margin-top: auto;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.price-section {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .price-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.15rem;
 }
 
 .current-price {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: #10b981;
+    color: #1a1a1a;
     line-height: 1;
 }
 
 .original-price {
-    font-size: 0.85rem;
-    color: #9ca3af;
+    font-size: 0.75rem;
+    color: #999;
     text-decoration: line-through;
-    margin-top: 0.125rem;
+    font-weight: 400;
+}
+
+/* Expired Offer Section - Horizontal */
+.expired-offer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.expired-sticker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.6rem;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 8px;
+    border: 1px solid #fbbf24;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+}
+
+.expired-sticker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.sticker-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.sticker-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.sticker-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #f57c00;
+    margin-bottom: 0;
+    line-height: 1.1;
+}
+
+.sticker-subtitle {
+    font-size: 0.65rem;
+    color: #999;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+/* No Offer Section - Horizontal */
+.no-offer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.no-offer-sticker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.6rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 8px;
+    border: 1px solid #38bdf8;
+    flex: 1;
+}
+
+/* Active Offer Section - Horizontal */
+.active-offer-section {
+    display: flex;
+    align-items: center;
+}
+
+/* Notification Button - Full Width */
+.notify-btn {
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border: 1px solid #10b981;
+    color: #10b981;
+    background: white;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.notify-btn:hover {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
 }
 
 .add-to-cart {
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    background: #10b981;
+    color: white;
+    border: none;
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+    letter-spacing: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.add-to-cart:hover {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    background: #059669;
+    color: white;
+}
+
+.add-to-cart:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
 }
 
 /* Empty State */
@@ -1753,7 +2075,7 @@ function getCookie(name) {
     }
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Vertical Cards */
 @media (max-width: 991px) {
     .catalog-container {
         padding: 0 10px;
@@ -1771,7 +2093,7 @@ function getCookie(name) {
     
     .items-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
+        gap: 0.75rem;
     }
 }
 
@@ -1802,12 +2124,20 @@ function getCookie(name) {
     }
     
     .items-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
     }
     
     .item-image-container {
-        height: 160px;
+        height: 140px;
+    }
+    
+    .item-content {
+        padding: 0.6rem;
+    }
+    
+    .item-title {
+        font-size: 0.85rem;
     }
 }
 
@@ -2134,6 +2464,64 @@ function getCookie(name) {
 
 // Clear filters button
 document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
+
+// Countdown Timer Function
+function updateCountdownTimers() {
+    const timers = document.querySelectorAll('.countdown-timer');
+    
+    timers.forEach(timer => {
+        const endDate = timer.getAttribute('data-end-date');
+        const endTime = timer.getAttribute('data-end-time');
+        const display = timer.querySelector('.countdown-display');
+        
+        if (!endDate || !display) return;
+        
+        // Combine date and time
+        const endDateTime = new Date(`${endDate}T${endTime}`);
+        const now = new Date();
+        
+        // Calculate difference
+        const diff = endDateTime - now;
+        
+        if (diff <= 0) {
+            display.textContent = 'Истекло';
+            display.style.color = '#dc2626';
+            return;
+        }
+        
+        // Calculate days, hours, minutes, seconds
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        // Format display
+        let displayText = '';
+        if (days > 0) {
+            displayText = `${days}д ${hours}ч ${minutes}м`;
+        } else if (hours > 0) {
+            displayText = `${hours}ч ${minutes}м ${seconds}с`;
+        } else {
+            displayText = `${minutes}м ${seconds}с`;
+        }
+        
+        display.textContent = displayText;
+        
+        // Change color based on urgency
+        if (days === 0 && hours < 3) {
+            display.style.color = '#dc2626'; // Red - urgent
+        } else if (days === 0 && hours < 12) {
+            display.style.color = '#ea580c'; // Orange - warning
+        } else {
+            display.style.color = '#d97706'; // Yellow - normal
+        }
+    });
+}
+
+// Initialize countdown timers
+updateCountdownTimers();
+// Update every second
+setInterval(updateCountdownTimers, 1000);
 </script>
 
 <style>
@@ -2152,17 +2540,18 @@ document.getElementById('clearFilters')?.addEventListener('click', clearAllFilte
 
 .surprise-box-badge {
     position: absolute;
-    top: 50px;
-    left: 10px;
-    background: linear-gradient(135deg, #28a745, #20c997);
+    top: 40px;
+    left: 8px;
+    background: #10b981;
     color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 15px;
-    font-size: 0.7rem;
-    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
     z-index: 2;
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 /* Section headers */

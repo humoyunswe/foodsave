@@ -23,11 +23,9 @@ def catalog_view(request):
     from django.db.models import Q
     from django.utils import timezone
     
-    # Filter active items that are not expired
+    # Filter active items (include expired items)
     queryset = Item.objects.filter(
         is_active=True
-    ).filter(
-        Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
     ).select_related('vendor', 'category', 'branch').prefetch_related(
         'images',
         'offers__branch'
@@ -117,12 +115,10 @@ def catalog_view(request):
     # Get all vendors for the filter
     vendors = Vendor.objects.filter(is_active=True).order_by('name')
     
-    # Get available Surprise Boxes
+    # Get available Surprise Boxes (include expired boxes)
     surprise_boxes = SurpriseBox.objects.filter(
         is_active=True,
-        status='available',
-        available_from__lte=timezone.now(),
-        available_until__gte=timezone.now()
+        status='available'
     ).select_related('vendor', 'branch').prefetch_related('items')[:6]  # Показываем только 6 боксов
     
     # Context data
@@ -159,8 +155,6 @@ class CategoryView(ListView):
         return Item.objects.filter(
             category=self.category, 
             is_active=True
-        ).filter(
-            Q(expiry_date__isnull=True) | Q(expiry_date__gt=timezone.now().date())
         ).select_related('vendor')
     
     def get_context_data(self, **kwargs):
@@ -178,7 +172,10 @@ def item_detail_view(request, pk):
         pk=pk
     )
     
-    # Get available offers for this item with quantity available
+    # Get available offers for this item with quantity available (include expired)
+    from django.db.models import Q
+    from django.utils import timezone
+    
     offers = item.offers.filter(
         status='available', 
         is_active=True
@@ -311,7 +308,9 @@ def get_recommendations(request):
     import random
     
     try:
-        # Получаем активные предложения с товарами
+        # Получаем активные предложения с товарами (include expired)
+        from django.db.models import Q
+        
         offers = Offer.objects.filter(
             is_active=True,
             status='available',
@@ -411,7 +410,7 @@ def get_quick_sets(request):
     from datetime import timedelta
     
     try:
-        # Получаем активные предложения
+        # Получаем активные предложения (include expired)
         offers = Offer.objects.filter(
             is_active=True,
             status='available',
