@@ -41,11 +41,15 @@ class Branch(models.Model):
     
     def get_today_hours(self):
         """Get opening hours for today"""
+        from zoneinfo import ZoneInfo
+        
         if not self.opening_hours:
             return None
             
-        # Get current day name in lowercase
-        today = timezone.now().strftime('%A').lower()
+        # Get current day name in local timezone (Asia/Tashkent)
+        now_utc = timezone.now()
+        now_local = now_utc.astimezone(ZoneInfo('Asia/Tashkent'))
+        today = now_local.strftime('%A').lower()
         
         # Map English day names to possible keys
         day_mapping = {
@@ -99,6 +103,9 @@ class Branch(models.Model):
     
     def is_open_now(self):
         """Check if branch is currently open"""
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        
         today_hours = self.get_today_hours()
         if not today_hours:
             return False
@@ -112,19 +119,51 @@ class Branch(models.Model):
                     # Handle both "09:00-18:00" and "09:00 - 18:00" formats
                     parts = today_hours.split('-')
                     if len(parts) == 2:
-                        open_time = parts[0].strip()
-                        close_time = parts[1].strip()
-                        current_time = timezone.now().strftime('%H:%M')
-                        return open_time <= current_time <= close_time
+                        open_time_str = parts[0].strip()
+                        close_time_str = parts[1].strip()
+                        
+                        # Get current time in local timezone (Asia/Tashkent)
+                        now_utc = timezone.now()
+                        now_local = now_utc.astimezone(ZoneInfo('Asia/Tashkent'))
+                        current_time = now_local.time()
+                        
+                        # Parse opening and closing times
+                        open_time = datetime.strptime(open_time_str, '%H:%M').time()
+                        close_time = datetime.strptime(close_time_str, '%H:%M').time()
+                        
+                        # Check if we're within opening hours
+                        if open_time <= close_time:
+                            # Normal case: 09:00 - 18:00
+                            return open_time <= current_time <= close_time
+                        else:
+                            # Overnight case: 20:00 - 02:00
+                            return current_time >= open_time or current_time <= close_time
                     return False
-                except ValueError:
+                except (ValueError, AttributeError):
                     return False
         
         elif isinstance(today_hours, dict):
-            open_time = today_hours.get('open')
-            close_time = today_hours.get('close')
-            if open_time and close_time:
-                current_time = timezone.now().strftime('%H:%M')
-                return open_time <= current_time <= close_time
+            open_time_str = today_hours.get('open')
+            close_time_str = today_hours.get('close')
+            if open_time_str and close_time_str:
+                try:
+                    # Get current time in local timezone (Asia/Tashkent)
+                    now_utc = timezone.now()
+                    now_local = now_utc.astimezone(ZoneInfo('Asia/Tashkent'))
+                    current_time = now_local.time()
+                    
+                    # Parse opening and closing times
+                    open_time = datetime.strptime(open_time_str, '%H:%M').time()
+                    close_time = datetime.strptime(close_time_str, '%H:%M').time()
+                    
+                    # Check if we're within opening hours
+                    if open_time <= close_time:
+                        # Normal case: 09:00 - 18:00
+                        return open_time <= current_time <= close_time
+                    else:
+                        # Overnight case: 20:00 - 02:00
+                        return current_time >= open_time or current_time <= close_time
+                except (ValueError, AttributeError):
+                    return False
         
         return False
