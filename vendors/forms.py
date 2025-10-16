@@ -246,3 +246,113 @@ class AssignVendorRoleForm(forms.Form):
             user.is_staff = True
         user.save()
         return user
+
+
+class OfferFormWithTime(forms.ModelForm):
+    """Form for creating offers with time fields"""
+    
+    start_time = forms.TimeField(
+        required=True,
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control'
+        }),
+        label='Время начала',
+        initial='09:00'
+    )
+    
+    end_time = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control'
+        }),
+        label='Время окончания',
+        help_text='Оставьте пустым, если предложение действует весь день'
+    )
+    
+    class Meta:
+        from catalog.models import Offer
+        model = Offer
+        fields = ['original_price', 'discount_percent', 'quantity', 'start_date', 'end_date', 'is_active']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'original_price': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '1'}),
+            'discount_percent': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '100', 'step': '1'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '1'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'original_price': 'Обычная цена',
+            'discount_percent': 'Скидка (%)',
+            'quantity': 'Количество',
+            'start_date': 'Дата начала',
+            'end_date': 'Дата окончания',
+            'is_active': 'Предложение активно',
+        }
+        help_texts = {
+            'quantity': '0 = неограниченно',
+            'end_date': 'Оставьте пустым для бессрочного предложения',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set default values
+        if not self.instance.pk:
+            from django.utils import timezone
+            self.fields['start_date'].initial = timezone.now().date()
+        
+        # If editing existing offer, populate time fields
+        if self.instance.pk and self.instance.start_datetime:
+            self.fields['start_time'].initial = self.instance.start_datetime.time()
+        if self.instance.pk and self.instance.end_datetime:
+            self.fields['end_time'].initial = self.instance.end_datetime.time()
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        start_time = cleaned_data.get('start_time')
+        end_date = cleaned_data.get('end_date')
+        end_time = cleaned_data.get('end_time')
+        
+        # Validate that end datetime is after start datetime
+        if start_date and start_time and end_date and end_time:
+            from datetime import datetime, time
+            from django.utils import timezone
+            
+            # Combine date and time
+            start_datetime = timezone.make_aware(datetime.combine(start_date, start_time))
+            end_datetime = timezone.make_aware(datetime.combine(end_date, end_time))
+            
+            if end_datetime <= start_datetime:
+                raise forms.ValidationError('Время окончания должно быть позже времени начала')
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        from datetime import datetime, time
+        from django.utils import timezone
+        
+        offer = super().save(commit=False)
+        
+        # Combine date and time into datetime fields
+        start_date = self.cleaned_data.get('start_date')
+        start_time = self.cleaned_data.get('start_time')
+        
+        if start_date and start_time:
+            offer.start_datetime = timezone.make_aware(datetime.combine(start_date, start_time))
+        
+        end_date = self.cleaned_data.get('end_date')
+        end_time = self.cleaned_data.get('end_time')
+        
+        if end_date and end_time:
+            offer.end_datetime = timezone.make_aware(datetime.combine(end_date, end_time))
+        elif end_date:
+            # If only end_date provided, set time to 23:59
+            offer.end_datetime = timezone.make_aware(datetime.combine(end_date, time(23, 59, 59)))
+        
+        if commit:
+            offer.save()
+        
+        return offer
