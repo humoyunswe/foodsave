@@ -246,8 +246,6 @@ class AssignVendorRoleForm(forms.Form):
             user.is_staff = True
         user.save()
         return user
-
-
 class OfferFormWithTime(forms.ModelForm):
     """Form for creating offers with time fields"""
     
@@ -304,10 +302,10 @@ class OfferFormWithTime(forms.ModelForm):
             self.fields['start_date'].initial = timezone.now().date()
         
         # If editing existing offer, populate time fields
-        if self.instance.pk and self.instance.start_datetime:
-            self.fields['start_time'].initial = self.instance.start_datetime.time()
-        if self.instance.pk and self.instance.end_datetime:
-            self.fields['end_time'].initial = self.instance.end_datetime.time()
+        if self.instance.pk and self.instance.start_date:
+            self.fields['start_time'].initial = self.instance.start_date
+        if self.instance.pk and self.instance.end_date:
+            self.fields['end_time'].initial = self.instance.end_date
     
     def clean(self):
         cleaned_data = super().clean()

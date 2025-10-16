@@ -571,3 +571,36 @@ def toggle_item_status(request, item_id):
         'message': f'Товар "{item.title}" {"активирован" if item.is_active else "деактивирован"}',
         'expiry_date': item.expiry_date.isoformat() if item.expiry_date else None
     })
+
+from django.utils import timezone
+
+
+@login_required
+def edit_offer(request, offer_id):
+    """Edit an existing offer"""
+    offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    item = offer.item
+    vendor = item.vendor
+    
+    if request.method == 'POST':
+        form = OfferFormWithTime(request.POST, instance=offer)
+        if form.is_valid():
+            offer = form.save(commit=False)
+            offer.item = item
+            offer.branch = item.branch
+            offer.save()
+            messages.success(request, f'Предложение для "{item.title}" успешно обновлено!')
+            return redirect('vendors:manage_items', vendor_id=vendor.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = OfferFormWithTime(instance=offer)
+    
+    return render(request, 'vendors/edit_offer.html', {
+        'form': form,
+        'offer': offer,
+        'item': item,
+        'vendor': vendor
+    })
