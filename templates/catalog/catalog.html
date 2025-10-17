@@ -370,9 +370,9 @@
                                                     <span class="original-price">{{ box.original_price|floatformat:0 }} сўм</span>
                                                 {% endif %}
                                             </div>
-                                            <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm add-to-cart">
-                                                <i class="fas fa-shopping-cart me-1"></i>
-                                                В корзину
+                                            <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm booking-btn">
+                                                <i class="fas fa-calendar-check me-1"></i>
+                                                Бронировать
                                             </a>
                                         </div>
                                     </div>
@@ -507,12 +507,12 @@
                                             </button>
                                         </div>
                                     {% else %}
-                                        <div class="active-offer-section">
-                                            <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm add-to-cart">
-                                                <i class="fas fa-shopping-cart me-1"></i>
-                                                В корзину
-                                            </a>
-                                        </div>
+                                    <div class="active-offer-section">
+                                        <a href="https://t.me/FoodSave_admin" target="_blank" class="btn btn-success btn-sm booking-btn">
+                                            <i class="fas fa-calendar-check me-1"></i>
+                                            Бронировать
+                                        </a>
+                                    </div>
                                     {% endif %}
                                 </div>
                                 {% else %}
@@ -929,6 +929,60 @@ function getCookie(name) {
     color: white;
 }
 
+.add-to-cart {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    background: #10b981;
+    color: white;
+    border: none;
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+    letter-spacing: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.add-to-cart:hover {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    background: #059669;
+    color: white;
+}
+
+.add-to-cart:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+/* СТАЛО: */
+.booking-btn {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    background: #10b981;
+    color: white;
+    border: none;
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+    letter-spacing: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.booking-btn:hover {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    background: #059669;
+    color: white;
+    text-decoration: none;
+}
+
+.booking-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
 #mobileFilters .filter-pill.active {
     background-color: #0B6361;
     color: white;

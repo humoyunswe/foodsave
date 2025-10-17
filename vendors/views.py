@@ -9,9 +9,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from .models import Vendor, Branch
-from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm
+from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm, OfferFormWithTime
 from catalog.models import Item, Category, ItemImage, Offer, SurpriseBox, SurpriseBoxItem
-from catalog.forms import ItemForm, ItemImageFormSet, OfferForm, SurpriseBoxForm
+from catalog.forms import ItemForm, ItemImageFormSet, SurpriseBoxForm
 from django import forms
 
 def index(request):
@@ -27,20 +27,6 @@ class VendorListView(ListView):
     def get_queryset(self):
         return Vendor.objects.filter(is_active=True).prefetch_related('branches')
 
-
-# class VendorDetailView(DetailView):
-#     model = Vendor
-#     template_name = 'vendors/vendor_detail.html'
-#     context_object_name = 'vendor'
-    
-#     def get_queryset(self):
-#         return Vendor.objects.filter(is_active=True).prefetch_related('branches', 'items')
-    
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['items'] = self.object.items.filter(is_active=True)[:12]
-#         context['branches'] = self.object.branches.filter(is_active=True)
-#         return context
 
 def vendor_detail(request, pk):
     from django.db.models import Q
@@ -188,12 +174,12 @@ def add_item(request, vendor_id):
 
 @login_required
 def add_offer(request, item_id):
-    """Add an offer to an item"""
+    """Add an offer to an item with time fields"""
     item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
     vendor = item.vendor
     
     if request.method == 'POST':
-        form = OfferForm(request.POST)
+        form = OfferFormWithTime(request.POST)
         if form.is_valid():
             offer = form.save(commit=False)
             offer.item = item
@@ -202,8 +188,13 @@ def add_offer(request, item_id):
             offer.save()
             messages.success(request, f'Предложение для "{item.title}" создано!')
             return redirect('vendors:manage_items', vendor_id=vendor.id)
+        else:
+            # Show form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
-        form = OfferForm()
+        form = OfferFormWithTime()
     
     return render(request, 'vendors/add_offer.html', {
         'form': form,
@@ -579,4 +570,37 @@ def toggle_item_status(request, item_id):
         'status_text': 'Активен' if item.is_active else 'Неактивен',
         'message': f'Товар "{item.title}" {"активирован" if item.is_active else "деактивирован"}',
         'expiry_date': item.expiry_date.isoformat() if item.expiry_date else None
+    })
+
+from django.utils import timezone
+
+
+@login_required
+def edit_offer(request, offer_id):
+    """Edit an existing offer"""
+    offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    item = offer.item
+    vendor = item.vendor
+    
+    if request.method == 'POST':
+        form = OfferFormWithTime(request.POST, instance=offer)
+        if form.is_valid():
+            offer = form.save(commit=False)
+            offer.item = item
+            offer.branch = item.branch
+            offer.save()
+            messages.success(request, f'Предложение для "{item.title}" успешно обновлено!')
+            return redirect('vendors:manage_items', vendor_id=vendor.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = OfferFormWithTime(instance=offer)
+    
+    return render(request, 'vendors/edit_offer.html', {
+        'form': form,
+        'offer': offer,
+        'item': item,
+        'vendor': vendor
     })

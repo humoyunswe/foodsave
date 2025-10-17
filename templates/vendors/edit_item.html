@@ -242,6 +242,95 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <h6 class="section-title">
+                                    <i class="fas fa-tags me-2"></i>
+                                    Предложения и скидки
+                                </h6>
+                                <div class="section-actions">
+                                    <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Добавить предложение
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            {% if item.offers.exists %}
+                                <div class="offers-list">
+                                    {% for offer in item.offers.all %}
+                                        <div class="offer-card {% if not offer.is_active %}offer-inactive{% endif %}">
+                                            <div class="offer-content">
+                                                <div class="offer-info">
+                                                    <div class="offer-pricing">
+                                                        <span class="original-price">{{ offer.original_price }} сум</span>
+                                                        <span class="discount-badge">-{{ offer.discount_percent }}%</span>
+                                                        <span class="final-price">{{ offer.get_final_price }} сум</span>
+                                                    </div>
+                                                    <div class="offer-details">
+                                                        <div class="offer-detail-item">
+                                                            <i class="fas fa-boxes text-muted me-2"></i>
+                                                            <span>Кол-во: {% if offer.quantity == 0 %}Неограниченно{% else %}{{ offer.quantity }}{% endif %}</span>
+                                                        </div>
+                                                        <div class="offer-detail-item">
+                                                            <i class="fas fa-calendar text-muted me-2"></i>
+                                                            <span>
+                                                                {% if offer.start_datetime %}
+                                                                    с {{ offer.start_datetime|date:"d.m.Y H:i" }}
+                                                                {% else %}
+                                                                    с {{ offer.start_date|date:"d.m.Y" }}
+                                                                {% endif %}
+                                                                {% if offer.end_datetime %}
+                                                                    до {{ offer.end_datetime|date:"d.m.Y H:i" }}
+                                                                {% elif offer.end_date %}
+                                                                    до {{ offer.end_date|date:"d.m.Y" }}
+                                                                {% else %}
+                                                                    (бессрочно)
+                                                                {% endif %}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="offer-actions">
+                                                    <span class="status-badge-small {% if offer.is_active %}status-active-small{% else %}status-inactive-small{% endif %}">
+                                                        {% if offer.is_active %}Активно{% else %}Неактивно{% endif %}
+                                                    </span>
+                                                    <div class="btn-group btn-group-sm mt-2">
+                                                        <a href="{% url 'vendors:edit_offer' offer.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form method="post" action="{% url 'vendors:delete_offer' offer.id %}" class="d-inline" 
+                                                              onsubmit="return confirm('Удалить это предложение?');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-outline-danger">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+                                    <h6 class="empty-state-title">Нет предложений</h6>
+                                    <p class="empty-state-text">Создайте первое предложение для этого товара</p>
+                                    <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-2"></i>Создать предложение
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- ============================================================================
+                          ДОБАВЬТЕ ЭТИ СТИЛИ В БЛОК extra_css В КОНЦЕ СУЩЕСТВУЮЩИХ СТИЛЕЙ
+                        ============================================================================ -->
+                        
+                        
+                        
                         
                         <!-- Image Management Section -->
                         <div class="form-section mb-5">
@@ -408,6 +497,166 @@
     color: white;
     box-shadow: 0 8px 25px rgba(1, 86, 84, 0.2);
 }
+
+                        /* Offers Management Styles */
+                        .offers-list {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 1rem;
+                        }
+                        
+                        .offer-card {
+                            background: white;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 16px;
+                            padding: 1.5rem;
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .offer-card:hover {
+                            border-color: #015654;
+                            box-shadow: 0 4px 12px rgba(1, 86, 84, 0.1);
+                        }
+                        
+                        .offer-card.offer-inactive {
+                            opacity: 0.6;
+                            background: #f9fafb;
+                        }
+                        
+                        .offer-content {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                            gap: 1.5rem;
+                        }
+                        
+                        .offer-info {
+                            flex: 1;
+                        }
+                        
+                        .offer-pricing {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            margin-bottom: 1rem;
+                            flex-wrap: wrap;
+                        }
+                        
+                        .original-price {
+                            font-size: 1.25rem;
+                            color: #9ca3af;
+                            text-decoration: line-through;
+                            font-weight: 500;
+                        }
+                        
+                        .discount-badge {
+                            background: #fef3c7;
+                            color: #92400e;
+                            padding: 0.375rem 0.75rem;
+                            border-radius: 20px;
+                            font-weight: 700;
+                            font-size: 0.875rem;
+                        }
+                        
+                        .final-price {
+                            font-size: 1.5rem;
+                            color: #059669;
+                            font-weight: 700;
+                        }
+                        
+                        .offer-details {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                        }
+                        
+                        .offer-detail-item {
+                            display: flex;
+                            align-items: center;
+                            font-size: 0.875rem;
+                            color: #6b7280;
+                        }
+                        
+                        .offer-actions {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-end;
+                            gap: 0.5rem;
+                        }
+                        
+                        .status-badge-small {
+                            padding: 0.375rem 0.75rem;
+                            border-radius: 12px;
+                            font-size: 0.75rem;
+                            font-weight: 600;
+                        }
+                        
+                        .status-active-small {
+                            background: #d1fae5;
+                            color: #065f46;
+                        }
+                        
+                        .status-inactive-small {
+                            background: #fee2e2;
+                            color: #991b1b;
+                        }
+                        
+                        /* Empty State */
+                        .empty-state {
+                            text-align: center;
+                            padding: 3rem 2rem;
+                            background: #f9fafb;
+                            border-radius: 16px;
+                            border: 2px dashed #d1d5db;
+                        }
+                        
+                        .empty-state-icon {
+                            width: 80px;
+                            height: 80px;
+                            background: linear-gradient(135deg, #e0f2f1, #b2dfdb);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto 1.5rem;
+                        }
+                        
+                        .empty-state-icon i {
+                            font-size: 2rem;
+                            color: #015654;
+                        }
+                        
+                        .empty-state-title {
+                            font-size: 1.25rem;
+                            font-weight: 600;
+                            color: #374151;
+                            margin-bottom: 0.5rem;
+                        }
+                        
+                        .empty-state-text {
+                            color: #6b7280;
+                            margin-bottom: 1.5rem;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .offer-content {
+                                flex-direction: column;
+                            }
+                            
+                            .offer-actions {
+                                width: 100%;
+                                flex-direction: row;
+                                justify-content: space-between;
+                                align-items: center;
+                            }
+                            
+                            .offer-pricing {
+                                flex-direction: column;
+                                align-items: flex-start;
+                                gap: 0.5rem;
+                            }
+                        }
+             
 
 .header-content {
     display: flex;
