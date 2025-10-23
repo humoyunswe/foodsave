@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Админ панель - Управление вендорами{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="me-2">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Админ панель
+                    </h1>
+                    <p class="text-muted mb-0">Управление всеми вендорами</p>
+                </div>
+                <div class="text-end">
+                    <div class="badge bg-success fs-6">{{ active_vendors }} активных</div>
+                    <div class="badge bg-secondary fs-6">{{ total_vendors }} всего</div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                    </svg>
+                                </span>
+                                <input type="text" class="form-control" name="search" 
+                                       placeholder="Поиск по названию вендора..." 
+                                       value="{{ search_query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                </svg>
+                                Поиск
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Vendors List -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="60"></th>
+                                    <th>Название вендора</th>
+                                    <th>Владелец</th>
+                                    <th>Товары</th>
+                                    <th>Филиалы</th>
+                                    <th>Статус</th>
+                                    <th>Дата создания</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vendor in vendors %}
+                                <tr class="vendor-row" onclick="window.location.href='{% url 'vendors:admin_vendor_items' vendor.id %}'" style="cursor: pointer;">
+                                    <td class="text-center">
+                                        {% if vendor.logo %}
+                                            <img src="{{ vendor.logo.url }}" alt="{{ vendor.name }}" 
+                                                 class="rounded-circle" width="40" height="40" style="object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px;">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
+                                                    <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                                                </svg>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ vendor.name }}</div>
+                                        <small class="text-muted">{{ vendor.description|truncatechars:50 }}</small>
+                                    </td>
+                                    <td>
+                                        <div>{{ vendor.owner.username }}</div>
+                                        <small class="text-muted">{{ vendor.owner.email }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ vendor.items_count }} всего</span>
+                                        <span class="badge bg-success">{{ vendor.active_items_count }} активных</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ vendor.branches_count }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if vendor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if vendor.is_active %}Активен{% else %}Неактивен{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ vendor.created_at|date:"d.m.Y H:i" }}</small>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" class="text-muted mb-3">
+                                            <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                                        </svg>
+                                        <h4>Вендоры не найдены</h4>
+                                        <p class="text-muted mb-0">Попробуйте изменить параметры поиска</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.vendor-row {
+    transition: background-color 0.2s ease;
+}
+
+.vendor-row:hover {
+    background-color: #f8f9fa;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem;
+}
+
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+</style>
+{% endblock %}

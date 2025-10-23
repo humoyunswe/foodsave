@@ -33,12 +33,34 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // Optimized Telegram WebApp initialization
         const tg = window.Telegram.WebApp;
-        tg.ready();         // сигнал готовности UI
-        tg.expand();        // развернуть на всю высоту
-        /
-        tg.setHeaderColor('secondary_bg_color');
-        tg.setBackgroundColor('secondary_bg_color');
+        
+        // Initialize immediately for faster startup
+        tg.ready();
+        tg.expand();
+        
+        // Set Telegram theme colors
+        tg.setHeaderColor('#015654');
+        tg.setBackgroundColor('#f8f9fa');
+        
+        // Enable closing confirmation
+        tg.enableClosingConfirmation();
+        
+        // Set main button for better UX
+        tg.MainButton.setText('Открыть каталог');
+        tg.MainButton.show();
+        
+        // Handle main button click
+        tg.MainButton.onClick(function() {
+            window.location.href = '{% url "catalog:catalog" %}';
+        });
+        
+        // Optimize for mobile
+        tg.enableVerticalSwiping();
+        
+        // Set viewport for better mobile experience
+        document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
     </script>
 
     
@@ -85,7 +107,15 @@
                 <!-- User Menu -->
                 <ul class="navbar-nav user-menu">
                     {% if user.is_authenticated %}
-                        {% if user.role == 'vendor' %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link admin-link" href="{% url 'vendors:admin_vendor_list' %}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>Админ панель
+                            </a>
+                        </li>
+                        {% elif user.role == 'vendor' %}
                         <li class="nav-item">
                             <a class="nav-link vendor-link" href="{% url 'vendors:vendor_dashboard' %}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Панель
@@ -469,6 +499,29 @@
         background: #015654 !important;
         color: white !important;
         box-shadow: 0 4px 20px rgba(1, 86, 84, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .admin-link {
+        color: #015654 !important;
+        background: #ffc107;
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-link:hover {
+        background: #ffb300 !important;
+        color: #015654 !important;
+        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
         transform: translateY(-2px);
     }
 

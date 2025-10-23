@@ -8,11 +8,15 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
+from django.db.models import Q, Count
 from .models import Vendor, Branch
 from .forms import VendorForm, BranchForm, OwnerForm, AssignVendorRoleForm, OfferFormWithTime
 from catalog.models import Item, Category, ItemImage, Offer, SurpriseBox, SurpriseBoxItem
 from catalog.forms import ItemForm, ItemImageFormSet, SurpriseBoxForm
 from django import forms
+
+User = get_user_model()
 
 def index(request):
     return render(request, 'vendors/index.html')
@@ -84,7 +88,11 @@ def vendor_dashboard(request):
 @login_required
 def add_branch(request, vendor_id):
     """Add a new branch to vendor"""
-    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    # Суперадмин может добавлять филиалы любому вендору
+    if request.user.is_superuser:
+        vendor = get_object_or_404(Vendor, id=vendor_id)
+    else:
+        vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
     
     if request.method == 'POST':
         form = BranchForm(request.POST)
@@ -134,7 +142,11 @@ def add_branch(request, vendor_id):
 @login_required
 def add_item(request, vendor_id):
     """Add a new item/product to vendor"""
-    vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
+    # Суперадмин может добавлять товары любому вендору
+    if request.user.is_superuser:
+        vendor = get_object_or_404(Vendor, id=vendor_id)
+    else:
+        vendor = get_object_or_404(Vendor, id=vendor_id, owner=request.user)
     
     # Check if vendor has branches
     if not vendor.branches.exists():
@@ -175,7 +187,11 @@ def add_item(request, vendor_id):
 @login_required
 def add_offer(request, item_id):
     """Add an offer to an item with time fields"""
-    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    # Суперадмин может добавлять предложения к любым товарам
+    if request.user.is_superuser:
+        item = get_object_or_404(Item, id=item_id)
+    else:
+        item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
     vendor = item.vendor
     
     if request.method == 'POST':
@@ -282,7 +298,11 @@ def management_hub(request):
 @login_required
 def edit_item(request, item_id):
     """Edit an existing item"""
-    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    # Суперадмин может редактировать любые товары
+    if request.user.is_superuser:
+        item = get_object_or_404(Item, id=item_id)
+    else:
+        item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
     vendor = item.vendor
     
     if request.method == 'POST':
@@ -323,7 +343,11 @@ def edit_item(request, item_id):
 @login_required
 def delete_item(request, item_id):
     """Delete an item"""
-    item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
+    # Суперадмин может удалять любые товары
+    if request.user.is_superuser:
+        item = get_object_or_404(Item, id=item_id)
+    else:
+        item = get_object_or_404(Item, id=item_id, vendor__owner=request.user)
     vendor = item.vendor
     
     if request.method == 'POST':
@@ -384,7 +408,11 @@ def vendor_locations_api(request):
 @login_required
 def delete_offer(request, offer_id):
     """Delete an offer"""
-    offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    # Суперадмин может удалять любые предложения
+    if request.user.is_superuser:
+        offer = get_object_or_404(Offer, id=offer_id)
+    else:
+        offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
     vendor = offer.item.vendor
     
     if request.method == 'POST':
@@ -578,7 +606,12 @@ from django.utils import timezone
 @login_required
 def edit_offer(request, offer_id):
     """Edit an existing offer"""
-    offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    # Суперадмин может редактировать любое предложение
+    if request.user.is_superuser:
+        offer = get_object_or_404(Offer, id=offer_id)
+    else:
+        offer = get_object_or_404(Offer, id=offer_id, item__vendor__owner=request.user)
+    
     item = offer.item
     vendor = item.vendor
     
@@ -590,7 +623,12 @@ def edit_offer(request, offer_id):
             offer.branch = item.branch
             offer.save()
             messages.success(request, f'Предложение для "{item.title}" успешно обновлено!')
-            return redirect('vendors:manage_items', vendor_id=vendor.id)
+            
+            # Перенаправление в зависимости от роли пользователя
+            if request.user.is_superuser:
+                return redirect('vendors:admin_item_edit', vendor_id=vendor.id, item_id=item.id)
+            else:
+                return redirect('vendors:manage_items', vendor_id=vendor.id)
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -604,3 +642,251 @@ def edit_offer(request, offer_id):
         'item': item,
         'vendor': vendor
     })
+
+
+# ==================== ADMIN PANEL VIEWS ====================
+
+@login_required
+def admin_vendor_list(request):
+    """Список всех вендоров для суперадмина"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendors = Vendor.objects.all().annotate(
+        items_count=Count('items'),
+        branches_count=Count('branches'),
+        active_items_count=Count('items', filter=Q(items__is_active=True))
+    ).order_by('-created_at')
+    
+    # Поиск
+    search_query = request.GET.get('search', '')
+    if search_query:
+        vendors = vendors.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(owner__username__icontains=search_query) |
+            Q(owner__email__icontains=search_query)
+        )
+    
+    # Фильтр по статусу
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'active':
+        vendors = vendors.filter(is_active=True)
+    elif status_filter == 'inactive':
+        vendors = vendors.filter(is_active=False)
+    
+    context = {
+        'vendors': vendors,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'total_vendors': vendors.count(),
+        'active_vendors': vendors.filter(is_active=True).count(),
+    }
+    
+    return render(request, 'vendors/admin/vendor_list.html', context)
+
+
+@login_required
+def admin_vendor_detail(request, vendor_id):
+    """Детальная информация о вендоре для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    
+    # Статистика
+    stats = {
+        'total_items': vendor.items.count(),
+        'active_items': vendor.items.filter(is_active=True).count(),
+        'total_branches': vendor.branches.count(),
+        'active_branches': vendor.branches.filter(is_active=True).count(),
+        'total_offers': Offer.objects.filter(item__vendor=vendor).count(),
+        'active_offers': Offer.objects.filter(item__vendor=vendor, is_active=True).count(),
+    }
+    
+    # Последние товары
+    recent_items = vendor.items.order_by('-created_at')[:10]
+    
+    # Последние филиалы
+    recent_branches = vendor.branches.order_by('-created_at')[:5]
+    
+    context = {
+        'vendor': vendor,
+        'stats': stats,
+        'recent_items': recent_items,
+        'recent_branches': recent_branches,
+    }
+    
+    return render(request, 'vendors/admin/vendor_detail.html', context)
+
+
+@login_required
+def admin_vendor_items(request, vendor_id):
+    """Управление товарами вендора для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    
+    # Получаем товары через филиалы вендора
+    from catalog.models import Item
+    items = Item.objects.filter(
+        branch__vendor=vendor
+    ).select_related('category', 'branch', 'vendor').prefetch_related('images', 'offers').order_by('-created_at')
+    
+    # Поиск
+    search_query = request.GET.get('search', '')
+    if search_query:
+        items = items.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        )
+    
+    # Фильтр по статусу
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'active':
+        items = items.filter(is_active=True)
+    elif status_filter == 'inactive':
+        items = items.filter(is_active=False)
+    
+    context = {
+        'vendor': vendor,
+        'items': items,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'vendors/admin/vendor_items.html', context)
+
+
+@login_required
+def admin_vendor_branches(request, vendor_id):
+    """Управление филиалами вендора для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    branches = vendor.branches.order_by('-created_at')
+    
+    # Поиск
+    search_query = request.GET.get('search', '')
+    if search_query:
+        branches = branches.filter(
+            Q(name__icontains=search_query) |
+            Q(address__icontains=search_query)
+        )
+    
+    context = {
+        'vendor': vendor,
+        'branches': branches,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'vendors/admin/vendor_branches.html', context)
+
+
+@login_required
+def admin_vendor_edit(request, vendor_id):
+    """Редактирование вендора для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    
+    if request.method == 'POST':
+        form = VendorForm(request.POST, request.FILES, instance=vendor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Вендор "{vendor.name}" успешно обновлен.')
+            return redirect('vendors:admin_vendor_detail', vendor_id=vendor.id)
+    else:
+        form = VendorForm(instance=vendor)
+    
+    context = {
+        'vendor': vendor,
+        'form': form,
+    }
+    
+    return render(request, 'vendors/admin/vendor_edit.html', context)
+
+
+@login_required
+def admin_vendor_toggle_status(request, vendor_id):
+    """Переключение статуса вендора"""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Нет прав доступа'}, status=403)
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    vendor.is_active = not vendor.is_active
+    vendor.save()
+    
+    status = 'активен' if vendor.is_active else 'неактивен'
+    messages.success(request, f'Вендор "{vendor.name}" теперь {status}.')
+    
+    return JsonResponse({
+        'success': True,
+        'is_active': vendor.is_active,
+        'status_text': status
+    })
+
+
+@login_required
+def admin_item_edit(request, vendor_id, item_id):
+    """Редактирование товара вендора для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    item = get_object_or_404(Item, id=item_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        form = ItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Товар "{item.title}" успешно обновлен.')
+            return redirect('vendors:admin_vendor_items', vendor_id=vendor.id)
+    else:
+        form = ItemForm(instance=item)
+    
+    context = {
+        'vendor': vendor,
+        'item': item,
+        'form': form,
+    }
+    
+    return render(request, 'vendors/admin/item_edit.html', context)
+
+
+@login_required
+def admin_branch_edit(request, vendor_id, branch_id):
+    """Редактирование филиала вендора для админа"""
+    if not request.user.is_superuser:
+        messages.error(request, 'У вас нет прав доступа к этой странице.')
+        return redirect('catalog:catalog')
+    
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    branch = get_object_or_404(Branch, id=branch_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        form = BranchForm(request.POST, instance=branch)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Филиал "{branch.name}" успешно обновлен.')
+            return redirect('vendors:admin_vendor_branches', vendor_id=vendor.id)
+    else:
+        form = BranchForm(instance=branch)
+    
+    context = {
+        'vendor': vendor,
+        'branch': branch,
+        'form': form,
+    }
+    
+    return render(request, 'vendors/admin/branch_edit.html', context)

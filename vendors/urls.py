@@ -39,6 +39,16 @@ urlpatterns = [
     path('add/', views.add_vendor, name='add_vendor'),
     path('assign-vendor/', views.assign_vendor, name='assign_vendor'),
     
+    # Super Admin Panel
+    path('admin/vendors/', views.admin_vendor_list, name='admin_vendor_list'),
+    path('admin/vendors/<int:vendor_id>/', views.admin_vendor_detail, name='admin_vendor_detail'),
+    path('admin/vendors/<int:vendor_id>/edit/', views.admin_vendor_edit, name='admin_vendor_edit'),
+    path('admin/vendors/<int:vendor_id>/toggle-status/', views.admin_vendor_toggle_status, name='admin_vendor_toggle_status'),
+    path('admin/vendors/<int:vendor_id>/items/', views.admin_vendor_items, name='admin_vendor_items'),
+    path('admin/vendors/<int:vendor_id>/branches/', views.admin_vendor_branches, name='admin_vendor_branches'),
+    path('admin/vendors/<int:vendor_id>/items/<int:item_id>/edit/', views.admin_item_edit, name='admin_item_edit'),
+    path('admin/vendors/<int:vendor_id>/branches/<int:branch_id>/edit/', views.admin_branch_edit, name='admin_branch_edit'),
+    
     # API endpoints
     path('api/vendors/locations/', views.vendor_locations_api, name='vendor_locations_api'),
 ]

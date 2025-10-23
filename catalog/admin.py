@@ -37,21 +37,25 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('title', 'vendor', 'branch', 'category', 'unit', 'is_active', 'offers_count', 'created_at')
+    list_display = ('image_preview', 'title', 'vendor', 'branch', 'category', 'unit', 'is_active', 'offers_count', 'created_at')
     list_filter = ('vendor__type', 'category', 'unit', 'is_active', 'created_at')
     search_fields = ('title', 'description', 'vendor__name', 'branch__name')
     ordering = ('-created_at',)
     inlines = [ItemImageInline, OfferInline]
+    list_per_page = 25
     
     fieldsets = (
-        ('Basic Information', {
+        ('Основная информация', {
             'fields': ('vendor', 'branch', 'category', 'title', 'description')
         }),
-
-        ('Status', {
+        ('Дополнительная информация', {
+            'fields': ('unit', 'expiry_date', 'original_price'),
+            'classes': ('collapse',)
+        }),
+        ('Статус', {
             'fields': ('is_active',)
         }),
-        ('Timestamps', {
+        ('Временные метки', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -59,28 +63,56 @@ class ItemAdmin(admin.ModelAdmin):
     
     readonly_fields = ('created_at', 'updated_at')
     
+    def image_preview(self, obj):
+        primary_image = obj.images.filter(is_primary=True).first()
+        if primary_image:
+            return format_html(
+                '<img src="{}" width="50" height="50" style="border-radius: 8px; object-fit: cover;" />',
+                primary_image.image.url
+            )
+        elif obj.images.exists():
+            return format_html(
+                '<img src="{}" width="50" height="50" style="border-radius: 8px; object-fit: cover;" />',
+                obj.images.first().image.url
+            )
+        return format_html(
+            '<div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">📦</div>'
+        )
+    image_preview.short_description = "Изображение"
+    
     def offers_count(self, obj):
         count = obj.offers.count()
         active_count = obj.offers.filter(status='available').count()
         if count > 0:
             return format_html(
-                '<a href="/admin/catalog/offer/?item__id__exact={}">{} total ({} active)</a>',
+                '<a href="/admin/catalog/offer/?item__id__exact={}" style="color: #198754; text-decoration: none;">{} всего ({} активных)</a>',
                 obj.id, count, active_count
             )
-        return "0 offers"
-    offers_count.short_description = "Offers"
+        return "0 предложений"
+    offers_count.short_description = "Предложения"
     
-    actions = ['activate_items', 'deactivate_items']
+    actions = ['activate_items', 'deactivate_items', 'view_item_in_catalog']
     
     def activate_items(self, request, queryset):
         updated = queryset.update(is_active=True)
-        self.message_user(request, f'{updated} items were successfully activated.')
-    activate_items.short_description = "Activate selected items"
+        self.message_user(request, f'{updated} товаров успешно активированы.')
+    activate_items.short_description = "Активировать выбранные товары"
     
     def deactivate_items(self, request, queryset):
         updated = queryset.update(is_active=False)
-        self.message_user(request, f'{updated} items were successfully deactivated.')
-    deactivate_items.short_description = "Deactivate selected items"
+        self.message_user(request, f'{updated} товаров успешно деактивированы.')
+    deactivate_items.short_description = "Деактивировать выбранные товары"
+    
+    def view_item_in_catalog(self, request, queryset):
+        if queryset.count() == 1:
+            item = queryset.first()
+            return format_html(
+                '<a href="/catalog/item/{}/" target="_blank" style="color: #0d6efd;">Открыть в каталоге</a>',
+                item.id
+            )
+        else:
+            self.message_user(request, 'Выберите только один товар для просмотра в каталоге.')
+    view_item_in_catalog.short_description = "Открыть в каталоге"
 
 
 @admin.register(ItemImage)
@@ -106,18 +138,19 @@ class OfferAdmin(admin.ModelAdmin):
     list_filter = ('status', 'is_active', 'item__vendor', 'item__category', 'branch', 'end_date')
     search_fields = ('item__title', 'item__vendor__name', 'branch__name')
     ordering = ('-created_at',)
+    list_per_page = 25
     
     fieldsets = (
-        ('Item & Branch', {
+        ('Товар и филиал', {
             'fields': ('item', 'branch')
         }),
-        ('Pricing', {
+        ('Ценообразование', {
             'fields': ('original_price', 'discount_percent')
         }),
-        ('Availability', {
+        ('Доступность', {
             'fields': ('quantity', 'start_date', 'end_date', 'is_active', 'status')
         }),
-        ('Timestamps', {
+        ('Временные метки', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -126,38 +159,38 @@ class OfferAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     def current_price_display(self, obj):
-        return f"{obj.current_price:.2f} ₸"
-    current_price_display.short_description = "Current Price"
+        return f"{obj.current_price:.2f} сўм"
+    current_price_display.short_description = "Текущая цена"
     
     def is_expired_display(self, obj):
         if obj.is_expired:
-            return format_html('<span style="color: red;">Yes</span>')
-        return format_html('<span style="color: green;">No</span>')
-    is_expired_display.short_description = "Expired"
+            return format_html('<span style="color: red; font-weight: bold;">Да</span>')
+        return format_html('<span style="color: green; font-weight: bold;">Нет</span>')
+    is_expired_display.short_description = "Истекло"
     
     actions = ['mark_as_expired', 'mark_as_available', 'mark_as_sold_out', 'activate_offers', 'deactivate_offers']
     
     def mark_as_expired(self, request, queryset):
         updated = queryset.update(status='expired')
-        self.message_user(request, f'{updated} offers were marked as expired.')
-    mark_as_expired.short_description = "Mark selected offers as expired"
+        self.message_user(request, f'{updated} предложений отмечены как истекшие.')
+    mark_as_expired.short_description = "Отметить как истекшие"
     
     def mark_as_available(self, request, queryset):
         updated = queryset.update(status='available')
-        self.message_user(request, f'{updated} offers were marked as available.')
-    mark_as_available.short_description = "Mark selected offers as available"
+        self.message_user(request, f'{updated} предложений отмечены как доступные.')
+    mark_as_available.short_description = "Отметить как доступные"
     
     def mark_as_sold_out(self, request, queryset):
         updated = queryset.update(status='sold_out')
-        self.message_user(request, f'{updated} offers were marked as sold out.')
-    mark_as_sold_out.short_description = "Mark selected offers as sold out"
+        self.message_user(request, f'{updated} предложений отмечены как распроданные.')
+    mark_as_sold_out.short_description = "Отметить как распроданные"
     
     def activate_offers(self, request, queryset):
         updated = queryset.update(is_active=True)
-        self.message_user(request, f'{updated} offers were activated.')
-    activate_offers.short_description = "Activate selected offers"
+        self.message_user(request, f'{updated} предложений активированы.')
+    activate_offers.short_description = "Активировать выбранные предложения"
     
     def deactivate_offers(self, request, queryset):
         updated = queryset.update(is_active=False)
-        self.message_user(request, f'{updated} offers were deactivated.')
-    deactivate_offers.short_description = "Deactivate selected offers"
+        self.message_user(request, f'{updated} предложений деактивированы.')
+    deactivate_offers.short_description = "Деактивировать выбранные предложения"

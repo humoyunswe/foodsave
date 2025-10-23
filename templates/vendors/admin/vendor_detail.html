@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Админ панель - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_list' %}">Админ панель</a>
+                            </li>
+                            <li class="breadcrumb-item active">{{ vendor.name }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        {% if vendor.logo %}
+                            <img src="{{ vendor.logo.url }}" alt="{{ vendor.name }}" 
+                                 class="rounded me-2" width="40" height="40">
+                        {% endif %}
+                        {{ vendor.name }}
+                    </h1>
+                    <p class="text-muted mb-0">Владелец: {{ vendor.owner.username }} ({{ vendor.owner.email }})</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'vendors:admin_vendor_edit' vendor.id %}" class="btn btn-outline-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                        Редактировать
+                    </a>
+                    <button class="btn {% if vendor.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" 
+                            onclick="toggleVendorStatus({{ vendor.id }}, {{ vendor.is_active|yesno:'false,true' }})">
+                        {% if vendor.is_active %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                            Деактивировать
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Активировать
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-6 text-primary">{{ stats.total_items }}</div>
+                            <div class="text-muted">Всего товаров</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-6 text-success">{{ stats.active_items }}</div>
+                            <div class="text-muted">Активных товаров</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-6 text-info">{{ stats.total_branches }}</div>
+                            <div class="text-muted">Филиалов</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-6 text-warning">{{ stats.active_offers }}</div>
+                            <div class="text-muted">Активных предложений</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Быстрые действия</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-2">
+                                    <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-outline-primary w-100">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                        </svg>
+                                        Управление товарами
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a href="{% url 'vendors:admin_vendor_branches' vendor.id %}" class="btn btn-outline-info w-100">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                        </svg>
+                                        Управление филиалами
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a href="{% url 'vendors:add_item' vendor.id %}" class="btn btn-outline-success w-100">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                        </svg>
+                                        Добавить товар
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a href="{% url 'vendors:add_branch' vendor.id %}" class="btn btn-outline-warning w-100">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                        </svg>
+                                        Добавить филиал
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendor Info -->
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Recent Items -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Последние товары</h5>
+                            <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-sm btn-outline-primary">
+                                Все товары
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Товар</th>
+                                                <th>Категория</th>
+                                                <th>Статус</th>
+                                                <th>Дата</th>
+                                                <th>Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in recent_items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if item.images.exists %}
+                                                            <img src="{{ item.images.first.image.url }}" 
+                                                                 alt="{{ item.title }}" 
+                                                                 class="rounded me-2" width="32" height="32">
+                                                        {% endif %}
+                                                        <div>
+                                                            <div class="fw-bold">{{ item.title }}</div>
+                                                            <small class="text-muted">{{ item.description|truncatechars:50 }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if item.category %}
+                                                        <span class="badge bg-secondary">{{ item.category.name }}</span>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge {% if item.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                                        {% if item.is_active %}Активен{% else %}Неактивен{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">{{ item.created_at|date:"d.m.Y" }}</small>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'vendors:admin_item_edit' vendor.id item.id %}" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                        </svg>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <p class="text-muted mb-0">Товары не найдены</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Vendor Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Информация о вендоре</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Название:</label>
+                                <p class="mb-0">{{ vendor.name }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Описание:</label>
+                                <p class="mb-0">{{ vendor.description|default:"—" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Владелец:</label>
+                                <p class="mb-0">
+                                    {{ vendor.owner.username }}<br>
+                                    <small class="text-muted">{{ vendor.owner.email }}</small>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Статус:</label>
+                                <p class="mb-0">
+                                    <span class="badge {% if vendor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if vendor.is_active %}Активен{% else %}Неактивен{% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Дата создания:</label>
+                                <p class="mb-0">{{ vendor.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            
+                            {% if vendor.phone %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Телефон:</label>
+                                <p class="mb-0">{{ vendor.phone }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if vendor.email %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Email:</label>
+                                <p class="mb-0">{{ vendor.email }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recent Branches -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Филиалы</h5>
+                            <a href="{% url 'vendors:admin_vendor_branches' vendor.id %}" class="btn btn-sm btn-outline-primary">
+                                Все филиалы
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_branches %}
+                                {% for branch in recent_branches %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <div class="fw-bold">{{ branch.name }}</div>
+                                        <small class="text-muted">{{ branch.address|truncatechars:30 }}</small>
+                                    </div>
+                                    <a href="{% url 'vendors:admin_branch_edit' vendor.id branch.id %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <p class="text-muted mb-0">Филиалы не найдены</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleVendorStatus(vendorId, currentStatus) {
+    fetch(`/vendors/admin/vendors/${vendorId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка при изменении статуса');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка при изменении статуса');
+    });
+}
+</script>
+{% endblock %}

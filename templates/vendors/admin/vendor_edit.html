@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Админ панель - Редактирование {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_list' %}">Админ панель</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_items' vendor.id %}">{{ vendor.name }}</a>
+                            </li>
+                            <li class="breadcrumb-item active">Редактирование</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="me-2">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                        Редактирование вендора
+                    </h1>
+                    <p class="text-muted mb-0">{{ vendor.name }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-outline-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                        Назад
+                    </a>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Основная информация</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                                            Название вендора <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">Телефон</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.logo.id_for_label }}" class="form-label">Логотип</label>
+                                        {{ form.logo }}
+                                        {% if form.logo.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.logo.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                                Вендор активен
+                                            </label>
+                                        </div>
+                                        {% if form.is_active.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.is_active.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                                        </svg>
+                                        Сохранить изменения
+                                    </button>
+                                    <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-outline-secondary">
+                                        Отмена
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Vendor Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Информация о вендоре</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID вендора:</label>
+                                <p class="mb-0">{{ vendor.id }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Владелец:</label>
+                                <p class="mb-0">
+                                    {{ vendor.owner.username }}<br>
+                                    <small class="text-muted">{{ vendor.owner.email }}</small>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Дата создания:</label>
+                                <p class="mb-0">{{ vendor.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Последнее обновление:</label>
+                                <p class="mb-0">{{ vendor.updated_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Статус:</label>
+                                <p class="mb-0">
+                                    <span class="badge {% if vendor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if vendor.is_active %}Активен{% else %}Неактивен{% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Logo -->
+                    {% if vendor.logo %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Текущий логотип</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ vendor.logo.url }}" alt="{{ vendor.name }}" 
+                                 class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+}
+</style>
+{% endblock %}

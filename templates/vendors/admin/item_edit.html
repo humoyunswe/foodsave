@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Админ панель - Редактирование товара{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_list' %}">Админ панель</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_detail' vendor.id %}">{{ vendor.name }}</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'vendors:admin_vendor_items' vendor.id %}">Товары</a>
+                            </li>
+                            <li class="breadcrumb-item active">Редактирование</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="me-2">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                        Редактирование товара
+                    </h1>
+                    <p class="text-muted mb-0">{{ item.title }} - {{ vendor.name }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-outline-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                        Назад
+                    </a>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Основная информация</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                                            Название товара <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.title.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.category.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.branch.id_for_label }}" class="form-label">Филиал</label>
+                                        {{ form.branch }}
+                                        {% if form.branch.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.branch.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Срок годности</label>
+                                        {{ form.expiry_date }}
+                                        {% if form.expiry_date.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.expiry_date.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.original_price.id_for_label }}" class="form-label">Оригинальная цена</label>
+                                        <div class="input-group">
+                                            {{ form.original_price }}
+                                            <span class="input-group-text">сўм</span>
+                                        </div>
+                                        {% if form.original_price.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.original_price.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check mt-4">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                                Товар активен
+                                            </label>
+                                        </div>
+                                        {% if form.is_active.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.is_active.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                                        </svg>
+                                        Сохранить изменения
+                                    </button>
+                                    <a href="{% url 'vendors:admin_vendor_items' vendor.id %}" class="btn btn-outline-secondary">
+                                        Отмена
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Item Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Информация о товаре</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID товара:</label>
+                                <p class="mb-0">{{ item.id }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Вендор:</label>
+                                <p class="mb-0">{{ vendor.name }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Дата создания:</label>
+                                <p class="mb-0">{{ item.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Последнее обновление:</label>
+                                <p class="mb-0">{{ item.updated_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Статус:</label>
+                                <p class="mb-0">
+                                    <span class="badge {% if item.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if item.is_active %}Активен{% else %}Неактивен{% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Количество предложений:</label>
+                                <p class="mb-0">{{ item.offers.count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Images -->
+                    {% if item.images.exists %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Текущие изображения</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for image in item.images.all %}
+                                <div class="col-6 mb-2">
+                                    <img src="{{ image.image.url }}" alt="{{ item.title }}" 
+                                         class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Offers Management -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Управление предложениями</h5>
+                            <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-success btn-sm">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Добавить предложение
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if item.offers.exists %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Филиал</th>
+                                                <th>Оригинальная цена</th>
+                                                <th>Скидка</th>
+                                                <th>Текущая цена</th>
+                                                <th>Количество</th>
+                                                <th>Период действия</th>
+                                                <th>Статус</th>
+                                                <th>Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for offer in item.offers.all %}
+                                            <tr>
+                                                <td>
+                                                    {% if offer.branch %}
+                                                        <span class="badge bg-info">{{ offer.branch.name }}</span>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ offer.original_price }} сўм</td>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark">{{ offer.discount_percent }}%</span>
+                                                </td>
+                                                <td>
+                                                    <strong class="text-success">{{ offer.current_price }} сўм</strong>
+                                                </td>
+                                                <td>{{ offer.quantity }} шт</td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        {{ offer.start_date|date:"d.m.Y" }} - 
+                                                        {{ offer.end_date|date:"d.m.Y" }}
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if offer.status == 'available' %}bg-success
+                                                        {% elif offer.status == 'expired' %}bg-danger
+                                                        {% elif offer.status == 'sold_out' %}bg-secondary
+                                                        {% else %}bg-warning{% endif %}">
+                                                        {% if offer.status == 'available' %}Доступно
+                                                        {% elif offer.status == 'expired' %}Истекло
+                                                        {% elif offer.status == 'sold_out' %}Распродано
+                                                        {% else %}{{ offer.status }}{% endif %}
+                                                    </span>
+                                                    {% if offer.is_active %}
+                                                        <span class="badge bg-success">Активно</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Неактивно</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'vendors:edit_offer' offer.id %}" 
+                                                           class="btn btn-outline-primary" title="Редактировать">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                            </svg>
+                                                        </a>
+                                                        <button onclick="deleteOffer({{ offer.id }})" 
+                                                                class="btn btn-outline-danger" title="Удалить">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" class="text-muted mb-3">
+                                        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                                    </svg>
+                                    <p class="text-muted mb-3">У этого товара пока нет предложений</p>
+                                    <a href="{% url 'vendors:add_offer' item.id %}" class="btn btn-primary">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="me-1">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                        </svg>
+                                        Добавить первое предложение
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteOffer(offerId) {
+    if (confirm('Вы уверены, что хотите удалить это предложение?')) {
+        fetch(`/vendors/offer/${offerId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Ошибка при удалении предложения');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при удалении предложения');
+        });
+    }
+}
+</script>
+
+<style>
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+}
+</style>
+{% endblock %}
